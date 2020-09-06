@@ -1,0 +1,155 @@
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8">
+    <title>MIDI files testing - Gemt Score Testbed</title>
+    <script type="text/javascript" src="js/jquery-3.5.1.min.js"> </script>
+    <!-- -->
+    <script type="text/javascript" src="../build/gemt.js"> </script>
+    <script type="text/javascript" src="../svg/pic-svg.js"> </script>
+    <script type="text/javascript" src="../src/impl/gemt-implement.js"> </script>
+    <!-- -->
+    <!-- - ->
+    <script type="text/javascript" src="gemt-min.js"> </script>
+    <!- - -->
+    <script type="text/javascript" src="js/pageutils.js"> </script>
+    <!--    <script type="text/javascript" src="js/jasmid/midifile.js"> </script> - ->
+    <script type="text/javascript" src="js/jasmid/replayer.js"> </script> -->
+    <script type="text/javascript" src="js/jasmid/stream.js"> </script>
+  </head>
+  <body>
+    <center>
+        <div id="title"></div><br>
+    <a href="#" onClick="prevPage();return false">上一页</a>
+    <span class="pageNum">0/0</span>
+    <a href="#" onClick="nextPage();return false">下一页</a>
+    <br>
+    <canvas id="myCanvas" width="1600px" height="1600px" style="width:800; height:800"></canvas><br>
+    <a href="#" onClick="prevPage();return false">上一页</a>
+    <span class="pageNum">0/0</span>
+    <a href="#" onClick="nextPage();return false">下一页</a>
+    </center>
+    <div id="catalog">
+    </div>
+    <script type="text/javascript">
+var fileIndex, tmp_fileIndex = getParam("mi");
+//var fileIndex = 29;     // time signature test
+//var fileIndex = 16;     // key signature test
+//var fileIndex = 2;
+//var fileIndex = 17;       // conflict between two track
+fileIndex = (tmp_fileIndex != null)? tmp_fileIndex: 17;
+
+var filelist = [
+//"Arabian_Dance-Tchaikovsky",  // no time signature
+//"Oriental-Granados",  // no time signature
+//"Rustles_of_Spring_Op-32_No-3",   // no time signature
+//"The_Entertainer-Joplin",   // no time signature
+//"Waltz_of_the_Flowers-Tchaikovsky",   // no time signature
+"七子之歌-澳门",
+"G大调变奏曲",              // single track
+"不想长大",
+"大鱼海棠",
+"天空之城",
+"Scarborough_Fair",
+"极乐净土",
+"爱的供养",
+"U.N.オーエンは彼女なのか",
+"いつも何度でも",
+"加勒比海盗主题曲",
+"only_my_railgun",  // 15
+"檄！帝国華撃団Ⅲ",
+"someone-else",
+"えれくとりっくえんじぇぅ",
+"yyjjxq",
+"幽雅に咲かせ、墨染の桜～Border_of_Life",
+"千本桜",
+"刀剑神域OP",
+"深海少女",
+"CANON IN D",
+"Lemon",
+"Lydia",
+"钟",
+"梁祝",
+"喀秋莎",
+"叶塞尼亚",
+"富士山下",
+"名侦探柯南-主题歌",
+"梦中的婚礼",
+"土耳其进行曲",
+"菊次郎的夏天",
+"轻飘飘的时间",
+"克罗地亚狂想曲",
+"柯南与爱尔兰对峙时的背景音乐",
+"兰的决意",
+"Graduation-三枝夕夏",
+"Time after time~在落花纷飞的街道上~《名侦探柯南——迷宫的十字路口》主题"
+];
+
+// make catalog
+makeCatalog(filelist, x=>x);
+document.getElementById("title").innerHTML = filelist[fileIndex];
+
+file = "../res/"+filelist[fileIndex]+".mid";
+
+var Container=document.getElementById("myCanvas");
+ctx=Container.getContext("2d");
+ctx.scale(2, 2);
+ctx.save();
+
+var savePages = new Set();
+
+var option = new EOption();
+//option.set("lengthOfRow", 500);
+option.use();
+option.set("marginTitle", 160);
+option.set("indentHeading", 60);
+
+function download(type = 'png') {
+    if (!savePages.has(pageIdx)) {
+        downloadImage(filelist[fileIndex]+"-"+(pageIdx+1), Container, type);
+        savePages.add(pageIdx);
+    }
+}
+
+var fetch = new XMLHttpRequest();
+fetch.open('GET', file);
+fetch.overrideMimeType('text/plain; charset=x-user-defined');
+fetch.onreadystatechange = function() {
+    if (this.readyState === 4) {
+        if (this.status === 200) {
+            var ff = [], t = this.responseText || '';
+            for (var z = 0; z < t.length; z++) {
+                ff[z] = String.fromCharCode(t.charCodeAt(z) & 255);
+            }
+            var binaryStr = MidiFile(ff.join(''));
+            var mc = new TMidiConvertor(binaryStr);
+            mc.convert();
+            console.log(mc);
+
+            var ms = MConvert(mc);
+            console.log(ms);
+
+            var es = EConvert(ms);
+            console.log(es);
+
+            gct = new GContext();
+            gct.context2D =ctx;
+            gct.beginBudget(800, 800);
+
+            es.budget(gct, 10, 0);
+            console.log(gct);
+
+            gct.print();
+
+            $(".pageNum").text("1/"+(gct.pageYBase.length-1));
+            setTimeout(download, 1000);
+        } else {
+            onerror && onerror('Unable to load MIDI file');
+        }
+    }
+};
+fetch.send();
+
+    </script>
+  </body>
+</html>
+
