@@ -1,4 +1,8 @@
-
+/********************************
+ *
+ *   MTimeSlice
+ *
+ *******************************/
 function MTimeSlice(b, s) {
   this.beatlen = b||0;
   this.start = s;

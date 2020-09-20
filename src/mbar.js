@@ -1,4 +1,3 @@
-
 /********************************
  *
  * MBar
@@ -144,7 +143,6 @@ MBar.prototype.settle = function(ch) {
 
       // strategy 2
       if (schn == 1) {
-
 
       }
 

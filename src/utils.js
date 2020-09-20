@@ -1,3 +1,9 @@
+function extend(child, parent) {
+  function T() {}
+  T.prototype = parent.prototype;
+  child.prototype = new T();
+  child.prototype.constructor = child;
+}
 
 function LargePowerOf2(x) {
 	x |= (x >> 1);

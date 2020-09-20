@@ -1,4 +1,9 @@
-
+/********************************
+ *
+ * GGrid
+ *
+ * @constructor
+ *******************************/
 function GGrid(w, h) {
   this.width = w >> 6;
   this.height = h >> 6;

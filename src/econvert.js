@@ -1,5 +1,3 @@
-
-
 /**************************************************************
  *
  * EConvert
@@ -81,10 +79,18 @@ function EConvert(ms){
           //pushSkip(b, 0);
           var newobj;
           if (ch instanceof MMark) {
-            if (ch.type == 0)
-              newobj = new EBarline(ch.kind);
-            else
-              newobj = new EMark(ch.kind, -1.5);
+            switch(ch.kind) {
+              case 'barline':
+                newobj = new EBarline(ch.type);
+                break;
+              case 'rest':
+                newobj = new ERest(-ch.type);
+                break;
+              default:
+                newobj = new EMark(ch.kind, -1.5);
+                break;
+            }
+
           } else if (ch instanceof MChord) {
             newobj = new EChord(...Array.from(ch.notes, n=>new ENote(ch.nths, ...bars[b].clef.noteLine(n.pitch))));
             if (ch.beamComb) {

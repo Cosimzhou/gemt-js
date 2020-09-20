@@ -29,7 +29,10 @@ GRect.prototype.budget = function(x, y, w=null, h=null){
 }
 GRect.prototype.hit = function(spc) {
   //return !(this.left >= spc.right || this.right <= spc.left || this.top >= spc.bottom || this.bottom <= spc.top);
-  return this.left < spc.right && this.right > spc.left && this.top < spc.bottom && this.bottom > spc.top;
+  return this.left < spc.right &&
+      this.right > spc.left &&
+      this.top < spc.bottom &&
+      this.bottom > spc.top;
 }
 GRect.prototype.expend = function(gap = 4) {
   this.x -= gap;

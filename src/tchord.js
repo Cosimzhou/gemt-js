@@ -1,6 +1,8 @@
-
-///
-// T层和弦类
+/**
+ *
+ *  TChord
+ *
+ */
 function TChord() {
   this.notes = [...arguments];
   var n = this.notes[0]||{};

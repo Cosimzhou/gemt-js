@@ -1,14 +1,13 @@
-
-
 /*********************************
  *
  * MMark
  * @constructor
  *
  *******************************/
-function MMark(k, t=0) {
-  this.type = t;
-  this.kind = k;
+
+function MMark(kind, type = 0) {
+  this.kind = kind;
+  this.type = type;
   this.beat = 0;
 }
 exports['MMark'] = MMark;

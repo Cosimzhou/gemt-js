@@ -1,6 +1,7 @@
-
 /********************************
+ *
  * EChord
+ *
  * @constructor
  *******************************/
 function EChord() {
@@ -246,30 +247,30 @@ EChord.prototype.budget = function(ctx, etrack, x) {
         var interRowTies = epos1.rowIndex != epos2.rowIndex;
         if (interRowTies) {
           console.log("inter-row ties");
-          var dummyTadpo = {};//x:tadpo2.x, y:tadpo2.y};
+          var dummyTadpo = {};
           dummyTadpo.x = epos1.rowOriginPoint.x + etrack.score.trackLength + tadpo2.x - epos2.rowOriginPoint.x;
           dummyTadpo.y = epos1.rowOriginPoint.y + tadpo2.y - epos2.rowOriginPoint.y;
 
           if (isUp) {
-            curve = ctx._curve(dummyTadpo.x, dummyTadpo.y+8, tadpo1.x, tadpo1.y + 8, 3).attach(tadpo1, 0, 2);
+            curve = ctx._curve(dummyTadpo.x, dummyTadpo.y+8, tadpo1.x, tadpo1.y + 8, 2).attach(tadpo1, 0, 2);
           } else {
-            curve = ctx._curve(tadpo1.x, tadpo1.y-6, dummyTadpo.x, dummyTadpo.y - 6, 3).attach(tadpo1, 0, 1);
+            curve = ctx._curve(tadpo1.x, tadpo1.y-6, dummyTadpo.x, dummyTadpo.y - 6, 2).attach(tadpo1, 0, 1);
           }
           epos.pushOperations(curve);
 
           dummyTadpo.x = epos2.rowOriginPoint.x - etrack.score.trackLength + tadpo1.x - epos1.rowOriginPoint.x;
           dummyTadpo.y = epos2.rowOriginPoint.y + tadpo1.y - epos1.rowOriginPoint.y;
           if (isUp) {
-            curve = ctx._curve(tadpo2.x, tadpo2.y+8, dummyTadpo.x, dummyTadpo.y + 8, 3).attach(tadpo2, 0, 1);
+            curve = ctx._curve(tadpo2.x, tadpo2.y+8, dummyTadpo.x, dummyTadpo.y + 8, 2).attach(tadpo2, 0, 1);
           } else {
-            curve = ctx._curve(dummyTadpo.x, dummyTadpo.y-6, tadpo2.x, tadpo2.y - 6, 3).attach(tadpo2, 0, 2);
+            curve = ctx._curve(dummyTadpo.x, dummyTadpo.y-6, tadpo2.x, tadpo2.y - 6, 2).attach(tadpo2, 0, 2);
           }
           epos.pushOperations(curve);
         } else {
           if (isUp) {
-            curve = ctx._curve(tadpo2.x, tadpo2.y+8, tadpo1.x, tadpo1.y + 8, 3).attach(tadpo1, 0, 2).attach(tadpo2, 0, 1);
+            curve = ctx._curve(tadpo2.x, tadpo2.y+8, tadpo1.x, tadpo1.y + 8, 2).attach(tadpo1, 0, 2).attach(tadpo2, 0, 1);
           } else {
-            curve = ctx._curve(tadpo1.x, tadpo1.y-6, tadpo2.x, tadpo2.y - 6, 3).attach(tadpo1, 0, 1).attach(tadpo2, 0, 2);
+            curve = ctx._curve(tadpo1.x, tadpo1.y-6, tadpo2.x, tadpo2.y - 6, 2).attach(tadpo1, 0, 1).attach(tadpo2, 0, 2);
           }
           epos.pushOperations(curve);
         }

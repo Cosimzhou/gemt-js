@@ -1,6 +1,7 @@
-
 /********************************
+ *
  * ERest
+ *
  * @constructor
  *******************************/
 function ERest(n) {
@@ -13,7 +14,15 @@ function ERest(n) {
 exports['ERest'] = ERest;
 ERest.prototype.budget = function(ctx, etrack, x) {
   var w = 0, y, epos;
-  if (this.nth <= 2) {
+  if (this.nth < 0) {
+    w = 60;
+    y = etrack.translate(1);
+    epos = new EPositionInfo(w, 4, x, y);
+    epos.pushOperations(ctx._vline(x, y, 16),
+        ctx._vline(x+w, y, 16),
+        ctx._lineWh(x, y+5, x+w, y+5, 6),
+        ctx._draw("num-"+(-this.nth), x+w/2 - 4.5, y-22, 9, 12));
+  } else if (this.nth <= 2) {
     w = 10;
     y = etrack.translate(1) + (this.nth > 1? 4: 0);
     epos = new EPositionInfo(w, 4, x, y);

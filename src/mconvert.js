@@ -1,5 +1,3 @@
-
-
 /**************************************************************
  *
  *  MConvert
@@ -27,7 +25,8 @@ function MConvert(tmidi_convertor) {
     });
     mch.beat = new MTimeSlice(ch.beat, ch.startBeat);
     if (ch.beat == 0) {
-      console.error('WTF!', ch, mch)
+      throw "MConvert ch.beat == 0 "+ch+" "+mch
+      //console.error('WTF!', ch, mch)
     }
     mch.analysis();
     return mch;

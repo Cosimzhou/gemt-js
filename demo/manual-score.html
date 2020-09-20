@@ -32,8 +32,8 @@
       </center>
     <div id="catalog"> </div>
     <script type="text/javascript">
-var Container=document.getElementById("myCanvas");
-ctx=Container.getContext("2d");
+var Container = document.getElementById("myCanvas");
+ctx = Container.getContext("2d");
 ctx.scale(2, 2);
 
 gct = new GContext(ctx);
@@ -57,10 +57,23 @@ bar.clef = clef;
 var option = new EOption().use();
 option.set("marginBlank", 20)
       .set("margin", 20)
-      .set("lengthOfRow", 550);
+      .set("marginTitle", 60)
+      .set("lengthOfRow", 550)
+      .set("pageRender", function(ctx, p){
+  for (var i = 0; i <= 600/210; i++) {
+    for (var j = 0; j <= 600/210; j++) {
+      //Mozaik.draw(ctx, i*210, j*210);
+    }
+  }
+})
+      .set("titleRender", function(ctx, p){
+  ctx.font="30px Verdana";
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'center';
+  ctx.fillText(Melody.name, 300, 18);
+});
 
-document.getElementById("title").innerHTML =
-document.title = Melody.name;
+document.getElementById("title").innerHTML = document.title = Melody.name;
 
 function makeMChord() {
     return new MChord(...[...arguments].map(x=>new MNote(x)));
@@ -76,8 +89,9 @@ function pushNote(ns, tm = 4, nso=null) {
         else
             ch = makeMChord(ns);
 
+        // link
         if (nso != null) {
-            ch.linkWith(bar.chords[bar.chords.length-1]);
+            ch.linkWith(bar.chords[bar.chords.length-nso]);
         }
     }
     ch.beat = new MTimeSlice();
@@ -98,13 +112,13 @@ function pushMelody(content) {
         if (e instanceof Array)
             pushNote(...e, e.o);
         else if (e instanceof Object) {
-            m = new MMark("fermata", 1);
+            m = new MMark(e.kind, e.type);
             m.beat = new MTimeSlice().follow(bar.beat);
             bar.feed(mtrk, m);
-        } else {
-            m = new MMark(e);
-            m.beat = new MTimeSlice().follow(bar.beat);
-            bar.feed(mtrk, m);
+//        } else {
+//            m = new MMark(e);
+//            m.beat = new MTimeSlice().follow(bar.beat);
+//            bar.feed(mtrk, m);
         }
     }
 

@@ -1,7 +1,9 @@
-
 /********************************
+ *
  * EBeatMark
+ *
  * @constructor
+ *
  *******************************/
 function EBeatMark(n = 4,d = 4){
   this.numerator = n;

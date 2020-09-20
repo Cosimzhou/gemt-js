@@ -29,10 +29,16 @@ TLayerJs: prepare
 	@echo "======================================="
 	@cat src/t*.js > $(BUILD_DIR)/TLayer.js
 
+XPluginJs:
+	@echo "======================================="
+	@echo "=  generate X Plugin js               ="
+	@echo "======================================="
+	@cat src/x*.js > $(BUILD_DIR)/XPlugin.js
+
 SvgPack:
 	cd svg && ./svgpack.sh
 
-GemtJs:  GLayerJs ELayerJs MLayerJs TLayerJs
+GemtJs:  GLayerJs ELayerJs MLayerJs TLayerJs XPluginJs
 	@echo "======================================="
 	@echo "=  generate GEMT layer js             ="
 	@echo "======================================="
@@ -42,10 +48,11 @@ GemtJs:  GLayerJs ELayerJs MLayerJs TLayerJs
 	@cat $(BUILD_DIR)/ELayer.js >> $(BUILD_DIR)/gemt.js
 	@cat $(BUILD_DIR)/MLayer.js >> $(BUILD_DIR)/gemt.js
 	@cat $(BUILD_DIR)/TLayer.js >> $(BUILD_DIR)/gemt.js
+	@cat $(BUILD_DIR)/XPlugin.js >> $(BUILD_DIR)/gemt.js
 	@echo "})();" >> $(BUILD_DIR)/gemt.js
 
 GemtGccJs: GemtJs
-	@cat $(BUILD_DIR)/gemt.js src/impl/gemt-implement.js | java -jar ~/.devtools/compiler-latest/closure-compiler-v20200614.jar --compilation_level ADVANCED > $(BUILD_DIR)/gemt-min.js
+	@cat $(BUILD_DIR)/gemt.js svg/pic-svg.js src/impl/gemt-implement.js | java -jar ~/.devtools/compiler-latest/closure-compiler-v20200614.jar --compilation_level ADVANCED > $(BUILD_DIR)/gemt-min.js
 
 
 .PHONY:  GemtJs

@@ -76,10 +76,16 @@ function EOption() {
    *  which implies indent just for first row.
    */
   this.indentHeading = 0;
+
+  this.funcPageRender = null;
+  this.funcTitleRender = null;
+  this.funcTailRender = null;
+  this.funcFootRender = null;
+  this.funcHeadRender = null;
 }
 exports['EOption'] = EOption;
 var g_option = new EOption();
-EOption.prototype.set = function (varname, value) {
+EOption.prototype['set'] = function (varname, value) {
   switch(varname) {
     case "gapOfLine":
       this.gap = value;
@@ -99,10 +105,25 @@ EOption.prototype.set = function (varname, value) {
     case "indentHeading":
       this.indentHeading = value;
       break;
+    case "pageRender":
+      this.funcPageRender = value;
+      break;
+    case "titleRender":
+      this.funcTitleRender = value;
+      break;
+    case "tailRender":
+      this.funcTailRender = value;
+      break;
+    case "footRender":
+      this.funcFootRender = value;
+      break;
+    case "headRender":
+      this.funcHeadRender = value;
+      break;
   }
   return this;
 }
-EOption.prototype.use = function () {
+EOption.prototype['use'] = function () {
   g_option = this;
   return this;
 }

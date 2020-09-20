@@ -9,7 +9,7 @@
  ************************************************************************/
 
 (function(){
-var exports = window|| {};
+var exports = window || {};
 
 /**
  * //////////////////////////////////////////////////////////////////////////////
@@ -144,9 +144,10 @@ exports['GContext'].prototype.debug= function(){
 }
 
 
-exports['GContext'].prototype.print = function(p = 0){
+exports['GContext'].prototype.printImpl = function(p = 0){
   var ctx = this.context2D;
   ctx.strokeStyle = "black";
+  ctx.fillStyle = "black";
   ctx.beginPath();
   var range = this.getPageOpsSlice(p);
   ctx.translate(0, -range[1]);
