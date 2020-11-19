@@ -18,6 +18,7 @@ function MToneTenser(){
   this.high = 0;
   this.low = Infinity;
 }
+
 MToneTenser.prototype.absorb = function (e){
   var key = 1<<(e.pitch %12);
   for (var t of this.tenser) {
@@ -34,9 +35,10 @@ MToneTenser.prototype.absorb = function (e){
   }
   this.total++;
 }
+
 MToneTenser.prototype.conclude = function() {
   if (this.total < 15) {
-//        console.log("not enough");
+// console.log("not enough");
     return false;
   }
 
@@ -81,7 +83,7 @@ MToneTenser.prototype.conclude = function() {
   ];
   var mlen = 0;
 
-  this.clef = 0;
+  this._clef = 0;
   for (var c of clef) {
     var h = c[1], l = c[0], len;
     if (h > this.high) h = this.high;
@@ -89,12 +91,13 @@ MToneTenser.prototype.conclude = function() {
     len = h-l;
     if (len > mlen) {
       mlen = len;
-      this.clef = c[3];
+      this._clef = c[3];
     }
   }
 
   return true;
 }
+
 MToneTenser.prototype.join = function (mtt) {
   if (this.candidate == null) return false;
   if (mtt.candidate == null) {

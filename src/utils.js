@@ -1,8 +1,26 @@
+var exports = (typeof window !== 'undefined')? window: {};
+
 function extend(child, parent) {
+  // add the following into child function at first line:
+  // parent.apply(this, ...arguments);
   function T() {}
   T.prototype = parent.prototype;
   child.prototype = new T();
   child.prototype.constructor = child;
+}
+
+function impl(child, interf) {
+  function T(func) {
+    return function(){
+      console.error("CAUTION: class " + child.name +
+        " should implement function " + func.name +
+        ", but didn't. It should be " + func.toString());
+    }
+  }
+
+  for (var k in interf) {
+    child.prototype[k] = T(interf[k]);
+  }
 }
 
 function LargePowerOf2(x) {

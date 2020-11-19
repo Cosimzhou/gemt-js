@@ -10,15 +10,15 @@
  *******************************/
 
 function EScore(trk_num = 2) {
-  this.tracks = [];
+  this._tracks = [];
   this.trkcombo = [];
   this.trackLength = g_option.trackWidth;
   for (var i = 0; i < trk_num; ++i) {
-    this.tracks.push(new ETrack(this));
+    this._tracks.push(new ETrack(this));
   }
   if (trk_num > 1) this.trkcombo.push([0, 1]);
 }
-exports['EScore'] = EScore;
+exports.EScore = EScore;
 
 EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
   var ox = x, oy = y, currentBarTrialIndex = this.currentBarIndex;
@@ -28,9 +28,9 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
   ctx.rowOriginPoint = {x: x, y: y};
 
 
-  // Prepare track line strokes for one row of tracks.
+  // Prepare track line strokes for one row of _tracks.
   var trkOriginX = x = ox + g_option.marginAhead;
-  for (var etrack, i = 0; etrack = this.tracks[i]; ++i) {
+  for (var etrack, i = 0; etrack = this._tracks[i]; ++i) {
     var cOps = etrack.preview(ctx, x, y);
     preOps.push(...cOps);
     trksYPoses.push({
@@ -45,13 +45,19 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
   }
   var lastTrackInfo = trksYPoses[trksYPoses.length - 1];
   y = lastTrackInfo.ey;
-  // Draw the vertical closed line in the two ends of the row.
-  preOps.push(ctx._Vline(x, oy, y).attach(
-      lastTrackInfo.bl, 0, GStroke.Const.ConstraintY2));
-  preOps.push(ctx._Vline(x + this.trackLength, oy, y)
-                  .attach(lastTrackInfo.bl, 0, GStroke.Const.ConstraintY2));
+
+  if (!g_option._openTrack) {
+    // Draw the vertical closed line in the two ends of the row.
+    preOps.push(ctx._Vline(x, oy, y)._attach(
+        lastTrackInfo.bl, GStroke.Const.ConstraintY2));
+    preOps.push(ctx._Vline(x + this.trackLength, oy, y)
+                    ._attach(lastTrackInfo.bl, GStroke.Const.ConstraintY2));
+  }
+
   // Print No. for the first bar in this row.
-  postOps.push(ctx._text(this.currentBarIndex + 1, trkOriginX, oy));
+  if (g_option.barNoShowAtRowHeading) {
+    postOps.push(ctx._text(this.currentBarIndex + 1, trkOriginX, oy));
+  }
   ctx._grid.overall.bottom = y;
 
 
@@ -65,16 +71,16 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
    *              clef, beat and so on.
    *******************************/
   function planEMarks(getArr) {
-    for (var curTrack, i, maxWidth, rest_trk = me.tracks.length,
-                                    cursor = me.tracks.map(x => 0);
+    for (var curTrack, i, maxWidth, rest_trk = me._tracks.length,
+                                    cursor = me._tracks.map(x => 0);
          rest_trk;) {
-      for (rest_trk = maxWidth = i = 0; curTrack = me.tracks[i]; ++i) {
+      for (rest_trk = maxWidth = i = 0; curTrack = me._tracks[i]; ++i) {
         var arr = getArr(i);
         if (!arr || arr.length <= cursor[i]) continue;
         rest_trk++;
 
         var m = arr[cursor[i]++];
-        var epos = m.budget(ctx, curTrack, x);
+        var epos = m._budget(ctx, curTrack, x);
         postOps.push(...epos.operations);
         trksYPoses[i].ops.push(...epos.operations);
         trksYPoses[i].recs.push(epos);
@@ -91,7 +97,7 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
   {
     var bakpg = null, me = this;
     // arrange the row
-    var restTrackNum = me.tracks.length,
+    var restTrackNum = me._tracks.length,
         nextVisualIndex = noteProgress.map(x => 0);
     var tailBarCompleted = false, firstBarInRow = true, beginAWholeBar = true,
         endAWholeBar = false;
@@ -102,13 +108,13 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
          visualIndex++) {
       var columnStartPos = postOps.length;
       if (beginAWholeBar) {
-        // We should check whether the cleves and time beats
+        // We should check whether the clefs and time beats
         // are need to drawn. In case of the first bar in a row or
-        // cleves or time beat changed, which should be drawn respectly.
+        // clefs or time beat changed, which should be drawn respect.
         var headerMarks = {}, addBarHeadingStaff = 0;
         if (firstBarInRow) {
           // draw cleves in first bar.
-          for (var track, obj, ni, i = 0; track = me.tracks[i]; ++i) {
+          for (var track, obj, ni, i = 0; track = me._tracks[i]; ++i) {
             for (obj, ni = 1; obj = track.clefMarks[ni]; ni++) {
               if (obj.marksIdx > noteProgress[i]) break;
             }
@@ -116,9 +122,9 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
             addBarHeadingStaff++;
           }
         } else {
-          // draw cleves and draw time beats when they are different from
-          // the ones in prevous bar.
-          for (var track, obj, ni, i = 0; track = me.tracks[i]; ++i) {
+          // draw clefs and draw time beats when they are different from
+          // the ones in previous bar.
+          for (var track, obj, ni, i = 0; track = me._tracks[i]; ++i) {
             for (obj, ni = 1; obj = track.clefMarks[ni]; ni++) {
               if (obj.marksIdx == noteProgress[i]) {
                 headerMarks[i] = track.clefMarks[ni].headerMarks;
@@ -135,9 +141,9 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
 
         // Prepare to draw beat marks.
         // Draw beat marks only when they are different from the ones
-        // of prevous bar, NOT every first bar in row.
+        // of previous bar, NOT every first bar in row.
         var beatMarks = [];
-        for (var track, obj, ni = 0, track = me.tracks[0];
+        for (var track, obj, ni = 0, track = me._tracks[0];
              obj = track.beatMarks[ni]; ni++) {
           if (obj.marksIdx == noteProgress[0]) {
             beatMarks.push(track.beatMarks[ni].headerMarks);
@@ -153,14 +159,14 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
       }
 
       for (var beatStartX = x, track, trackIndex = 0;
-           track = me.tracks[trackIndex]; ++trackIndex) {
+           track = me._tracks[trackIndex]; ++trackIndex) {
         if (visualIndex < nextVisualIndex[trackIndex])
           // Skip the unreached emarks; wait the progress.
           continue;
 
         if (noteProgress[trackIndex] >= track.marks.length) {
           // Whether all emarks in this track are settled.
-          // if so, eliminate tracks.
+          // if so, eliminate _tracks.
           nextVisualIndex[trackIndex]++;
           restTrackNum--;
           endAWholeBar = false;
@@ -171,12 +177,12 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
         // treat the emark in this track
         var m = track.marks[noteProgress[trackIndex]++];
         if (m instanceof ESkip) {
-          nextVisualIndex[trackIndex] += m.skipn;
+          nextVisualIndex[trackIndex] += m._skipN;
         } else if (m instanceof EBarline) {
           // Be careful; EBarline will not trigger nextVisualIndex
           // moving next.
           // nextVisualIndex[trackIndex]++;
-          epos = m.budget(ctx, x, trksYPoses);
+          epos = m._budget(ctx, x, trksYPoses);
           postOps.push(...epos.operations);
           // At this visualIndex, there is only one EBarline. So
           // the width of EBarline is the maximum width.
@@ -201,7 +207,7 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
         } else {
           nextVisualIndex[trackIndex]++;
 
-          epos = m.budget(ctx, track, x);
+          epos = m._budget(ctx, track, x);
           postOps.push(...epos.operations);
 
           maxWidth = Math.max(
@@ -224,12 +230,12 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
                   postOps, epos.shx.x - (x - beatStartX), 0, columnStartPos);
               x = beatStartX + epos.shx.x;
             }
-            // shift befores
+            // shift before
           }
 
           trksYPoses[trackIndex].rec.union(epos.rect);
           ctx._grid.put(epos.rect);
-          if (m.link) {
+          if (m._linkObject) {
           }
         }
         endAWholeBar = false;
@@ -260,7 +266,7 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
         }
       }
       if (trackShiftY > 0) {
-        for (var op, i = 0; op = preOps[i]; i++) op.settle();
+        for (var op, i = 0; op = preOps[i]; i++) op._settle();
         ctx._grid.overall.bottom += trackShiftY;
       }
     }
@@ -292,7 +298,7 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
   }
 
 
-  // draw bracket of tracks
+  // draw bracket of _tracks
   for (var e, i = 0; e = this.trkcombo[i]; ++i) {
     preOps.push(ctx._draw(
         'brace', ox, trksYPoses[e[0]].y, 0,
@@ -303,7 +309,7 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
   this.currentBarIndex = currentBarTrialIndex;
   {
     // Avoid overlap between adjacent rows.
-    // Whether this row rised to conflict with prevous row.
+    // Whether this row risen to conflict with previous row.
     var preY = ctx.rowBaselineY[ctx.rowBaselineY.length - 1];
     if (preY > ctx._grid.overall.top) {
       diff = preY - ctx._grid.overall.top + g_option.gapMinBetweenRows;
@@ -316,13 +322,13 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
     }
   }
   ctx.rowBaselineY.push(ctx._grid.overall.bottom);
-  ctx.settle(finalOps);
+  ctx._settle(finalOps);
 
   return EndFlag ? null : ctx._grid.overall.bottom;
 }
 
-EScore.prototype['budget'] = function(ctx, x, y) {
-  var prog = this.tracks.map(x => 0);
+EScore.prototype.budget = function(ctx, x, y) {
+  var prog = this._tracks.map(x => 0);
 
   y += g_option.marginTitle;
   x += g_option.indentHeading;
@@ -348,8 +354,8 @@ EScore.prototype['budget'] = function(ctx, x, y) {
 }
 
 EScore.prototype.put = function(etrack, elem) {
-  if (etrack < this.tracks.length) {
-    this.tracks[etrack].append(elem);
+  if (etrack < this._tracks.length) {
+    this._tracks[etrack].append(elem);
   }
 }
 

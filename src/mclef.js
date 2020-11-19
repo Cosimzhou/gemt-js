@@ -10,7 +10,7 @@ function MClef(n, t=null) {
   this.tone = t;
   this.load();
 }
-exports['MClef'] = MClef;
+exports.MClef = MClef;
 MClef.Const = {
   GClef: 0,
   FClef: 1,
@@ -26,7 +26,9 @@ MClef.Const = {
       // c-clef
       {low:53, high:67, base:60, level:0, line:2},
       // c-clef tensor
-      {low:50, high:64, base:60, level:0, line:1}
+      {low:50, high:64, base:60, level:0, line:1},
+      //
+      {low:0, high:14, base:0, level:0, line:4}
   ],
 };
 MClef.prototype.load = function() {
@@ -76,13 +78,11 @@ MClef.prototype.lineOrder = function(l) {
   var diff = (this.line - l)*2 % 7 + this.order;
   return diff;
 }
-//MClef.prototype.orderLine = function(order) {
-//
-//}
-MClef.prototype.equal = function(mc) {
-  return mc.type == this.type && mc.tone.equal(this.tone);
+
+MClef.prototype._equal = function(mc) {
+  return mc.type == this.type && mc.tone._equal(this.tone);
 }
-MClef.prototype.convertMark = function(preClef = null){
+MClef.prototype._convertMark = function(preClef = null){
   var ms = [];
 
   if (preClef == null) {
@@ -95,6 +95,9 @@ MClef.prototype.convertMark = function(preClef = null){
         break;
       case 2:
         ms.push(new EMark('c-clef', 2));
+        break;
+      case 3:
+        ms.push(new EMark('c-clef', 1));
         break;
     }
     if (this.tone && this.tone.shifts.length) {

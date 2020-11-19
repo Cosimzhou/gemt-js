@@ -41,6 +41,7 @@ var gEID = {
   "num":       ESpace(0,  0,      8,      82),
   "fermata":   ESpace(0,  8,      6,      13),
 };
+
 (function(){
   gEID.get = function(x){
     return gEID[x];
@@ -70,6 +71,7 @@ function EOption() {
 
   this.marginTitle = 0;
 
+  this.barNoShowAtRowHeading = true;
   /**
    *  heading indent
    *
@@ -82,10 +84,14 @@ function EOption() {
   this.funcTailRender = null;
   this.funcFootRender = null;
   this.funcHeadRender = null;
+
+
 }
-exports['EOption'] = EOption;
+
+exports.EOption = EOption;
 var g_option = new EOption();
-EOption.prototype['set'] = function (varname, value) {
+
+EOption.prototype.set = function (varname, value) {
   switch(varname) {
     case "gapOfLine":
       this.gap = value;
@@ -120,10 +126,17 @@ EOption.prototype['set'] = function (varname, value) {
     case "headRender":
       this.funcHeadRender = value;
       break;
+    case "barNoShowAtRowHeading":
+      this.barNoShowAtRowHeading = value;
+      break;
+    case "openTrack":
+      this._openTrack = value;
+      break;
   }
   return this;
 }
-EOption.prototype['use'] = function () {
+
+EOption.prototype.use = function () {
   g_option = this;
   return this;
 }

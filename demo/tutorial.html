@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8">
+    <title>Gemt Score Testbed - from MIDI files</title>
+    <!-- - ->
+    <script type="text/javascript" src="../build/gemt-min.js"> </script>
+    <!- - -->
+    <!-- -->
+    <script type="text/javascript" src="../build/gemt.js"> </script>
+    <!-- -->
+    <script type="text/javascript" src="../svg/pic-svg.js"> </script>
+    <script type="text/javascript" src="../src/impl/gemt-implement.js"> </script>
+    <script type="text/javascript" src="js/pageutils.js"> </script>
+    <script type="text/javascript">
+function MakeTutorial(Melody, drawer) {
+  var Container = document.createElement("canvas");
+  Container.height = 150;
+  Container.width = 400;
+  Container.style.height = 75;
+  Container.style.width = 200;
+  document.body.appendChild(Container);
+  var c = Container.getContext("2d");
+  c.scale(2, 2);
+
+  var gct = new GContext(c);
+  gct.beginBudget(Container.clientWidth, Container.clientHeight);
+
+  var option = new EOption().use();
+  option.set("lengthOfRow", 180)
+        .set("barNoShowAtRowHeading", false)
+        .set("openTrack", true)
+        .set("pageRender", function(c, p) {
+    var tile = Mozaik;
+
+    tile.pushOnload(function() {
+      var imgWidth = tile.img.width;
+      var imgHeight = tile.img.height;
+      for (var i = 0; i <= Container.clientWidth/imgWidth; i++) {
+        for (var j = 0; j <= Container.clientHeight/imgHeight; j++) {
+          Mozaik.draw(c, i*imgWidth, j*imgHeight);
+        }
+      }
+      gct.print();
+    });
+    tile.draw(c, 0, 0);
+  });
+
+  var mscore = new MScore();
+  PushMelody(mscore.appendTrack(), Melody);
+  EConvert(mscore).budget(gct, 0, 0);
+
+  gct.print();
+}
+
+    </script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      var m = [1,2,3,4,5,6,7,11];
+      m.min = 200;
+      //m.clef = 5;
+      MakeTutorial(m);
+
+      m = [-5, -6, -7, 1,2,3,4,5,6,7,11];
+      m.min = 200;
+      MakeTutorial(m);
+
+      m = [-5, -6, -7, 1,2,3,4,5,6,7,11];
+      m.min = 200;
+      m.clef = 2;
+      MakeTutorial(m);
+    </script>
+
+  </body>
+</html>

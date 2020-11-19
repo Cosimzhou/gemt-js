@@ -11,8 +11,10 @@ function ERest(n) {
     this.img = gEID.get(this.imgK);
   }
 }
-exports['ERest'] = ERest;
-ERest.prototype.budget = function(ctx, etrack, x) {
+exports.ERest = ERest;
+impl(ERest, EScoreElement);
+
+ERest.prototype._budget = function(ctx, etrack, x) {
   var w = 0, y, epos;
   if (this.nth < 0) {
     w = 60;
@@ -30,7 +32,7 @@ ERest.prototype.budget = function(ctx, etrack, x) {
   } else {
     y = etrack.translate(2);
     epos = new EPositionInfo();
-    epos.rect = this.img.budget(x, y);
+    epos.rect = this.img._budget(x, y);
     epos.width = this.img.width;
     epos.pushOperations(ctx._draw(this.imgK, x, y));
   }

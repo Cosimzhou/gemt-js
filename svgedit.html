@@ -1,0 +1,194 @@
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  </head>
+  <body>
+
+        <canvas id="myCanvas" width="1200px" height="1200px" style="width:600; height:600"></canvas>
+        <script type="text/javascript">
+var Container=document.getElementById("myCanvas");
+var ctx=Container.getContext("2d");
+
+ctx.save()
+ctx.translate(100,100);
+ctx.moveTo(0,0)
+ctx.lineTo(0,50);
+ctx.rotate(-Math.PI/2);
+ctx.lineTo(0,50);
+ctx.rotate(-Math.PI/2);
+ctx.lineTo(0,50);
+ctx.rotate(-Math.PI/2);
+ctx.lineTo(0,50);
+ctx.rotate(-Math.PI/2);
+ctx.lineTo(0,50);
+ctx.fill();
+
+
+
+ctx.restore();
+ctx.save()
+ctx.scale(4,4)
+
+var parray = [50,100,50,85,33,85,33,70,66,70,66,85,50,85,50,100,100,100];
+var pparray = [50,105,50,95,40,85,30,75, 40,65,50,65,60,65 ,70,75,60,85,50,95,50,105,100,100];
+//var parray = [45,105,45,95,40,85,30,75, 40,65,50,65,60,65 ,70,75,60,85,50,95,50,105,100,100];
+parray = [];
+function noise() {
+    return Math.random()*7-3;
+}
+for (var i = 0; i < 2; ++i)
+    parray.push(pparray[i] + noise());
+
+{
+    var ox = pparray[4]+noise(), oy = pparray[5]+noise();
+    var dx = 10 + noise(), dy = 10+ noise();
+
+    parray.push(ox+dx);
+    parray.push(oy+dy);
+    parray.push(ox);
+    parray.push(oy);
+    var rn = -(Math.random()*0.5+0.75);
+    dx*=rn, dy*=rn;
+    parray.push(ox+dx);
+    parray.push(oy+dy);
+}
+
+{
+    var ox = pparray[10]+noise(), oy = pparray[11]+noise();
+    var dx = -10 + noise(), dy = noise();
+
+    parray.push(ox+dx);
+    parray.push(oy+dy);
+    parray.push(ox);
+    parray.push(oy);
+    var rn = -(Math.random()*0.5+0.75);
+    dx*=rn, dy*=rn;
+    parray.push(ox+dx);
+    parray.push(oy+dy);
+}
+
+{
+    var ox = pparray[16]+noise(), oy = pparray[17]+noise();
+    var dx = 10 + noise(), dy = -10+ noise();
+
+    parray.push(ox+dx);
+    parray.push(oy+dy);
+    parray.push(ox);
+    parray.push(oy);
+    var rn = -(Math.random()*0.5+0.75);
+    dx*=rn, dy*=rn;
+    parray.push(ox+dx);
+    parray.push(oy+dy);
+}
+
+for (var i = 20; i < pparray.length; ++i)
+    parray.push(pparray[i] + noise());
+
+//for (var i = 0; i < pparray.length; ++i)
+//    parray.push(pparray[i]+Math.random()*7-3)
+
+//ctx.moveTo(0, 100);
+//for (var i = 0; i < parray.length/2; i++)
+//    ctx.lineTo(parray[i*2], parray[i*2+1]);
+
+ctx.moveTo(0, 100);
+for (var i = 0; i < parray.length/6; i++)
+    ctx.bezierCurveTo(...parray.slice(i*6,(i+1)*6));
+
+ctx.restore()
+ctx.translate(0, 1200);
+ctx.scale(1, -1);
+//d="m 220,138 c 56,0 109,-29 109,-91 0,-72 -56,-121 -103,-149 -36,-21 -76,-36 -117,-36 -56,0 -109,29 -109,91 0,72 56,121 103,149 36,21 76,36 117,36 z"
+    //var arr = [56,0,109,-29,109,-91,0,-72,-56,-121,-103,-149,-36,-21,-76,-36,-117,-36,-56,0,-109,29,-109,91,0,72,56,121,103,149,36,21,76,36,117,36];
+
+//arr = [32.396495528201655,38.60863993319646,51.949820085024356,84.46938021042655,28.202442348336064,104.39579611070928,221.88670772676886,317.05192881413717,170.72212334215234,294.1915853182609,132.80758524874602,270.78693190993965]//,-0.6673428582570864,86.32522605536309,-29.553030130364846,63.56853317572893,-53.27189292779812,35.30149322463859,100.4110897205444,232.1782919767432,80.85776516372167,186.31755169951307,104.60514290040999,166.39113579923037,-25.694292975514912,12.161139275923176,25.470291409101634,35.02148277179947,63.38482950250793,58.42613618012069,133.47492810700314,184.46170585457656,162.3606153791109,207.21839873421072,186.07947817654417,235.48543868530106];
+
+var arr = [98,58,227,148,227,259,0,57,-16,112,-41,163,-3,16,10,27,23,27,7,0,15,-3,20,-11,25,-56,40,-117,40,-179];
+
+
+console.log(arr.length);
+var oarr = arr;
+var cx = 0, cy = 250;
+var mxy = 0, mny = Infinity;
+var mxx = 0, mnx = Infinity;
+var mdx, mdy;
+var hist = [];
+//cx+=29.464307679052098,cy+=-144.08842513457824
+function curdraw() {
+    var tarr = arr.slice(0, 6);
+    for (var i = 0; i < 3; ++i) {
+        tarr[i*2] += cx;
+        tarr[i*2+1] += cy;
+        if (mxx < tarr[i*2]) mxx = tarr[i*2];
+        if (mnx > tarr[i*2]) mnx = tarr[i*2];
+        if (mxy < tarr[i*2+1]) mxy = tarr[i*2+1];
+        if (mny > tarr[i*2+1]) mny = tarr[i*2+1];
+    }
+    cx = tarr[4]; cy = tarr[5]
+    ctx.bezierCurveTo(...tarr);
+    hist.push(tarr);
+
+    arr =arr.slice(6);
+}
+
+var hist2 = [];
+function trans(a) {
+    var ret = [], A=50/180*Math.PI, x, y;
+    for (var i = 0; i < 3; ++i) {
+        x = (a[i*2] - mdx)*.9;
+        y = (a[i*2+1] - mdy)*.4;
+
+        ret.push(mdx+x*Math.cos(A)+y*Math.sin(A));
+        ret.push(mdy+x*Math.sin(A)-y*Math.cos(A));
+    }
+    hist2.push(ret);
+    return ret;
+}
+        ctx.moveTo(cx,cy);
+        while (arr.length) curdraw();
+        ctx.bezierCurveTo(269,305,0,204,0,0);
+        ctx.stroke();
+
+        mdx = (mxx+mnx)/2;
+        mdy = (mxy+mny)/2;
+
+        ctx.moveTo(0, mdy);
+        ctx.lineTo(600, mdy);
+
+        ctx.moveTo(...trans([220,438]));
+        for(var e of hist) ctx.bezierCurveTo(...trans(e));
+        ctx.stroke();
+
+console.log(hist2);
+var e = hist2.shift();
+//cx = e[0], cy = e[1];
+console.log(cx,cy);
+console.log("M",(e[0]-cx)+","+(e[1]-cy));
+cx = e[0], cy = e[1];
+var msg = "c", x, y;
+for (var e of hist2) {
+    for (var i = 0; i < 3; ++i){
+        x = e[i*2]-cx;
+        y = e[i*2+1]-cy;
+        msg+= " ";
+        msg+= x;
+        msg+= ",";
+        msg+= y;
+    }
+    cx = e[4];
+    cy = e[5];
+}
+console.log(msg);
+
+ctx.beginPath();
+ctx.moveTo(0,300);
+ctx.bezierCurveTo(100, 340, 500, 340, 600, 300);
+ctx.bezierCurveTo(500, 350, 100, 350, 0, 300);
+ctx.fill();
+
+
+        </script>
+  </body>
+</html>
+

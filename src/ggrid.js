@@ -9,7 +9,7 @@ function GGrid(w, h) {
   this.height = h >> 6;
   this.clear();
 }
-exports['GGrid'] = GGrid;
+exports.GGrid = GGrid;
 GGrid.prototype.clear = function() {
   this.array = [];
   this.arr = Array(this.height);
@@ -23,6 +23,7 @@ GGrid.prototype.clear = function() {
   r.left = r.top = Infinity;
   r.right = r.bottom = -Infinity;
 }
+
 GGrid.prototype.enumerate = function(g, act) {
   var l = g.left >> 6, t = g.top >> 6,
       r = (g.right >> 6) + (g.right % 64? 1:0),
@@ -41,6 +42,7 @@ GGrid.prototype.enumerate = function(g, act) {
       }
   }
 }
+
 GGrid.prototype.put = function(g){
   this.array.push(g);
   this.enumerate(g, function (arr, g) {
@@ -48,6 +50,7 @@ GGrid.prototype.put = function(g){
   });
   this.overall.union(g);
 }
+
 GGrid.prototype.hit = function(g) {
   if (!this.overall.hit(g))
     return false;

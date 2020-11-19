@@ -79,4 +79,4 @@ var MConst = {
 //      010101101011 	=1387
   MajorToneKeys: [2741, 1387, 2774, 1453, 2906, 1717, 3434, 2773, 1451, 2902, 1709, 3418],
 }
-exports['MConst'] = MConst;
+exports.MConst = MConst;

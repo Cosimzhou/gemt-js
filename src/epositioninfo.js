@@ -1,6 +1,6 @@
 
 function EPositionInfo() {
-  this.rect = new GRect(...arguments);
+  this.rect = new GRect(... arguments);
   this.operations = [];
   this.width = this.rect.width||0;
   //this.shx = {};
@@ -12,7 +12,8 @@ EPositionInfo.prototype.addOperation = function(op) {
   this.operations.push(op);
   return this;
 }
+
 EPositionInfo.prototype.pushOperations = function() {
-  this.operations.push(...arguments);
+  this.operations.push(... arguments);
   return this;
 }

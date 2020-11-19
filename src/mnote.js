@@ -6,7 +6,7 @@
 function MNote(h) {
   this.pitch = h;
 }
-exports['MNote'] = MNote;
+exports.MNote = MNote;
 /********************************
  * 获取音名
  *******************************/

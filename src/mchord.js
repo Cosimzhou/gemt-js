@@ -1,4 +1,3 @@
-
 /********************************
  *
  * MChord
@@ -12,7 +11,16 @@ function MChord() {
   this.tone = 0;
   this.nths = [1];
 }
-exports['MChord'] = MChord;
+
+exports.MChord = MChord;
+
+impl(MChord, MInterface);
+MChord.prototype._convertToE = function(clef) {
+  var newobj = new EChord(...Array.from(this.notes, n=>new ENote(this.nths, ... clef.noteLine(n.pitch))));
+  newobj._oumark = this._oumark;
+  return newobj;
+}
+
 MChord.prototype.clone = function() {
   var nmc = new MChord();
   for (var n of this.notes) {
@@ -23,25 +31,28 @@ MChord.prototype.clone = function() {
   nmc.beat = this.beat.clone();
   return nmc;
 }
+
 MChord.prototype.linkWith = function(mchord) {
-  if (this.link == null) {
-    var linkObj = {start: [mchord], end: this};
-    this.link = linkObj;
-    mchord.link = linkObj;
+  if (this._linkObject == null) {
+    var linkObj = {_start: [mchord], _end: this};
+    this._linkObject = linkObj;
+    mchord._linkObject = linkObj;
   } else {
-    this.link.start.push(mchord);
-    mchord.link = this.link;
+    this._linkObject._start.push(mchord);
+    mchord._linkObject = this._linkObject;
   }
 }
+
 // 生成和弦的特征
-MChord.prototype._charactorize = function(){
+MChord.prototype._charactorize = function() {
   var n = 0;
   for (var e of this.notes) {
     n |= 1<<(e.pitch%12);
   }
   return n;
 }
-MChord.prototype.analysis = function(){
+
+MChord.prototype.analysis = function() {
   var ck = this._charactorize();
   var ck1 = ck & (ck-1);
   if (ck1 == 0) {
@@ -87,7 +98,7 @@ MChord.prototype.shift = function(n) {
 /********************************
  * 计算拍子
  *******************************/
-MChord.prototype.nth = function(){
+MChord.prototype.nth = function() {
   var beat = this.beat.beatlen;
   var nth = 4 / beat;
   return nth;

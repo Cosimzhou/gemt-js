@@ -42,17 +42,21 @@ GemtJs:  GLayerJs ELayerJs MLayerJs TLayerJs XPluginJs
 	@echo "======================================="
 	@echo "=  generate GEMT layer js             ="
 	@echo "======================================="
-	@echo "(function(){var exports = (typeof window !== 'undefined')? window: {}; " > $(BUILD_DIR)/gemt.js
+	@echo "(function() {" > $(BUILD_DIR)/gemt.js
 	@cat src/utils.js >> $(BUILD_DIR)/gemt.js
 	@cat $(BUILD_DIR)/GLayer.js >> $(BUILD_DIR)/gemt.js
 	@cat $(BUILD_DIR)/ELayer.js >> $(BUILD_DIR)/gemt.js
 	@cat $(BUILD_DIR)/MLayer.js >> $(BUILD_DIR)/gemt.js
 	@cat $(BUILD_DIR)/TLayer.js >> $(BUILD_DIR)/gemt.js
 	@cat $(BUILD_DIR)/XPlugin.js >> $(BUILD_DIR)/gemt.js
+	#@cat src/impl/gemt-implement.js >> $(BUILD_DIR)/gemt.js
 	@echo "})();" >> $(BUILD_DIR)/gemt.js
 
-GemtGccJs: GemtJs
-	@cat $(BUILD_DIR)/gemt.js svg/pic-svg.js src/impl/gemt-implement.js | java -jar ~/.devtools/compiler-latest/closure-compiler-v20200614.jar --compilation_level ADVANCED > $(BUILD_DIR)/gemt-min.js
+GccJs: GemtJs
+	@for f in `grep -Eo "prototype\.\\w*" $(BUILD_DIR)/gemt.js|grep -v "\._"|sort -u|awk -F. '{print $$2}'`; do sed -i "s/\.\b$$f\b/[\"$$f\"]/g" $(BUILD_DIR)/gemt.js; done
+	@sed -i "s/^exports\.\(\\w*\)/exports[\"\1\"\]/" $(BUILD_DIR)/gemt.js
+	#@cat $(BUILD_DIR)/gemt.js svg/pic-svg.js src/impl/gemt-implement.js | java -jar ~/local/compiler-latest/closure-compiler-v20200614.jar --compilation_level ADVANCED > $(BUILD_DIR)/gemt-min.js
+	@cat $(BUILD_DIR)/gemt.js svg/pic-svg.js | java -jar ~/local/compiler-latest/closure-compiler-v20200614.jar --compilation_level ADVANCED > $(BUILD_DIR)/gemt-min.js
 
 
 .PHONY:  GemtJs

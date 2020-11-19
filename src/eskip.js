@@ -5,7 +5,7 @@
  * @constructor
  *******************************/
 function ESkip(n) {
-  this.skipn = n;
+  this._skipN = n;
 }
-exports['ESkip'] = ESkip;
+exports.ESkip = ESkip;
 

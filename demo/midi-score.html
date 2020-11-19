@@ -2,8 +2,12 @@
   <head>
     <meta charset="UTF-8">
     <title>MIDI files testing - Gemt Score Testbed</title>
-    <script type="text/javascript" src="js/jquery-3.5.1.min.js"> </script>
+    <!-- Utilities -->
     <script type="text/javascript" src="js/pageutils.js"> </script>
+    <!-- Play code -->
+    <script type="text/javascript" src="js/inc/Base64binary.js"> </script>
+    <script type="text/javascript" src="js/inc/MIDI.min.js"> </script>
+
     <!-- - ->
     <script type="text/javascript" src="../build/gemt-min.js"> </script>
     <!- - -->
@@ -16,15 +20,18 @@
   </head>
   <body>
     <center>
-        <div id="title"></div><br>
-    <a href="#" onClick="prevPage();return false">上一页</a>
-    <span class="pageNum">0/0</span>
-    <a href="#" onClick="nextPage();return false">下一页</a>
-    <br>
-    <canvas id="myCanvas" width="1600px" height="1600px" style="width:800; height:800"></canvas><br>
-    <a href="#" onClick="prevPage();return false">上一页</a>
-    <span class="pageNum">0/0</span>
-    <a href="#" onClick="nextPage();return false">下一页</a>
+      <div id="title"></div><br>
+      <a href="#" onClick="prevPage();return false">上一页</a>
+      <span class="pageNum">0/0</span>
+      <a href="#" onClick="nextPage();return false">下一页</a>
+      <a href="#" onClick="Play();return false">播放</a>
+      <br>
+      <canvas id="myCanvas" width="1600px" height="1600px" style="width:800; height:800"></canvas><br>
+      <a href="#" onClick="prevPage();return false">上一页</a>
+      <span class="pageNum">0/0</span>
+      <a href="#" onClick="nextPage();return false">下一页</a>
+      <a href="#" onClick="ldownload();return false">下载</a>
+      <a href="#" onClick="Play();return false">播放</a>
     </center>
     <div id="catalog">
     </div>
@@ -89,27 +96,32 @@ document.getElementById("title").innerHTML = filelist[fileIndex];
 file = "../res/"+filelist[fileIndex]+".mid";
 
 var Container=document.getElementById("myCanvas");
-ctx=Container.getContext("2d");
+ctx = Container.getContext("2d");
 ctx.scale(2, 2);
 ctx.save();
 
-
 var savePages = new Set();
-
 var option = new EOption();
-//option.set("lengthOfRow", 500);
-option.use();
-option.set("marginTitle", 160);
-option.set("indentHeading", 60);
-option.set("pageRender", function(ctx, p){
-  for (var i = 0; i <= 800/210; i++) {
-    for (var j = 0; j <= 800/210; j++) {
-      Mozaik.draw(ctx, i*210, j*210);
-    }
-  }
-});
+option.use()
+//.set("lengthOfRow", 500);
+  .set("marginTitle", 60)
+  .set("indentHeading", 60)
+  .set("pageRender", function(ctx, p) {
+  var tile = Mozaik;
 
-option.set("titleRender", function(ctx, p){
+  tile.onload = function() {
+    var imgWidth = tile.img.width;
+    var imgHeight = tile.img.height;
+    for (var i = 0; i <= Container.clientWidth/imgWidth; i++) {
+      for (var j = 0; j <= Container.clientHeight/imgHeight; j++) {
+        Mozaik.draw(ctx, i*imgWidth, j*imgHeight);
+      }
+    }
+    gct.print();
+  }
+  tile.draw(ctx, 0, 0);
+})
+  .set("titleRender", function(ctx, p) {
   ctx.font="30px Verdana";
   ctx.textBaseline = 'top';
   ctx.textAlign = 'center';
@@ -117,51 +129,85 @@ option.set("titleRender", function(ctx, p){
 });
 
 
-function download(type = 'png') {
-    if (!savePages.has(pageIdx)) {
-        downloadImage(filelist[fileIndex]+"-"+(pageIdx+1), Container, type);
-        savePages.add(pageIdx);
-    }
+function ldownload(type = 'png') {
+  if (!savePages.has(pageIdx)) {
+    downloadImage(filelist[fileIndex]+"-"+(pageIdx+1), Container, type);
+    savePages.add(pageIdx);
+  }
 }
 
 var fetch = new XMLHttpRequest();
 fetch.open('GET', file);
 fetch.overrideMimeType('text/plain; charset=x-user-defined');
 fetch.onreadystatechange = function() {
-    if (this.readyState === 4) {
-        if (this.status === 200) {
-            var ff = [], t = this.responseText || '';
-            for (var z = 0; z < t.length; z++) {
-                ff[z] = String.fromCharCode(t.charCodeAt(z) & 255);
-            }
-            var binaryStr = MidiFile(ff.join(''));
-            var mc = new TMidiConvertor(binaryStr);
-            mc.convert();
-            console.log(mc);
+  if (this.readyState === 4) {
+    if (this.status === 200) {
+      var ff = [], t = this.responseText || '';
+      for (var z = 0; z < t.length; z++) {
+        ff[z] = String.fromCharCode(t.charCodeAt(z) & 255);
+      }
+      var midi = MidiFile(ff.join(''));
+      var mc = new TMidiConvertor(midi);
+      mc.convert();
+      console.log(mc);
 
-            var ms = MConvert(mc);
-            console.log(ms);
+      var ms = MConvert(mc);
+      console.log(ms);
 
-            var es = EConvert(ms);
-            console.log(es);
+      var es = EConvert(ms);
+      console.log(es);
 
-            gct = new GContext();
-            gct.context2D =ctx;
-            gct.beginBudget(800, 800);
+      gct = new GContext(ctx);
+      gct.beginBudget(800, 800);
 
-            es.budget(gct, 10, 0);
-            console.log(gct);
+      es.budget(gct, 10, 0);
+      console.log(gct);
 
-            gct.print();
+      gct.print();
 
-            $(".pageNum").text("1/"+(gct.pageYBase.length-1));
-            setTimeout(download, 1000);
-        } else {
-            onerror && onerror('Unable to load MIDI file');
-        }
+      showPage();
+    } else {
+      onerror && onerror('Unable to load MIDI file');
     }
+  }
 };
 fetch.send();
+
+
+// Play sounds
+window.onload = function () {
+  MIDI.loadPlugin({
+    soundfontUrl: "../soundfont/",
+    //instrument: "synth_drum",
+    instruments: ["acoustic_grand_piano", "violin"],
+    onprogress: function(state, progress) {
+      console.log(state, progress);
+    },
+    onsuccess: function() {}
+  });
+};
+
+var start = false;
+function StartSound() {
+  if (start) return;
+  start = true;
+
+  var delay = 0; // play one note every quarter second
+  var note = 69; // the MIDI note
+  var velocity = 127; // how hard the note hits
+
+  MIDI.programChange(0, 40, 0);
+  setInterval(function() {
+    // play the note
+    MIDI.setVolume(0, 127);
+    MIDI.noteOn(0, note, velocity, delay);
+    MIDI.noteOff(0, note, delay + 0.75);
+  }, 1000);
+}
+
+function Play() {
+  StartSound();
+}
 
     </script>
   </body>

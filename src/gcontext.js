@@ -9,17 +9,29 @@ function GContext(ctx) {
   this.segs = [];
   this.context2D = ctx;
 }
-exports['GContext'] = GContext;
-GContext.prototype['beginBudget'] = function(w, h) {
+exports.GContext = GContext;
+
+GContext.prototype.context = function() {
+  return this.context2D;
+}
+
+GContext.prototype.strokes = function() {
+  return this.ops;
+}
+
+GContext.prototype.beginBudget = function(w, h) {
   this.height = h;
   this._grid = new GGrid(w, h);
 }
-GContext.prototype['pageCount'] = function() {
+
+GContext.prototype.pageCount = function() {
   return this.pageYBase.length-1;
 }
+
 GContext.prototype.seg = function() {
   this.segs.push(this.ops.length);
 }
+
 GContext.prototype.slicePages = function() {
   var arr = [0], yarr = [0], startY = 0;
   for (var i = 0; i < this.rowBaselineY.length; ++i) {
@@ -34,64 +46,80 @@ GContext.prototype.slicePages = function() {
   this.pageSegs = arr;
   this.pageYBase = yarr;
 }
+
 GContext.prototype.getPageOpsSlice = function(p) {
   if (p >= this.pageSegs.length) {
     p = 0;
   }
   return [this.pageSegs.slice(p, p+2), this.pageYBase[p]];
 }
+
 GContext.prototype._xmark = function(x, val) {
   var gs = new GStroke('x', x, 0);
   gs.ext = val||0;
   return gs;
 }
+
 GContext.prototype._line = function(x, y, x1, y1) {
   return new GStroke('line', x, y, x1, y1);
 }
+
 GContext.prototype._curve = function(x, y, x1, y1, w) {
   return new GStroke('curve', x, y, x1, y1, w);
 }
+
 GContext.prototype._charCurve = function(x, y, x1, y1, w) {
   return new GStroke('ccurve', x, y, x1, y1, w);
 }
+
 GContext.prototype._lineWh = function(x, y, x1, y1, w) {
   // use for beam
   return new GStroke('lineH', x, y, x1, y1, w);
 }
+
 GContext.prototype._lineWv = function(x, y, x1, y1, w) {
   return new GStroke('lineV', x, y, x1, y1, w);
 }
+
 GContext.prototype._vline = function(x, y, h) {
   return new GStroke('vline', x, y, h);
 }
+
 GContext.prototype._Vline = function(x, y, y1) {
   // use for EBarline
   return new GStroke('Vline', x, y, y1);
 }
+
 GContext.prototype._VlineW = function(x, y, y1, w) {
   // use for EBarline, substitution of rect
   return new GStroke('Vlinew', x, y, y1, w);
 }
+
 GContext.prototype._hline = function(x, y, w) {
   return new GStroke('hline', x, y, w);
 }
+
 GContext.prototype._rect = function(x, y, w, h) {
   return new GStroke('rect', x, y, w, h);
 }
+
 GContext.prototype._dot = function(x, y, r) {
   return new GStroke('dot', x, y, r);
 }
+
 GContext.prototype._draw = function(name, x, y, w, h) {
   return new GStroke('draw', x, y, w, h, name);
 }
+
 GContext.prototype._text = function(name, x, y, w, h) {
   return new GStroke('text', x, y, w, h, name);
 }
+
 GContext.prototype._char = function(name, x, y, w, h) {
   return new GStroke('char', x, y, w, h, name);
 }
 
-GContext.prototype.attach = function() {
+GContext.prototype._attach = function() {
 
 }
 
@@ -99,7 +127,7 @@ GContext.prototype.shift = function(ops, vx, vy, si=0, ei=null) {
   if (ei == null) ei = ops.length;
 
   for (var e, i = si; i < ei; ++i) {
-    ops[i].settle(
+    ops[i]._settle(
         function(x) {
           return x + vx;
         },
@@ -108,6 +136,7 @@ GContext.prototype.shift = function(ops, vx, vy, si=0, ei=null) {
         });
   }
 }
+
 GContext.prototype.compress = function(ops, baseX, aimWidth, ubound, si=0, ei=null) {
   var me = this, rate = aimWidth/ubound;
   function rx(x) {
@@ -116,7 +145,7 @@ GContext.prototype.compress = function(ops, baseX, aimWidth, ubound, si=0, ei=nu
   if (ei == null) ei = ops.length;
   var debug = ops[ei-1].x;
   for (var i = si; i < ei; ++i) {
-    ops[i].settle(rx);
+    ops[i]._settle(rx);
   }
 
   function rt(e) {
@@ -128,10 +157,12 @@ GContext.prototype.compress = function(ops, baseX, aimWidth, ubound, si=0, ei=nu
     rt(this._grid.array[i]);
   }
 }
-GContext.prototype.settle = function(ops) {
+
+GContext.prototype._settle = function(ops) {
   this.segs.push(this.ops.length);
   this.ops.push(...ops);
 }
+
 GContext.prototype.print = function(p = 0) {
   if (g_option.funcPageRender != null)
     g_option.funcPageRender(this.context2D, p);

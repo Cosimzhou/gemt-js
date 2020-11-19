@@ -5,7 +5,7 @@ GEMT Change Logs
 
 * treat inter-row ties clip
 * inter-row ties should print in pre row
-* triplet, pentalet and sort of n-connected note
+* N-tuplet widely fit
 
 # NEED:
 
@@ -38,6 +38,7 @@ GEMT Change Logs
 
 ## v0.1.1a
 
+* add overmark logic
 * format code as Google code guideline
 * add repeat line
 * add __ties__ show
@@ -55,6 +56,7 @@ GEMT Change Logs
 * bar number show
 * the terminal condition of EScore budget function
 * treat ties inter-row matter
+* triplet, pentalet and sort of n-connected note
 
 ## v0.1.0a
 

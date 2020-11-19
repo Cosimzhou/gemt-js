@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   xmlns="http://www.w3.org/2000/svg" 
-   version="1.2"
-   width="25"
-   height="35"
-   viewBox="0 0 4 5.6">
-  <path transform="matrix(0.01,0,0,-0.01,0,5.25)"
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" width="12.5" height="17.5" viewBox="0 0 2 2.8">
+  <path transform="matrix(0.005,0,0,-0.005,0,2.625)"
     d="M190 506q-83 0 -131 -82q-41 -71 -41 -171q0 -98 41 -169q48 -81 131 -81q82 0 129 81q41 71 41 169q0 100 -41 171q-46 82 -129 82zM115 252q0 226 75 226q76 0 76 -226q0 -222 -76 -222q-75 0 -75 222z"
      style="fill:currentColor" />
 </svg>

@@ -17,10 +17,12 @@ function ETrack(sc) {
   this.clefMarks = [];
   this.beatMarks = [];
 }
-exports['ETrack'] = ETrack;
+exports.ETrack = ETrack;
+
 ETrack.prototype.translate = function(l) {
   return this._y + l * this.gap;
 }
+
 ETrack.prototype.preview = function(ctx, x, y) {
   var ops = [], line;
   x += this.x;
@@ -32,6 +34,7 @@ ETrack.prototype.preview = function(ctx, x, y) {
   ops.baseLine = line;
   return ops;
 }
+
 ETrack.prototype.append = function(mark) {
   this.marks.push(mark);
 }

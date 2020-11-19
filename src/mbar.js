@@ -5,26 +5,42 @@
  *
  *******************************/
 function MBar() {
-  this.timeBeat = null;
+  this._timeBeat = null;
   this.chords = [];
-  this.beat = new MTimeSlice(0, 0);
+  this.beat = new GTimeSlice(0, 0);
 }
-exports['MBar'] = MBar;
+exports.MBar = MBar;
+
+MBar.prototype.clef = function(c) {
+  if (c instanceof MClef) {
+    this._clef = c;
+  }
+  return this._clef;
+}
+
+MBar.prototype.timeBeat = function(t) {
+  if (t instanceof MBeat) {
+    this._timeBeat = t;
+  }
+  return this._timeBeat;
+}
+
 MBar.prototype.extend = function(mtrack) {
-  if (this.cap()>0) {
+  if (this.cap() > 0) {
     return this;
   }
 
   var nb = new MBar();
-  nb.timeBeat = this.timeBeat;
-  nb.clef = this.clef;
+  nb._timeBeat = this._timeBeat;
+  nb._clef = this._clef;
   nb.beat.follow(this.beat);
   mtrack.bars.push(nb);
   return nb;
 }
+
 var g_MBar_feed_NoteID = 0;
 MBar.prototype.feed = function(mtrack, ch) {
-  var capacity = this.timeBeat.length();
+  var capacity = this._timeBeat.length();
   if (this.beat.add(ch.beat) > capacity) {
     // this bar has no enough space to offer this note,
     // and split the note into pieces to settle.
@@ -33,7 +49,7 @@ MBar.prototype.feed = function(mtrack, ch) {
       this.chords.push(lch);
       lch.beat.follow(this.beat).movTo(-this.beat.sub(capacity));
       ch.beat.follow(lch.beat).subTo(lch.beat);
-      lch.nths = this.timeBeat.nths(lch.beat.beatlen);
+      lch.nths = this._timeBeat.nths(lch.beat.beatlen);
 
       ch.linkWith && ch.linkWith(lch);
     }
@@ -41,29 +57,33 @@ MBar.prototype.feed = function(mtrack, ch) {
     var nb = this.extend(mtrack);
     return nb.feed(mtrack, ch);
   } else {
-    if (ch.nths == null || ch.nths.seq == null)
-      ch.nths = this.timeBeat.nths(ch.beat.beatlen);
+    if (ch.nths == null || ch.nths.seq == null) {
+      ch.nths = this._timeBeat.nths(ch.beat.beatlen);
+    }
     this.chords.push(ch);
     this.beat.addTo(ch.beat);
     return this;
   }
 }
+
 MBar.prototype.append = function(ch) {
   // make sure all of MBar elements are MChore type
   if (ch instanceof MNote)
     ch = new MChord(ch);
   this.chords.push(ch);
 }
+
 var g_BarCombineID = 0;
-MBar.prototype.settle = function(ch) {
+MBar.prototype._settle = function(ch) {
   var me = this;
-  var unseq =[];
-  var CompleteBeat = this.timeBeat.numerator, unsetBeat = CompleteBeat;
+  var unseq = [];
+  var CompleteBeat = this._timeBeat.numerator, unsetBeat = CompleteBeat;
   for (var sb = 0, ch, i = 0; ch = this.chords[i]; ++i) {
-    if (ch.beat.start == null) {
-      ch.beat.start = sb;
+    if (ch.beat._start == null) {
+      ch.beat._start = sb;
     }
     if (ch.beat.beatlen == null) {
+      // beatElapser
       ch.beat.beatlen = 4/ch.nths[0];
     }
     if (ch.nths.seq == null) {
@@ -73,21 +93,21 @@ MBar.prototype.settle = function(ch) {
     }
 
     if (ch instanceof MRest) {
-      if (ch.beat.start != null)
-        sb = ch.beat.start;
+      if (ch.beat._start != null)
+        sb = ch.beat._start;
       if (ch.nths.length > 1) {
         while (ch.nths.length>1) {
           var rest = new MRest();
           rest.nths = [ch.nths.shift()];
-          rest.beat = new MTimeSlice(4 / rest.nths[0], sb);
+          rest.beat = new GTimeSlice(4 / rest.nths[0], sb);
           this.chords.splice(i++, 0, rest);
           sb = rest.beat.endBeat();
         }
         //TODO:
-        ch.beat.start = sb;
+        ch.beat._start = sb;
         ch.beat.movTo(ch.endBeat - ch.startBeat);
       } else {
-        ch.beat.start = sb;
+        ch.beat._start = sb;
       }
     }
 
@@ -103,18 +123,18 @@ MBar.prototype.settle = function(ch) {
       this.chords[this.chords.length - 1].beat.addTo(diffBeat);
       this.beat.addTo(diffBeat);
     }
-    if (this.beat.less(CompleteBeat)) {
+    if (this.beat.less(CompleteBeat) && !this._timeBeat._unlimited()) {
       var beatlen = -this.beat.sub(CompleteBeat);
-      var rest =new MRest(this.timeBeat.nths(beatlen)[0]);
-      rest.beat = new MTimeSlice(beatlen).follow(this.chords[this.chords.length-1].beat);
-      rest.nths = this.timeBeat.nths(rest.beat.beatlen);
+      var rest =new MRest(this._timeBeat.nths(beatlen)[0]);
+      rest.beat = new GTimeSlice(beatlen).follow(this.chords[this.chords.length-1].beat);
+      rest.nths = this._timeBeat.nths(rest.beat.beatlen);
       this.chords.push(rest);
     }
   }
 
   if (unseq.length > 0) {
     function reassign(schi, schn) {
-      var sebeat = me.chords[schi+schn].beat.endBeat() - me.chords[schi].beat.start;
+      var sebeat = me.chords[schi+schn].beat.endBeat() - me.chords[schi].beat._start;
       var exception = 0;
 
       // strategy 1
@@ -134,7 +154,7 @@ MBar.prototype.settle = function(ch) {
           var ch = me.chords[schi+i];
           ch.beat.movTo(avgbeat);
           //ch.endBeat = ch.startBeat + avgbeat;
-          ch.nths = me.timeBeat.nths(ch.beat.beatlen);
+          ch.nths = me._timeBeat.nths(ch.beat.beatlen);
           if (i < schn) me.chords[schi+i+1].beat.follow(ch.beat);
         }
         unsetBeat -= sebeat;
@@ -163,7 +183,7 @@ MBar.prototype.settle = function(ch) {
   }
 
 
-  // beamComb the 8th or shorter note togather.
+  // _beamCombine the 8th or shorter note togather.
   var linkArr = [];
   for (var ch, i = 0; ch = this.chords[i]; ++i) {
     if (ch instanceof MChord && ch.nths[0] > 4) {
@@ -174,11 +194,11 @@ MBar.prototype.settle = function(ch) {
   function dealBeams(sb, n) {
     if (n == 0) return;
     var ch = me.chords[sb], nthlines = [], och = ch;
-    ch.beamComb = {beamPhase:0, id: ++g_BarCombineID};
+    ch._beamCombine = {_beamPhase:0, id: ++g_BarCombineID};
     nthlines.push(Log2(ch.nths[0])-3);
     while (n-- > 0) {
       ch = me.chords[++sb];
-      ch.beamComb = {beamPhase:(n?1:2), id: g_BarCombineID};
+      ch._beamCombine = {_beamPhase:(n?1:2), id: g_BarCombineID};
       nthlines.push(Log2(ch.nths[0])-3);
     }
     var max = Math.max(...nthlines);
@@ -199,7 +219,7 @@ MBar.prototype.settle = function(ch) {
         }
         dislen[l-1] = dis;
       }
-      och.beamComb.bms = dislen;
+      och._beamCombine._subBeamLayout = dislen;
     }
   }
 
@@ -209,7 +229,7 @@ MBar.prototype.settle = function(ch) {
     for (var cb, i = 1; i < linkArr.length; b = cb, i++) {
       cb = linkArr[i];
       if (b + 1 == cb &&
-          (Math.floor(this.chords[b].beat.start) == Math.floor(this.chords[cb].beat.start) &&
+          (Math.floor(this.chords[b].beat._start) == Math.floor(this.chords[cb].beat._start) &&
           Math.ceil(this.chords[b].beat.endBeat()) == Math.ceil(this.chords[cb].beat.endBeat())))
       {
         ++n;
@@ -221,7 +241,8 @@ MBar.prototype.settle = function(ch) {
     dealBeams(sb, n);
   }
 }
+
 MBar.prototype.cap = function() {
-  return this.timeBeat.length() - this.beat.beatlen;
+  return this._timeBeat.length() - this.beat.beatlen;
 }
 

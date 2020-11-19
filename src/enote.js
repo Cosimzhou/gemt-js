@@ -20,17 +20,20 @@ function ENote(ns, l = 0, s=null) {
     }
   }
 }
-exports['ENote'] = ENote;
+exports.ENote = ENote;
+impl(ENote, EScoreElement);
+
 ENote.prototype.width = function() {
   // note head width
-  return this.nth > 1? 7.7: 11.2;
+  return this.nth > 1? 7.65: 12.6;
 }
-ENote.prototype.budget = function(ctx, etrack, x) {
+
+ENote.prototype._budget = function(ctx, etrack, x) {
   // budget note head, float point and flat/sharp symbol only
   var w = this.width(), y = etrack.translate(this.line), oy = y;
   var noteImg = ctx._draw(this.imgK, x, oy);
   var epos = new EPositionInfo();
-  epos.rect = this.img.budget(x, y);
+  epos.rect = this.img._budget(x, y);
   epos.width = epos.rect.width;
   epos.pushOperations(noteImg);
 
@@ -39,13 +42,13 @@ ENote.prototype.budget = function(ctx, etrack, x) {
     y = oy + ((this.line*2)%2 == 0? 4: 0);
     var dot;
     epos.pushOperations(dot = ctx._dot(x+w+3, y, 1));
-    dot.attach(noteImg, w+3);
+    dot._attach(noteImg, GStroke.Const.ConstraintX, w+3);
     epos.width += 4;
     epos.rect.width += 4;
     if (this.ffloat) {
       // draw double float point
       epos.pushOperations(dot = ctx._dot(x+w+7, y, 1));
-      dot.attach(noteImg, w+7);
+      dot._attach(noteImg, GStroke.Const.ConstraintX, w+7);
       epos.width += 5;
       epos.rect.width += 5;
     }

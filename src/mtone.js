@@ -16,7 +16,7 @@ function MTone(n = 0, flat = false){
   this.shifts = [];
   this.shifted = new Set(this.load());
 }
-exports['MTone'] = MTone;
+exports.MTone = MTone;
 
 MTone.Const = {
   // #: G D A E B #F #C; #G E #A F C
@@ -27,7 +27,7 @@ MTone.Const = {
   FlatKey: {5:1, 10:2, 3:3, 8:4, 1:5, 6:6, 11:7, 4:8, 9:9, 2:10, 7:11, 0:12},
 }
 
-MTone.prototype.equal = function(t) {
+MTone.prototype._equal = function(t) {
   return t.nTone == this.nTone && t.flat == this.flat;
 }
 

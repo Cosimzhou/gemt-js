@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   xmlns="http://www.w3.org/2000/svg"
-   version="1.2"
-   width="25"
-   height="35"
-   viewBox="0 0 4 5.6">
-  <path transform="matrix(0.01,0,0,-0.01,0,5.25)"
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" width="12.5" height="17.5" viewBox="0 0 2 2.8">
+  <path transform="matrix(0.005,0,0,-0.005,0,2.625)"
     d="M183 22q59 32 59 167q0 70 -16 77q-34 -46 -98 -46q-51 0 -81 45q-27 40 -27 89q2 71 44 111q41 38 100 38h4q84 -2 136 -84q44 -68 44 -165v-7q-2 -95 -57 -170q-57 -77 -131 -77h-3q-70 0 -101 43q-22 28 -22 69q0 25 17 43t38 20l11 1q51 0 51 -64q0 -30 -22 -49
 q-11 -11 -22 -12.5t-11 -5.5q0 -2 3.5 -5.5t13.5 -10.5q23 -14 44 -14q16 0 26 7zM162 246q62 0 62 108v15q-5 114 -61 114h-1q-56 -2 -59 -114v-11q0 -112 59 -112z"
-     id="path3217"
      style="fill:currentColor" />
 </svg>
