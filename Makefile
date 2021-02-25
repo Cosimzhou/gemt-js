@@ -38,7 +38,8 @@ XPluginJs:
 SvgPack:
 	cd svg && ./svgpack.sh
 
-GemtJs:  GLayerJs ELayerJs MLayerJs TLayerJs XPluginJs
+GemtJs:  GLayerJs ELayerJs MLayerJs TLayerJs
+	# XPluginJs
 	@echo "======================================="
 	@echo "=  generate GEMT layer js             ="
 	@echo "======================================="
@@ -48,7 +49,7 @@ GemtJs:  GLayerJs ELayerJs MLayerJs TLayerJs XPluginJs
 	@cat $(BUILD_DIR)/ELayer.js >> $(BUILD_DIR)/gemt.js
 	@cat $(BUILD_DIR)/MLayer.js >> $(BUILD_DIR)/gemt.js
 	@cat $(BUILD_DIR)/TLayer.js >> $(BUILD_DIR)/gemt.js
-	@cat $(BUILD_DIR)/XPlugin.js >> $(BUILD_DIR)/gemt.js
+	#@cat $(BUILD_DIR)/XPlugin.js >> $(BUILD_DIR)/gemt.js
 	#@cat src/impl/gemt-implement.js >> $(BUILD_DIR)/gemt.js
 	@echo "})();" >> $(BUILD_DIR)/gemt.js
 

@@ -5,6 +5,9 @@
     <!-- Utilities -->
     <script type="text/javascript" src="js/pageutils.js"> </script>
     <!-- Play code -->
+    <script src="js/inc/jasmid/stream.js"></script>
+    <script src="js/inc/jasmid/midifile.js"></script>
+    <script src="js/inc/jasmid/replayer.js"></script>
     <script type="text/javascript" src="js/inc/Base64binary.js"> </script>
     <script type="text/javascript" src="js/inc/MIDI.min.js"> </script>
 
@@ -21,17 +24,24 @@
   <body>
     <center>
       <div id="title"></div><br>
+      <a href="#" onClick="firstPage();return false">首页</a>
       <a href="#" onClick="prevPage();return false">上一页</a>
       <span class="pageNum">0/0</span>
       <a href="#" onClick="nextPage();return false">下一页</a>
-      <a href="#" onClick="Play();return false">播放</a>
+      <a href="#" onClick="lastPage();return false">尾页</a>
+      <a href="#" onClick="ldownload();return false">下载</a>
+      <a href="#" onClick="Play();return false" class="play_pause">播放</a>
+      <a href="#" onClick="Stop();return false">停止</a>
       <br>
       <canvas id="myCanvas" width="1600px" height="1600px" style="width:800; height:800"></canvas><br>
+      <a href="#" onClick="firstPage();return false">首页</a>
       <a href="#" onClick="prevPage();return false">上一页</a>
       <span class="pageNum">0/0</span>
       <a href="#" onClick="nextPage();return false">下一页</a>
+      <a href="#" onClick="lastPage();return false">尾页</a>
       <a href="#" onClick="ldownload();return false">下载</a>
-      <a href="#" onClick="Play();return false">播放</a>
+      <a href="#" onClick="Play();return false" class="play_pause">播放</a>
+      <a href="#" onClick="Stop();return false">停止</a>
     </center>
     <div id="catalog">
     </div>
@@ -166,6 +176,9 @@ fetch.onreadystatechange = function() {
       gct.print();
 
       showPage();
+
+      player = new TPlayer(MIDI.Player, midi);
+      console.log(midi.tracks)
     } else {
       onerror && onerror('Unable to load MIDI file');
     }
@@ -173,41 +186,16 @@ fetch.onreadystatechange = function() {
 };
 fetch.send();
 
-
 // Play sounds
 window.onload = function () {
   MIDI.loadPlugin({
     soundfontUrl: "../soundfont/",
     //instrument: "synth_drum",
     instruments: ["acoustic_grand_piano", "violin"],
-    onprogress: function(state, progress) {
-      console.log(state, progress);
-    },
-    onsuccess: function() {}
+//    onprogress: function(state, progress) {},
+//    onsuccess: function() {}
   });
 };
-
-var start = false;
-function StartSound() {
-  if (start) return;
-  start = true;
-
-  var delay = 0; // play one note every quarter second
-  var note = 69; // the MIDI note
-  var velocity = 127; // how hard the note hits
-
-  MIDI.programChange(0, 40, 0);
-  setInterval(function() {
-    // play the note
-    MIDI.setVolume(0, 127);
-    MIDI.noteOn(0, note, velocity, delay);
-    MIDI.noteOff(0, note, delay + 0.75);
-  }, 1000);
-}
-
-function Play() {
-  StartSound();
-}
 
     </script>
   </body>

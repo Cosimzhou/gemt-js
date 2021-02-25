@@ -3,14 +3,14 @@ function StreamString(str) {
   this._data = str;
 }
 
-StreamString.prototype._read =	function (length) {
+StreamString.prototype._read = function (length) {
   var result = this._data.substr(this._position, length);
   this._position += length;
   return result;
 }
 
 /* read a big-endian 32-bit integer */
-StreamString.prototype._readInt32 =function readInt32() {
+StreamString.prototype._readInt32 = function readInt32() {
   var result = (
     (this._data.charCodeAt(this._position) << 24)
     + (this._data.charCodeAt(this._position + 1) << 16)
@@ -30,7 +30,7 @@ StreamString.prototype._readInt16 =	function readInt16() {
 }
 
 /* read an 8-bit integer */
-StreamString.prototype._readInt8 =	function readInt8(signed) {
+StreamString.prototype._readInt8 = function readInt8(signed) {
   var result = this._data.charCodeAt(this._position);
   if (signed && result > 127) result -= 256;
   this._position += 1;
@@ -41,7 +41,7 @@ StreamString.prototype._eof =	function eof() {
   return this._position >= this._data.length;
 }
 
-StreamString.prototype._tell =    function tell() {
+StreamString.prototype._tell = function tell() {
   return this._position;
 }
 
@@ -49,7 +49,7 @@ StreamString.prototype._tell =    function tell() {
   (big-endian value in groups of 7 bits,
   with top bit set to signify that another byte follows)
 */
-StreamString.prototype._readVarInt =	function readVarInt() {
+StreamString.prototype._readVarInt = function readVarInt() {
   var result = 0;
   while (true) {
     var b = this._readInt8();

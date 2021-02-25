@@ -11,12 +11,19 @@ function TChord() {
   this.beat = n.beat;
 }
 exports.TChord = TChord;
-TChord.prototype.match = function(tn){
+TChord.prototype._match = function(tn){
   var n = this.notes[0];
-  return n? n.match(tn): false;
+  return n? n._match(tn): false;
 }
 
 TChord.prototype.elapse = function(){
   return this.beat;
   //return this.endBeat - this.startBeat;
+}
+
+
+TChord.prototype._sound = function(ctx, offset) {
+  for (var i = 0, n; n = this.notes[i]; ++i) {
+    n._sound(ctx, offset);
+  }
 }

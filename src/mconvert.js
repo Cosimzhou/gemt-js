@@ -34,16 +34,16 @@ function MConvert(tmidi_convertor) {
   var obj = {keySignature: {}};
 
   for (var e, i = 0; e = tmidi_convertor.eventList[i]; ++i) {
-    if (obj[e._subtype] == null) {
-      obj[e._subtype] = [];
+    if (obj[e.subtype] == null) {
+      obj[e.subtype] = [];
     }
-    if (e._subtype == 'keySignature') {
-      if (obj[e._subtype][e.trkId] == null) {
-        obj[e._subtype][e.trkId] = [];
+    if (e.subtype == 'keySignature') {
+      if (obj[e.subtype][e.trkId] == null) {
+        obj[e.subtype][e.trkId] = [];
       }
-      obj[e._subtype][e.trkId].push(e);
+      obj[e.subtype][e.trkId].push(e);
     } else
-      obj[e._subtype].push(e);
+      obj[e.subtype].push(e);
   }
   obj.timeSignature = obj['timeSignature'];
   obj.keySignature = obj['keySignature']||{};
@@ -166,3 +166,71 @@ function MConvert(tmidi_convertor) {
 }
 exports.MConvert = MConvert;
 
+
+function TEvent(t, ci, nn = null, st = null) {
+  this.time = t;
+  this.type = 'channel';
+  this.channel = ci;
+  this.subtype = st;
+  this.noteNumber = nn;
+}
+
+TEvent.prototype.implement = function(pre) {
+  this.deltaTime = this.time - pre.time;
+}
+TEvent.prototype.turnPlain = function() {
+  
+}
+
+function MTConvert(mscore) {
+  var ticksPerBeat = 480;
+  var ttracks = [];
+  for (var ti = 0, mtrk; mtrk = mscore._tracks[ti]; ++ti) {
+    var ttrk = [], openChords = new Set(), tmpv;
+    ttrk.push(tmpv = new TEvent(0, 0, null, 'programChange'));
+    tmpv.programNumber = 40;
+    for (var bi = 0, mb; mb = mtrk.bars[bi]; ++bi) {
+      for (var ci = 0, mch; mch = mb.chords[ci]; ++ci) {
+        // Convert MChord to TChord
+        if (mch instanceof MChord) {
+          if (openChords.has(mch)) continue;
+          var start = mch.beat._start, end = start, gap = 15;
+          if (mch._linkObject && mch._linkObject._same) {
+            for (var li = 0, lo; lo = mch._linkObject._start[li]; ++li) {
+              end += lo.beat.beatlen;
+              openChords.add(lo);
+            }
+            openChords.add(mch._linkObject._end);
+            end += mch._linkObject._end.beat.beatlen;
+          } else {
+            if (mch._linkObject && mch != mch._linkObject._end) {
+              gap = 0;
+            }
+            end += mch.beat.beatlen;
+          }
+
+          for (var ni = 0, note; note = mch.notes[ni]; ++ni) {
+            var on = new TEvent(ticksPerBeat * start, ti, note.pitch, 'noteOn');
+            on.velocity = 90;
+            ttrk.push(on);
+            ttrk.push(new TEvent(ticksPerBeat * end - gap, ti, note.pitch, 'noteOff'));
+          }
+        }
+      }
+    }
+    ttracks.push(ttrk);
+    ttrk.sort(function(a, b) {return a.time - b.time;});
+    ttrk[0].deltaTime = ttrk[0].time;
+    for (var ei = 1, ent; ent = ttrk[ei]; ++ei) {
+      ttrk[ei].implement(ttrk[ei-1]);
+      ttrk[ei].turnPlain();
+    }
+  }
+
+  console.log(ttracks);
+  return {
+    'header': {'ticksPerBeat': ticksPerBeat},
+    'tracks': ttracks,
+  };
+}
+exports.MTConvert = MTConvert;

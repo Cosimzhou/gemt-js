@@ -26,7 +26,7 @@ TTrack.prototype.detectBeat = function(){
 
 ///
 //  用于整合多个同时触发的音符，合为一个和弦
-TTrack.prototype.fusion = function (){
+TTrack.prototype.fusion = function () {
   var arr = [], tch = new TChord();
   for (var e, i = 0; e = this.notes[i]; ++i) {
     if (e.endBeat == null) {
@@ -34,7 +34,7 @@ TTrack.prototype.fusion = function (){
     }
 
     if (tch.startBeat == e.startBeat) {
-      if (tch.match(e)) {
+      if (tch._match(e)) {
         tch.notes.push(e);
       } else {
         // TODO: ff
@@ -59,3 +59,36 @@ TTrack.prototype.fusion = function (){
   this.chords = arr;
 }
 
+TTrack.prototype.tempoFollow = function (tempos, tpb) {
+  var ci = 0, tempo, next_tempo, spb = 1000000.0 / tpb;
+  function tempoTheChords(me) {
+    for (var ni = 0, note, notes = me.chords[ci++].notes; note = notes[ni]; ++ni) {
+      note._rtstart = tempo._rttime + (note.stime - tempo.stime) * spb;
+      note._rtend = tempo._rttime + (note.etime - tempo.stime) * spb;
+    }
+  }
+
+  for (var ti = 0; ti < tempos.length; tempo = next_tempo, ++ti) {
+    if (tempos[ti].subtype != "setTempo") continue;
+    next_tempo = tempos[ti];
+    if (tempo == null) {
+      next_tempo._rttime = 0;
+      continue;
+    }
+    spb = tempo.microsecondsPerBeat / 1000000.0 / tpb;
+    next_tempo._rttime = tempo._rttime + (next_tempo.startBeat - tempo.startBeat) * spb;
+
+    while(ci < this.chords.length) {
+      if (this.chords[ci].startBeat >= next_tempo.startBeat)
+        break;
+      tempoTheChords(this);
+    }
+  }
+
+  if (tempo){
+    spb = tempo.microsecondsPerBeat / 1000000.0 / tpb;
+  }
+  while(ci < this.chords.length) {
+    tempoTheChords(this);
+  }
+}

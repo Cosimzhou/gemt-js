@@ -32,9 +32,9 @@ MChord.prototype.clone = function() {
   return nmc;
 }
 
-MChord.prototype.linkWith = function(mchord) {
+MChord.prototype.linkWith = function(mchord, same = false) {
   if (this._linkObject == null) {
-    var linkObj = {_start: [mchord], _end: this};
+    var linkObj = {_start: [mchord], _end: this, _same: same};
     this._linkObject = linkObj;
     mchord._linkObject = linkObj;
   } else {

@@ -2,6 +2,13 @@
   <head>
     <meta charset="UTF-8">
     <title>Gemt Score Testbed - from MIDI files</title>
+    <!-- Play code -->
+    <script src="js/inc/jasmid/stream.js"></script>
+    <script src="js/inc/jasmid/midifile.js"></script>
+    <script src="js/inc/jasmid/replayer.js"></script>
+    <script type="text/javascript" src="js/inc/Base64binary.js"> </script>
+    <script type="text/javascript" src="js/inc/MIDI.min.js"> </script>
+
     <!-- - ->
     <script type="text/javascript" src="../build/gemt-min.js"> </script>
     <!- - -->
@@ -18,17 +25,26 @@
       <div>
         <center>
           <div id="title"></div><br>
-          <a href="#" onClick="prevPage();return false">上一页</a>
-          <span class="pageNum">0/0</span>
-          <a href="#" onClick="nextPage();return false">下一页</a>
-          <a id="play_btn" href="#" onClick="play();return false">播放</a>
+      <a href="#" onClick="firstPage();return false">首页</a>
+      <a href="#" onClick="prevPage();return false">上一页</a>
+      <span class="pageNum">0/0</span>
+      <a href="#" onClick="nextPage();return false">下一页</a>
+      <a href="#" onClick="lastPage();return false">尾页</a>
+      <a href="#" onClick="ldownload();return false">下载</a>
+      <a href="#" onClick="Play();return false" class="play_pause">播放</a>
+      <a href="#" onClick="Stop();return false">停止</a>
+
         </center>
         <canvas id="myCanvas" width="1200px" height="1200px" style="width:600; height:600"></canvas>
         <center>
-          <a href="#" onClick="prevPage();return false">上一页</a>
-          <span class="pageNum">0/0</span>
-          <a href="#" onClick="nextPage();return false">下一页</a>
-          <a href="#" onClick="ldownload();return false">下载</a>
+      <a href="#" onClick="firstPage();return false">首页</a>
+      <a href="#" onClick="prevPage();return false">上一页</a>
+      <span class="pageNum">0/0</span>
+      <a href="#" onClick="nextPage();return false">下一页</a>
+      <a href="#" onClick="lastPage();return false">尾页</a>
+      <a href="#" onClick="ldownload();return false">下载</a>
+      <a href="#" onClick="Play();return false" class="play_pause">播放</a>
+      <a href="#" onClick="Stop();return false">停止</a>
         </center>
       </div>
     </center>
@@ -82,6 +98,18 @@ console.log(gct);
 
 gct.print();
 showPage();
+
+window.onload = function () {
+  MIDI.loadPlugin({
+    soundfontUrl: "../soundfont/",
+    //instrument: "synth_drum",
+    instruments: ["acoustic_grand_piano", "violin"],
+//    onprogress: function(state, progress) {},
+//    onsuccess: function() {}
+  });
+};
+
+player = new TPlayer(MIDI.Player, MTConvert(mscore));
 
 function ldownload() {
   downloadImage(Melody.name+"-"+(pageIdx+1), Container, 'png');

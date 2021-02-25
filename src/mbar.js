@@ -51,7 +51,7 @@ MBar.prototype.feed = function(mtrack, ch) {
       ch.beat.follow(lch.beat).subTo(lch.beat);
       lch.nths = this._timeBeat.nths(lch.beat.beatlen);
 
-      ch.linkWith && ch.linkWith(lch);
+      ch.linkWith && ch.linkWith(lch, true);
     }
     this.beat.movTo(capacity);
     var nb = this.extend(mtrack);
@@ -61,6 +61,7 @@ MBar.prototype.feed = function(mtrack, ch) {
       ch.nths = this._timeBeat.nths(ch.beat.beatlen);
     }
     this.chords.push(ch);
+    ch.beat.follow(this.beat);
     this.beat.addTo(ch.beat);
     return this;
   }

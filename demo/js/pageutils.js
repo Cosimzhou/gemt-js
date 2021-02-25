@@ -101,6 +101,7 @@ function makeCatalog(array, func) {
 
 var gct, ctx;
 var pageIdx = 0;
+var player;
 
 function showPage() {
   for (var elem of document.querySelectorAll(".pageNum")) {
@@ -117,6 +118,13 @@ function redraw(){
   showPage();
 }
 
+function firstPage() {
+  if (pageIdx > 0) {
+    pageIdx = 0;
+    redraw();
+  }
+}
+
 function prevPage() {
   if (pageIdx > 0) {
     pageIdx--;
@@ -130,5 +138,29 @@ function nextPage() {
     redraw();
   } else {
 
+  }
+}
+
+function lastPage() {
+  if (pageIdx < gct.pageCount()-1) {
+    pageIdx = gct.pageCount() - 1;
+    redraw();
+  }
+}
+
+
+
+function Stop() {
+  player.stop();
+  for (var elem of document.querySelectorAll(".play_pause")) {
+    elem.innerText = "播放";
+  }
+}
+
+function Play() {
+  player.resume();
+  var hintText = player.playing()? "暂停": "播放";
+  for (var elem of document.querySelectorAll(".play_pause")) {
+    elem.innerText = hintText;
   }
 }

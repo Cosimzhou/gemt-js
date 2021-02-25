@@ -25,12 +25,10 @@ GEMT Change Logs
 * make a better beat to nth function
 * clef detecting
 * tone detecting
-* mtconvert: transform from M to T
 
 ## T-layer
 
 * beat detecting
-* make sounds
 * and so on
 
 
@@ -38,6 +36,8 @@ GEMT Change Logs
 
 ## v0.1.1a
 
+* make sounds
+* mtconvert: transform from M to T
 * add overmark logic
 * format code as Google code guideline
 * add repeat line

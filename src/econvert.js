@@ -42,17 +42,17 @@ function EConvert(ms) {
     {
       // check and draw clef & beat marks
       for (var i = 0; i < bars.length; ++i) {
-          if (bars[i] == null) continue;
-          if (!last_bars || !bars[i]._clef._equal(last_bars[i]._clef)) {
-              var arr = bars[i]._clef._convertMark();
-              score._tracks[i].clefMarks.push({marksIdx:score._tracks[i].marks.length, headerMarks:arr});
-          }
-          if ((i == 0) &&
-              (!last_bars || !bars[i]._timeBeat._equal(last_bars[i]._timeBeat))) {
-              var arr = bars[i]._timeBeat._convertMark();
-              if (arr)
-                score._tracks[i].beatMarks.push({marksIdx:score._tracks[i].marks.length, headerMarks:arr});
-          }
+        if (bars[i] == null) continue;
+        if (!last_bars || !bars[i]._clef._equal(last_bars[i]._clef)) {
+          var arr = bars[i]._clef._convertMark();
+          score._tracks[i].clefMarks.push({marksIdx:score._tracks[i].marks.length, headerMarks:arr});
+        }
+        if ((i == 0) &&
+            (!last_bars || !bars[i]._timeBeat._equal(last_bars[i]._timeBeat))) {
+          var arr = bars[i]._timeBeat._convertMark();
+          if (arr)
+            score._tracks[i].beatMarks.push({marksIdx:score._tracks[i].marks.length, headerMarks:arr});
+        }
       }
     }
 
@@ -122,7 +122,7 @@ function EConvert(ms) {
     }
     { // add bar line
       var trk0Marks = score._tracks[0].marks;
-      if (bars[0]._timeBeat._unlimited()) {
+      if (bars[0] && bars[0]._timeBeat._unlimited()) {
         trk0Marks.push(new EBarline(6));
       } else {
         if (trk0Marks.length == 0 || !(trk0Marks[trk0Marks.length-1] instanceof EBarline))
