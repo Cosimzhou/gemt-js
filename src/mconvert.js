@@ -179,7 +179,7 @@ TEvent.prototype.implement = function(pre) {
   this.deltaTime = this.time - pre.time;
 }
 TEvent.prototype.turnPlain = function() {
-  
+
 }
 
 function MTConvert(mscore) {
@@ -187,8 +187,8 @@ function MTConvert(mscore) {
   var ttracks = [];
   for (var ti = 0, mtrk; mtrk = mscore._tracks[ti]; ++ti) {
     var ttrk = [], openChords = new Set(), tmpv;
-    ttrk.push(tmpv = new TEvent(0, 0, null, 'programChange'));
-    tmpv.programNumber = 40;
+    // ttrk.push(tmpv = new TEvent(0, 0, null, 'programChange'));
+    // tmpv.programNumber = 40;
     for (var bi = 0, mb; mb = mtrk.bars[bi]; ++bi) {
       for (var ci = 0, mch; mch = mb.chords[ci]; ++ci) {
         // Convert MChord to TChord
