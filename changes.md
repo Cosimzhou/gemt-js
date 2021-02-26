@@ -34,38 +34,40 @@ GEMT Change Logs
 
 # CHANGES:
 
+## v0.1.2a
+
 ## v0.1.1a
 
-* make sounds
-* mtconvert: transform from M to T
+* add 16th, 32th or more beam style
+* add combined note beam
 * add overmark logic
-* format code as Google code guideline
 * add repeat line
 * add __ties__ show
-* align end line with the terminal bar line
-* avoid conflict by note in adjacent tracks
-* page turning
-* time signature show
 * add tone switch
-* add combined note beam
-* some middle note may crash with the beam
+* align end line with the terminal bar line
 * attach note to lever when avoiding overlap between adjacent notes
 * avoid adjacent note overlaped
-* 16th, 32th or more beam style
-* same direction in same beam
+* avoid conflict by note in adjacent tracks
 * bar number show
+* format code as Google code guideline
+* make sounds
+* mtconvert: transform from M to T
+* page turning
+* same direction in same beam
+* some middle note may crash with the beam
 * the terminal condition of EScore budget function
+* time signature show
 * treat ties inter-row matter
 * triplet, pentalet and sort of n-connected note
 
 ## v0.1.0a
 
-* adjust position of every note in a line
-* make a tidy timeline
-* anchor all svg pictures in right position
 * add MClef, MToneTenser and so on
-* add some music symbol svg picture
-* add some musical theory implementation
-* add some MIDI file parsing logic
 * add some convertor function between GEMT layers
+* add some MIDI file parsing logic
+* add some musical theory implementation
+* add some music symbol svg picture
+* adjust position of every note in a line
+* anchor all svg pictures in right position
+* make a tidy timeline
 * make Graphic-Expression-Musical-Timing layer model, which is GEMT standing for
