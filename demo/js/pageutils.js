@@ -10,7 +10,7 @@ function Img(url) {
   this.img = new Image();
   var me = this;
   this.onloads = [];
-  this.img.onload = function(){
+  this.img.onload = function() {
     var queue = me.queue;
     me.queue = null;
     for (var a of queue) {
@@ -29,14 +29,14 @@ function Img(url) {
   this.img.src = url;
 }
 
-Img.prototype.draw = function(ctx, x, y, w=null, h=null) {
+Img.prototype.draw = function(ctx, x, y, w = null, h = null) {
   if (this.queue != null) {
     this.queue.push([ctx, x, y, w, h]);
   } else {
-    ctx.drawImage(this.img, x, y, w||this.img.width, h||this.img.height);
+    ctx.drawImage(this.img, x, y, w || this.img.width, h || this.img.height);
   }
 }
-Img.prototype.pushOnload = function(f){
+Img.prototype.pushOnload = function(f) {
   if (this.onloads instanceof Array)
     this.onloads.push(f);
 }
@@ -48,119 +48,270 @@ function downloadImage(filename, container, type = 'png') {
   //设置保存图片的类型
   var imgdata = container.toDataURL(type);
   //将mime-type改为image/octet-stream,强制让浏览器下载
-  var fixtype = function (type) {
-      type = type.toLocaleLowerCase().replace(/jpg/i, 'jpeg');
-      var r = type.match(/png|jpeg|bmp|gif/)[0];
-      return 'image/' + r;
+  var fixtype = function(type) {
+    type = type.toLocaleLowerCase().replace(/jpg/i, 'jpeg');
+    var r = type.match(/png|jpeg|bmp|gif/)[0];
+    return 'image/' + r;
   }
   imgdata = imgdata.replace(fixtype(type), 'image/octet-stream')
   //将图片保存到本地
-  var saveFile = function (data, filename) {
+  var saveFile = function(data, filename) {
     var link = document.createElement('a');
     link.href = data;
     link.download = filename;
     var event = document.createEvent('MouseEvents');
-    event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false,
+      false, false, false, 0, null);
     link.dispatchEvent(event);
   }
-  var filename = 'score-' + filename + '-' + (new Date().getTime()) + '.' + type;
+  var filename = 'score-' + filename + '-' + (new Date().getTime()) + '.' +
+    type;
   saveFile(imgdata, filename);
 }
 
 
-function getParam(name) {
-  var fileIndex = null;
+function getParam(name, def = null) {
+  var paramVal = def;
   if (location.search.length > 1) {
     var params = location.search.substr(1).split("&");
     for (var p of params) {
-      var pos = p.indexOf("=")
+      var pos = p.indexOf("=");
       if (pos < 0) continue;
 
       var pname = p.substr(0, pos),
-      value = p.substr(pos+1);
+        value = p.substr(pos + 1);
       if (pname == name) {
-        fileIndex = parseInt(value);
+        paramVal = parseInt(value);
       }
     }
   }
-  return fileIndex;
+  return paramVal;
 }
 
 
 function makeCatalog(array, func) {
-  var url = location.origin+location.pathname;
+  var url = location.origin + location.pathname;
   var div = document.getElementById("catalog");
   for (var i in array) {
     var a = document.createElement("a");
-    a.innerHTML = i + ". " + func(array[i]);
-    a.href = url+"?mi="+i;
+    a.innerHTML = i + ". " + (func ? func(array[i]) : array[i]);
+    a.href = url + "?mi=" + i;
     div.appendChild(a);
     div.appendChild(document.createElement("br"));
   }
 }
 
 var gct, ctx;
-var pageIdx = 0;
 var player;
 
 function showPage() {
   for (var elem of document.querySelectorAll(".pageNum")) {
-    elem.innerText = (pageIdx+1)+ "/"+gct.pageCount();
+    elem.innerText = (gct.pageIndex() + 1) + "/" + gct.pageCount();
   }
 }
 
-function redraw(){
+function redraw() {
   ctx.restore();
   ctx.save();
-  ctx.clearRect(0,0, 800,800);
-  gct.print(pageIdx);
+  ctx.clearRect(0, 0, 800, 800);
+  gct.print(gct.pageIndex());
+
+  showPage();
+}
+
+function playRedraw() {
+  if (!gct.frameNext()) {
+    return;
+  }
+
+  if (!gct.isPlaying()) {
+    if (playIntervalHandle)
+      clearInterval(playIntervalHandle);
+    playIntervalHandle = null;
+  }
+
+  ctx.restore();
+  ctx.save();
+  ctx.clearRect(0, 0, 800, 800);
+
+  gct.print();
 
   showPage();
 }
 
 function firstPage() {
-  if (pageIdx > 0) {
-    pageIdx = 0;
+  if (gct.pageIndex() > 0) {
+    gct.pageIndex(0);
     redraw();
   }
 }
 
 function prevPage() {
-  if (pageIdx > 0) {
-    pageIdx--;
+  if (gct.pageIndex() > 0) {
+    gct.pageIndex(gct.pageIndex() - 1);
     redraw();
   }
 }
 
 function nextPage() {
-  if (pageIdx < gct.pageCount()-1) {
-    pageIdx++;
+  if (gct.pageIndex() < gct.pageCount() - 1) {
+    gct.pageIndex(gct.pageIndex() + 1);
     redraw();
-  } else {
-
   }
 }
 
 function lastPage() {
-  if (pageIdx < gct.pageCount()-1) {
-    pageIdx = gct.pageCount() - 1;
+  if (gct.pageIndex() < gct.pageCount() - 1) {
+    gct.pageIndex(gct.pageCount() - 1);
     redraw();
   }
 }
 
-
+var playIntervalHandle;
 
 function Stop() {
   player.stop();
   for (var elem of document.querySelectorAll(".play_pause")) {
     elem.innerText = "播放";
   }
+  gct.cursor = 0;
+  redraw();
+  clearInterval(playIntervalHandle);
+  playIntervalHandle = null;
+  gct.cursor = 0;
 }
 
 function Play() {
   player.resume();
-  var hintText = player.playing()? "暂停": "播放";
+  var hintText;
+  if (player.playing()) {
+    if (playIntervalHandle)
+      clearInterval(playIntervalHandle);
+
+    if (gct.cursor == 0) {
+      gct.cursor = 1;
+      playRedraw();
+    }
+    playIntervalHandle = setInterval(playRedraw, 60000 / 120 / 32);
+    hintText = "暂停";
+  } else {
+    hintText = "播放";
+    clearInterval(playIntervalHandle);
+    playIntervalHandle = null;
+  }
+
   for (var elem of document.querySelectorAll(".play_pause")) {
     elem.innerText = hintText;
   }
 }
+
+function addButtonBar(content) {
+  var array = [];
+  var a = document.createElement("a");
+  a.href = "#";
+  a.innerHTML = "首页";
+  a.onclick = firstPage;
+  array.push(a);
+
+  a = document.createElement("a");
+  a.href = "#";
+  a.innerHTML = "上一页";
+  a.onclick = prevPage;
+  array.push(a);
+
+  a = document.createElement("span");
+  a.className = "pageNum";
+  a.innerHTML = "0 / 0";
+  array.push(a);
+
+  a = document.createElement("a");
+  a.href = "#";
+  a.innerHTML = "下一页";
+  a.onclick = nextPage;
+  array.push(a);
+
+  a = document.createElement("a");
+  a.href = "#";
+  a.innerHTML = "尾页";
+  a.onclick = lastPage;
+  array.push(a);
+
+  a = document.createElement("a");
+  a.href = "#";
+  a.innerHTML = "下载";
+  a.onclick = ldownload;
+  array.push(a);
+
+  a = document.createElement("a");
+  a.href = "#";
+  a.className = "prev_song";
+  a.innerHTML = "上一首";
+  array.push(a);
+
+  a = document.createElement("a");
+  a.href = "#";
+  a.onclick = Play;
+  a.innerHTML = "播放";
+  a.className = "play_pause";
+  array.push(a);
+
+  a = document.createElement("a");
+  a.href = "#";
+  a.onclick = Stop;
+  a.innerHTML = "停止";
+  array.push(a);
+
+  a = document.createElement("a");
+  a.href = "#";
+  a.className = "next_song";
+  a.innerHTML = "下一首";
+  array.push(a);
+
+
+  for (var a of array) {
+    content.appendChild(a);
+    content.appendChild(a = document.createElement("span"));
+    a.innerHTML = " ";
+  }
+}
+
+function addScorePanel(w, h) {
+  var content = document.getElementById("content");
+  var title = document.createElement("div");
+  title.id = "title";
+  content.appendChild(title);
+  content.appendChild(document.createElement("br"));
+
+  addButtonBar(content);
+  content.appendChild(document.createElement("br"));
+
+  var canvas = document.createElement("canvas");
+  canvas.width = w * 2;
+  canvas.height = h * 2;
+  canvas.id = "myCanvas";
+  canvas.style.width = w;
+  canvas.style.height = h;
+  content.appendChild(canvas);
+
+  content.appendChild(document.createElement("br"));
+  addButtonBar(content);
+}
+
+window.addEventListener("load", function() {
+  var mi = getParam("mi");
+  var nmi = mi + 1;
+  for (var elem of document.querySelectorAll(".next_song")) {
+    if (nmi > 39) elem.style.display = 'none';
+    elem.href = location.pathname + "?mi=" + nmi;
+  }
+
+  nmi = mi - 1;
+  for (var elem of document.querySelectorAll(".prev_song")) {
+    if (nmi < 0) elem.style.display = 'none';
+    elem.href = location.pathname + "?mi=" + nmi;
+  }
+
+});
+
+
+var drawBackgrond = false;

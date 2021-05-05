@@ -19,6 +19,7 @@ MTrack.prototype.append = function(b) {
   //b._settle();
   this.bars.push(b);
 }
+
 /********************************
  *
  *  detectClef
@@ -31,11 +32,12 @@ MTrack.prototype.detectClef = function() {
 }
 
 
-MTrack.prototype.assignClef = function(keySign){
+MTrack.prototype.assignClef = function(keySign) {
   for (var b, i = 0; b = this.bars[i]; ++i) {
 
   }
 }
+
 MTrack.prototype.shift = function(d) {
   for (var b, i = 0; b = this.bars[i]; ++i) {
     for (var ch, j = 0; ch = b.chords[j]; ++j) {
@@ -43,15 +45,19 @@ MTrack.prototype.shift = function(d) {
     }
   }
 }
-MTrack.prototype.analysis = function(){
+
+MTrack.prototype.analysis = function() {
   // clef   h    b   a
   // g clef 67   64  77
   // c clef 60   53  67
   // f clef 53   43  57
-  var gclefh = 67, cclefh = 60, fclefh = 53;
+  var gclefh = 67,
+    cclefh = 60,
+    fclefh = 53;
 
   var tenser = new MToneTenser();
-  var tensers = [], preten, sorbarn = 0;
+  var tensers = [],
+    preten, sorbarn = 0;
   tenser.barn = 0;
   for (var b, bn = 0, i = 0; b = this.bars[i]; ++i, ++bn) {
     if (bn >= 4) {
@@ -61,7 +67,7 @@ MTrack.prototype.analysis = function(){
         } else {
           tensers.push(preten = tenser);
           tenser = new MToneTenser();
-          tenser.barn =sorbarn = i;
+          tenser.barn = sorbarn = i;
         }
         bn = 0;
       }
@@ -77,38 +83,37 @@ MTrack.prototype.analysis = function(){
   }
 
   if (tenser.conclude()) {
-      tensers.push(tenser);
+    tensers.push(tenser);
   } else {
-      //tensers[tensers.length-1].join(tenser);
+    //tensers[tensers.length-1].join(tenser);
   }
 
-  var bt = tensers[0], newtenser = [bt];
+  var bt = tensers[0],
+    newtenser = [bt];
   for (var bt1, i = 1; bt1 = tensers[i]; ++i) {
-      if (!bt.join(bt1)) {
-          if (bt.candidate == null) continue;
-          if (bt.candidate && bt.candidate.size == 1) {
-          }
-          bt._clef = new MClef(bt._clef, new MTone(Array.from(bt.candidate)[0]));
-          bt = bt1;
-          newtenser.push(bt);
-      }
+    if (!bt.join(bt1)) {
+      if (bt.candidate == null) continue;
+      if (bt.candidate && bt.candidate.size == 1) {}
+      bt._clef = new MClef(bt._clef, new MTone(Array.from(bt.candidate)[0]));
+      bt = bt1;
+      newtenser.push(bt);
+    }
   }
   bt._clef = new MClef(bt._clef, new MTone(Array.from(bt.candidate)[0]));
   tensers = newtenser;
 
-  for (var ccf = tensers[0]._clef, ncfi = 1, i = 0, b;
-      b = this.bars[i]; ++i) {
-      if (tensers[ncfi] && i >= tensers[ncfi].barn) {
-          ccf = tensers[ncfi++]._clef;
-      }
-      b._clef = ccf;
+  for (var ccf = tensers[0]._clef, ncfi = 1, i = 0, b; b = this.bars[i]; ++
+    i) {
+    if (tensers[ncfi] && i >= tensers[ncfi].barn) {
+      ccf = tensers[ncfi++]._clef;
+    }
+    b._clef = ccf;
   }
   //console.log(tensers);
   for (var b, i = 0; b = this.bars[i]; ++i) {
 
   }
 }
-
 
 MTrack.prototype.feed = function(ch) {
   this._tailBar = this._tailBar.feed(this, ch);
@@ -170,20 +175,24 @@ function PushMelody(mtrack, content) {
       content[prop] = content['param'][prop];
     }
   }
-  var tone = content['tone'] || 0, clef = content['clef']||0;
+  var tone = content['tone'] || 0,
+    clef = content['clef'] || 0;
   mtrack._tailBar.clef(new MClef(clef, new MTone(tone)));
 
-  var min = content['min']||2, dem = content['dem']||4;
+  var min = content['min'] || 2,
+    dem = content['dem'] || 4;
   mtrack._tailBar.timeBeat(new MBeat(min, dem));
 
   function makeNote(x) {
     return new MNote(x);
   }
+
   function makeNoteIn7(x) {
     var idx = x % 10;
     var n = parseInt(x / 10);
     if (idx < 0) {
-      n--; x = -idx;
+      n--;
+      x = -idx;
     } else {
       x = idx;
     }
@@ -195,14 +204,15 @@ function PushMelody(mtrack, content) {
     return new MNote(n);
   }
   var mabs = !content['abs'];
-  var make_note = mabs? makeNoteIn7: makeNote;
+  var make_note = mabs ? makeNoteIn7 : makeNote;
+
   function pushNote(notes, timeBeat = 4, linkToObjIdx = null) {
     var ch;
     if (notes == null || (notes == 0 && mabs)) {
       ch = new MRest(timeBeat);
     } else {
       if (notes instanceof Array) {
-        ch = new MChord(... notes.map(make_note));
+        ch = new MChord(...notes.map(make_note));
       } else {
         ch = new MChord(make_note(notes));
       }
@@ -216,7 +226,7 @@ function PushMelody(mtrack, content) {
             linkToObjIdx -= chds.length;
             bidx--;
           } else {
-            ch.linkWith(chds[chds.length-linkToObjIdx]);
+            ch.linkWith(chds[chds.length - linkToObjIdx]);
             break;
           }
         }
@@ -226,7 +236,7 @@ function PushMelody(mtrack, content) {
     ch.beat = new GTimeSlice();
     if (timeBeat instanceof Array) {
       for (var tb of timeBeat) {
-        ch.beat.addTo(mtrack.currentBeat().denominator/tb);
+        ch.beat.addTo(mtrack.currentBeat().denominator / tb);
       }
       ch.nths = timeBeat;
 
@@ -236,7 +246,7 @@ function PushMelody(mtrack, content) {
         ch.nths.seq = timeBeat['tuplet'];
       }
     } else if (typeof(timeBeat) == 'number') {
-      ch.beat.movTo(mtrack.currentBeat().denominator/timeBeat);
+      ch.beat.movTo(mtrack.currentBeat().denominator / timeBeat);
     } else {
       console.error();
     }
@@ -244,11 +254,23 @@ function PushMelody(mtrack, content) {
     return ch;
   }
 
+  // Pickup bar
+  if (content['pickup']) {
+    //  mtrack._tailBar.pickup = content['pickup'];
+    mtrack._tailBar.beat.beatlen = content['pickup'];
+  }
+
   for (var elem of content) {
     if (elem instanceof Array) {
-      var ch = pushNote(... elem, elem['linkPrev']);
+      var ch = pushNote(...elem, elem['linkPrev']);
       if (elem['oum']) {
         ch._oumark = elem['oum'];
+      }
+      if (elem['overmarks']) {
+        ch._overmarks = elem['overmarks'];
+      }
+      if (elem['undermarks']) {
+        ch._overmarks = elem['undermarks'];
       }
     } else if (elem instanceof Object) {
       var m = new MMark(elem.kind, elem.type);
@@ -259,7 +281,7 @@ function PushMelody(mtrack, content) {
     }
   }
 
-  var base = content['base']||60;
+  var base = content['base'] || 60;
   if (base) {
     mtrack.shift(base);
   }
@@ -272,14 +294,17 @@ exports.PushMelody = PushMelody;
 
 
 function DumpMTrack(mtrack, ops) {
-  var ret = {score: [], param: {}};
+  var ret = {
+    score: [],
+    param: {}
+  };
 
   var bar = mtrack._tailBar;
   ret.param.tone = bar._clef.tone;
   ret.param.clef = bar._clef.type;
   ret.param.min = bar._timeBeat.numerator;
   ret.param.dem = bar._timeBeat.denominator;
-//  ret.param.base = number,
+  //  ret.param.base = number,
 
   return ret;
 }

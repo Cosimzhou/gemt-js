@@ -12,9 +12,10 @@ function MMark(kind, type = 0) {
 }
 exports.MMark = MMark;
 impl(MMark, MInterface);
+
 MMark.prototype._convertToE = function() {
   var newobj;
-  switch(this.kind) {
+  switch (this.kind) {
     case 'barline':
       newobj = new EBarline(this.type);
       break;

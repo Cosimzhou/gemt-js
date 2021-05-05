@@ -19,7 +19,7 @@
   <script type="text/javascript" src="../svg/pic-svg.js"> </script>
   <script type="text/javascript" src="../src/impl/gemt-implement.js"> </script>
   <script type="text/javascript" src="js/pageutils.js"> </script>
-  <script type="text/javascript" src="js/melody.js"> </script>
+  <script type="text/javascript" src="js/hohmann.js"> </script>
 </head>
 
 <body>
@@ -32,7 +32,7 @@
     }
     var mi = getParam("mi");
     var Melody = MelodyDict[mi != null ? mi : 4];
-    addScorePanel(600, 600);
+    addScorePanel(900, 900);
     makeCatalog(MelodyDict, function(x) {
       return x.name;
     });
@@ -40,14 +40,14 @@
 
     var Container = document.getElementById("myCanvas");
     ctx = Container.getContext("2d");
-    ctx.scale(2, 2);
+    ctx.scale(3, 3);
 
     gct = new GContext(ctx);
     gct.beginBudget(Container.clientWidth, Container.clientHeight);
 
     var option = new EOption().use();
     option.set("marginBlank", 20)
-      .set("margin", 20)
+      .set("margin", 5)
       .set("marginTitle", 50)
       .set("lengthOfRow", 550)
       .set("pageRender", function(ctx, p) {
@@ -75,7 +75,8 @@
       });
 
     var mscore = new MScore();
-    PushMelody(mscore.appendTrack(), Melody);
+    for (var i = 0, melody; melody = Melody[i]; ++i)
+      PushMelody(mscore.appendTrack(), melody);
     console.log(mscore);
     var es = EConvert(mscore);
     console.log(es);

@@ -16,8 +16,11 @@ exports.MChord = MChord;
 
 impl(MChord, MInterface);
 MChord.prototype._convertToE = function(clef) {
-  var newobj = new EChord(...Array.from(this.notes, n=>new ENote(this.nths, ... clef.noteLine(n.pitch))));
+  var newobj = new EChord(...Array.from(this.notes, n => new ENote(this.nths,
+    ...clef.noteLine(n.pitch))));
   newobj._oumark = this._oumark;
+  newobj._overmarks = this._overmarks;
+  newobj._undermarks = this._undermarks;
   return newobj;
 }
 
@@ -34,7 +37,11 @@ MChord.prototype.clone = function() {
 
 MChord.prototype.linkWith = function(mchord, same = false) {
   if (this._linkObject == null) {
-    var linkObj = {_start: [mchord], _end: this, _same: same};
+    var linkObj = {
+      _start: [mchord],
+      _end: this,
+      _same: same
+    };
     this._linkObject = linkObj;
     mchord._linkObject = linkObj;
   } else {
@@ -47,18 +54,18 @@ MChord.prototype.linkWith = function(mchord, same = false) {
 MChord.prototype._charactorize = function() {
   var n = 0;
   for (var e of this.notes) {
-    n |= 1<<(e.pitch%12);
+    n |= 1 << (e.pitch % 12);
   }
   return n;
 }
 
 MChord.prototype.analysis = function() {
   var ck = this._charactorize();
-  var ck1 = ck & (ck-1);
+  var ck1 = ck & (ck - 1);
   if (ck1 == 0) {
     // single note pitch
-    this.tone = this.notes[0].pitch%12;
-    this.info = MConst.ToneList[this.tone]+"音";
+    this.tone = this.notes[0].pitch % 12;
+    this.info = MConst.ToneList[this.tone] + "音";
   } else {
     for (var i = 0; i < 12; i++) {
       for (var e of MConst.ChordsInfo) {
@@ -68,18 +75,19 @@ MChord.prototype.analysis = function() {
           return;
         }
       }
-      ck = (ck>>1)|(ck&1?0x800:0);
+      ck = (ck >> 1) | (ck & 1 ? 0x800 : 0);
     }
 
-    if ((ck1 & (ck1-1)) == 0) {
+    if ((ck1 & (ck1 - 1)) == 0) {
       //this.notes.sort(function(a,b){return a.pitch-b.pitch});
       var diff = this.notes[0].pitch - this.notes[1].pitch;
       if (diff > 0) {
         this.tone = this.notes[1].pitch;
-        this.info = this.notes[1].tone() + "+" +MConst.DegreeList[diff][1];
+        this.info = this.notes[1].tone() + "+" + MConst.DegreeList[diff][1];
       } else {
         this.tone = this.notes[0].pitch;
-        this.info = this.notes[0].tone() + "+" +MConst.DegreeList[-diff%12][1];
+        this.info = this.notes[0].tone() + "+" + MConst.DegreeList[-diff % 12]
+          [1];
       }
       return;
     }

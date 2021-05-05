@@ -78,14 +78,15 @@ var g_BarCombineID = 0;
 MBar.prototype._settle = function(ch) {
   var me = this;
   var unseq = [];
-  var CompleteBeat = this._timeBeat.numerator, unsetBeat = CompleteBeat;
+  var CompleteBeat = this._timeBeat.numerator,
+    unsetBeat = CompleteBeat;
   for (var sb = 0, ch, i = 0; ch = this.chords[i]; ++i) {
     if (ch.beat._start == null) {
       ch.beat._start = sb;
     }
     if (ch.beat.beatlen == null) {
       // beatElapser
-      ch.beat.beatlen = 4/ch.nths[0];
+      ch.beat.beatlen = 4 / ch.nths[0];
     }
     if (ch.nths.seq == null) {
       unseq.push(i);
@@ -97,7 +98,7 @@ MBar.prototype._settle = function(ch) {
       if (ch.beat._start != null)
         sb = ch.beat._start;
       if (ch.nths.length > 1) {
-        while (ch.nths.length>1) {
+        while (ch.nths.length > 1) {
           var rest = new MRest();
           rest.nths = [ch.nths.shift()];
           rest.beat = new GTimeSlice(4 / rest.nths[0], sb);
@@ -126,8 +127,9 @@ MBar.prototype._settle = function(ch) {
     }
     if (this.beat.less(CompleteBeat) && !this._timeBeat._unlimited()) {
       var beatlen = -this.beat.sub(CompleteBeat);
-      var rest =new MRest(this._timeBeat.nths(beatlen)[0]);
-      rest.beat = new GTimeSlice(beatlen).follow(this.chords[this.chords.length-1].beat);
+      var rest = new MRest(this._timeBeat.nths(beatlen)[0]);
+      rest.beat = new GTimeSlice(beatlen).follow(this.chords[this.chords
+        .length - 1].beat);
       rest.nths = this._timeBeat.nths(rest.beat.beatlen);
       this.chords.push(rest);
     }
@@ -135,14 +137,15 @@ MBar.prototype._settle = function(ch) {
 
   if (unseq.length > 0) {
     function reassign(schi, schn) {
-      var sebeat = me.chords[schi+schn].beat.endBeat() - me.chords[schi].beat._start;
+      var sebeat = me.chords[schi + schn].beat.endBeat() - me.chords[schi]
+        .beat._start;
       var exception = 0;
 
       // strategy 1
-      var avgbeat = sebeat /(schn+1);
+      var avgbeat = sebeat / (schn + 1);
       for (var rate, i = 0; i <= schn; ++i) {
-        rate = me.chords[i+schi].beat.beatlen/avgbeat - 1;
-        if (-0.2 < rate && rate<0.25) {
+        rate = me.chords[i + schi].beat.beatlen / avgbeat - 1;
+        if (-0.2 < rate && rate < 0.25) {
 
         } else {
           exception++;
@@ -152,11 +155,11 @@ MBar.prototype._settle = function(ch) {
 
       if (exception == 0) {
         for (var i = 0; i <= schn; ++i) {
-          var ch = me.chords[schi+i];
+          var ch = me.chords[schi + i];
           ch.beat.movTo(avgbeat);
           //ch.endBeat = ch.startBeat + avgbeat;
           ch.nths = me._timeBeat.nths(ch.beat.beatlen);
-          if (i < schn) me.chords[schi+i+1].beat.follow(ch.beat);
+          if (i < schn) me.chords[schi + i + 1].beat.follow(ch.beat);
         }
         unsetBeat -= sebeat;
         return;
@@ -170,13 +173,13 @@ MBar.prototype._settle = function(ch) {
       //console.log(schi, schn, sebeat, ...me.chords.slice(schi, schi+schn+1));
     }
     for (var schi = unseq[0], schn = 0, i = 1; i < unseq.length; ++i) {
-        if (schi + schn + 1 == unseq[i]) {
-            schn++;
-        } else {
-            reassign(schi, schn);
-            schi = unseq[i];
-            schn = 0;
-        }
+      if (schi + schn + 1 == unseq[i]) {
+        schn++;
+      } else {
+        reassign(schi, schn);
+        schi = unseq[i];
+        schn = 0;
+      }
     }
     reassign(schi, schn);
 
@@ -194,13 +197,21 @@ MBar.prototype._settle = function(ch) {
 
   function dealBeams(sb, n) {
     if (n == 0) return;
-    var ch = me.chords[sb], nthlines = [], och = ch;
-    ch._beamCombine = {_beamPhase:0, id: ++g_BarCombineID};
-    nthlines.push(Log2(ch.nths[0])-3);
+    var ch = me.chords[sb],
+      nthlines = [],
+      och = ch;
+    ch._beamCombine = {
+      _beamPhase: 0,
+      id: ++g_BarCombineID
+    };
+    nthlines.push(Log2(ch.nths[0]) - 3);
     while (n-- > 0) {
       ch = me.chords[++sb];
-      ch._beamCombine = {_beamPhase:(n?1:2), id: g_BarCombineID};
-      nthlines.push(Log2(ch.nths[0])-3);
+      ch._beamCombine = {
+        _beamPhase: (n ? 1 : 2),
+        id: g_BarCombineID
+      };
+      nthlines.push(Log2(ch.nths[0]) - 3);
     }
     var max = Math.max(...nthlines);
 
@@ -211,14 +222,14 @@ MBar.prototype._settle = function(ch) {
         for (var i = 0; i < nthlines.length; ++i) {
           if (nthlines[i] < l) continue;
           if (dis.length == 0) {
-            dis.push(i,i);
-          } else if (dis[dis.length-1] == i-1) {
-            dis[dis.length-1] = i;
+            dis.push(i, i);
+          } else if (dis[dis.length - 1] == i - 1) {
+            dis[dis.length - 1] = i;
           } else {
-            dis.push(i,i);
+            dis.push(i, i);
           }
         }
-        dislen[l-1] = dis;
+        dislen[l - 1] = dis;
       }
       och._beamCombine._subBeamLayout = dislen;
     }
@@ -226,13 +237,16 @@ MBar.prototype._settle = function(ch) {
 
   if (linkArr.length > 1) {
     // deal some combined beam
-    var n = 0, b = linkArr[0], sb = b;
+    var n = 0,
+      b = linkArr[0],
+      sb = b;
     for (var cb, i = 1; i < linkArr.length; b = cb, i++) {
       cb = linkArr[i];
       if (b + 1 == cb &&
-          (Math.floor(this.chords[b].beat._start) == Math.floor(this.chords[cb].beat._start) &&
-          Math.ceil(this.chords[b].beat.endBeat()) == Math.ceil(this.chords[cb].beat.endBeat())))
-      {
+        (Math.floor(this.chords[b].beat._start) == Math.floor(this.chords[cb]
+            .beat._start) &&
+          Math.ceil(this.chords[b].beat.endBeat()) == Math.ceil(this.chords[
+            cb].beat.endBeat()))) {
         ++n;
         continue;
       }
@@ -246,4 +260,3 @@ MBar.prototype._settle = function(ch) {
 MBar.prototype.cap = function() {
   return this._timeBeat.length() - this.beat.beatlen;
 }
-

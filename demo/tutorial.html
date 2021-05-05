@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8">
     <title>Gemt Score Testbed - from MIDI files</title>
+    <script src="js/inc/jasmid/replayer.js"></script>
+    <script type="text/javascript" src="js/inc/Base64binary.js"> </script>
+    <script type="text/javascript" src="js/inc/MIDI.min.js"> </script>
     <!-- - ->
     <script type="text/javascript" src="../build/gemt-min.js"> </script>
     <!- - -->
@@ -13,13 +16,22 @@
     <script type="text/javascript" src="../src/impl/gemt-implement.js"> </script>
     <script type="text/javascript" src="js/pageutils.js"> </script>
     <script type="text/javascript">
-function MakeTutorial(Melody, drawer) {
+var ToneList = ["C","#C","D","#D","E","F","#F","G","#G","A","#A","B"];
+var exampleID = 0;
+function MakeTutorial(Melody, title) {
+  exampleID++;
+
+  var div = document.createElement("div");
+  div.className = "example";
+  document.body.appendChild(div);
+
   var Container = document.createElement("canvas");
   Container.height = 150;
   Container.width = 400;
   Container.style.height = 75;
   Container.style.width = 200;
-  document.body.appendChild(Container);
+  div.appendChild(Container);
+
   var c = Container.getContext("2d");
   c.scale(2, 2);
 
@@ -51,25 +63,75 @@ function MakeTutorial(Melody, drawer) {
   EConvert(mscore).budget(gct, 0, 0);
 
   gct.print();
-}
 
+  div.appendChild(document.createElement("br"));
+
+  if (title) {
+    var dtitle = document.createElement("span");
+    dtitle.innerText = "例"+exampleID+"：" + title+" ";
+    div.appendChild(dtitle);
+  }
+
+  var a_player = document.createElement("a");
+  a_player.innerText = "Play";
+  a_player.className = "play_btn";
+  a_player.href = "";
+  a_player.onclick = function() {
+    var text = "Play";
+    var player = new TPlayer(MTConvert(mscore));
+    if (player.playing()) {
+      player.stop();
+    } else {
+      player.resume();
+      text = "Stop";
+    }
+
+    for (var btn of document.querySelectorAll(".play_btn")) {
+      btn.innerText = text;
+    }
+    return false;
+  }
+  div.appendChild(a_player);
+}
     </script>
   </head>
   <body>
     <script type="text/javascript">
       var m = [1,2,3,4,5,6,7,11];
       m.min = 200;
-      //m.clef = 5;
-      MakeTutorial(m);
+      MakeTutorial(m, "中央C大调七音音阶");
 
-      m = [-5, -6, -7, 1,2,3,4,5,6,7,11];
+      m = [-5, -6, -7, 1,2,3,4,5];
       m.min = 200;
-      MakeTutorial(m);
+      MakeTutorial(m, "高音谱号示例");
 
-      m = [-5, -6, -7, 1,2,3,4,5,6,7,11];
+      m.min = 200;
+      m.clef = 1;
+      MakeTutorial(m, "低音谱号示例");
+
       m.min = 200;
       m.clef = 2;
-      MakeTutorial(m);
+      MakeTutorial(m, "中音谱号示例");
+
+      m.min = 200;
+      m.clef = 3;
+      MakeTutorial(m, "次中音谱号示例");
+
+      m = [[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[11,1]];
+      m.min = 200;
+      for (var i = 0; i < 12; ++i) {
+        m.base = 54 + (6 + i) % 12;
+        m.tone = i;
+        MakeTutorial(m, ToneList[i]+"大调音阶");
+      }
+
+MIDI.loadPlugin({
+  soundfontUrl: "../soundfont/",
+  //instrument: "synth_drum",
+  instruments: ["acoustic_grand_piano", "violin"],
+  //onprogress: function(state, progress) {},
+  //onsuccess: function() {}
+});
     </script>
 
   </body>

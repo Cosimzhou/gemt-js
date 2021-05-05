@@ -24,12 +24,13 @@ ETrack.prototype.translate = function(l) {
 }
 
 ETrack.prototype.preview = function(ctx, x, y) {
-  var ops = [], line;
+  var ops = [],
+    line;
   x += this.x;
   this._y = y;
   for (var i = 0; i < 5; i++) {
     ops.push(line = ctx._hline(x, y, this.score.trackLength));
-    y+= this.gap;
+    y += this.gap;
   }
   ops.baseLine = line;
   return ops;

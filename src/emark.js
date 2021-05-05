@@ -7,7 +7,7 @@
 function EMark(imgk, l = 0, m = 0) {
   this.imgK = imgk;
   this.img = gEID.get(imgk);
-  this.line = l + (m? 0.5: 0);
+  this.line = l + (m ? 0.5 : 0);
   this.overnote = false;
 }
 exports.EMark = EMark;
@@ -21,6 +21,8 @@ EMark.prototype._budget = function(ctx, etrack, x) {
   if (this.imgK == 'flat' || this.imgK == 'sharp') {
     epos.noMargin = true;
   }
+
   epos.pushOperations(ctx._draw(this.imgK, x, y));
+
   return epos;
 }
