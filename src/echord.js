@@ -75,6 +75,7 @@ EChord.prototype._budget = function(ctx, etrack, x) {
   }
 
   this.epos = epos;
+  // is tadpo tail upwards
   var isUp = this.force ? this.force.up : (maxLineOfNote > 4 - minLineOfNote);
   if (need_tail) {
     var leverX = x,
@@ -86,7 +87,7 @@ EChord.prototype._budget = function(ctx, etrack, x) {
     var midYOfTrack = etrack.translate(2),
       opl;
     if (isUp) {
-      leverX -= 0.2;
+      leverX -= 0.6;
       //if (adjacent_shift) {
       //    //leverX += w;
       //    for (var adjnote of adjnote_heads) {
@@ -98,10 +99,10 @@ EChord.prototype._budget = function(ctx, etrack, x) {
       //}
       leverX += w;
       leverMinY = y = midYOfTrack > minYOfLever ? minYOfLever : midYOfTrack;
-      leverNoteY = maxYOfNote, leverEndY = y;
+      leverNoteY = maxYOfNote - 0.5, leverEndY = y;
       h = maxYOfNote - y;
     } else {
-      leverX += 0.7;
+      leverX += 0.6;
       if (adjacent_shift) {
         //leverX += w;
         for (var adjnote of adjnote_heads) {
@@ -113,7 +114,7 @@ EChord.prototype._budget = function(ctx, etrack, x) {
         }
       }
       y = midYOfTrack < maxYOfLever ? maxYOfLever : midYOfTrack;
-      leverNoteY = leverMinY = minYOfNote, leverEndY = y;
+      leverNoteY = leverMinY = minYOfNote + 0.5, leverEndY = y;
       h = y - minYOfNote;
       // fix
     }

@@ -1,18 +1,11 @@
 var MInterface = {
-  _convertToE: function(){
+  _convertToE: function() {
     // return new EScoreElement();
   },
 };
 
 var EScoreElement = {
-  _budget: function(){
+  _budget: function() {
     // return new EPositionInfo();
   },
 };
-
-
-// _linkObject = {
-//  _start: [],
-//  _end:
-//}
-

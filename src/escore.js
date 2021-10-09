@@ -39,7 +39,6 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
   ctx._grid.clear();
   ctx.rowOriginPoint = { x: x, y: y };
 
-
   // Prepare track lines strokes for one row of _tracks.
   var trkOriginX = x = ox + g_option.marginAhead;
   for (var etrack, i = 0; etrack = this._tracks[i]; ++i) {
@@ -225,6 +224,9 @@ EScore.prototype.budgetARow = function(ctx, x, y, noteProgress) {
           endAWholeBar = beginAWholeBar = true;
           currentBarTrialIndex++;
 
+          if (m._lineFresh) {
+            tailBarCompleted = true;
+          }
           // EBarline only appears in the first track,
           break;
         } else {

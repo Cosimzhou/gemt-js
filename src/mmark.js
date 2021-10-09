@@ -18,6 +18,7 @@ MMark.prototype._convertToE = function() {
   switch (this.kind) {
     case 'barline':
       newobj = new EBarline(this.type);
+      newobj._lineFresh = this.lf;
       break;
     case 'rest':
       newobj = new ERest(-this.type);

@@ -1,0 +1,101 @@
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Gemt Score Testbed - from MIDI files</title>
+  <!-- Play code -->
+  <script src="js/inc/jasmid/stream.js"></script>
+  <script src="js/inc/jasmid/midifile.js"></script>
+  <script src="js/inc/jasmid/replayer.js"></script>
+  <script type="text/javascript" src="js/inc/Base64binary.js"> </script>
+  <script type="text/javascript" src="js/inc/MIDI.min.js"> </script>
+
+  <!-- - ->
+    <script type="text/javascript" src="../build/gemt-min.js"> </script>
+    <!- - -->
+  <!-- -->
+  <script type="text/javascript" src="../build/gemt.js"> </script>
+  <!-- -->
+  <script type="text/javascript" src="../svg/pic-svg.js"> </script>
+  <script type="text/javascript" src="../src/impl/gemt-implement-svg.js">
+  </script>
+  <script type="text/javascript" src="js/pageutils.js"> </script>
+  <script type="text/javascript" src="js/melody.js"> </script>
+</head>
+
+<body>
+  <center id="content"> </center>
+  <div id="catalog"> </div>
+  <script type="text/javascript">
+    function ldownload() {
+      downloadImage(Melody.name + "-" + (gct.pageIndex() + 1), ctx, 'svg');
+    }
+    var mi = getParam("mi");
+    var Melody = MelodyDict[mi != null ? mi : 4];
+    addScorePanel(600, 600, true);
+    makeCatalog(MelodyDict, function(x) {
+      return x.name;
+    });
+    document.getElementById("title").innerHTML = document.title = Melody.name;
+
+    //var Container = document.getElementById("myCanvas");
+    //ctx = Container.getContext("2d");
+    //ctx.scale(2, 2);
+
+    gct = new GContext(ctx);
+    gct.beginBudget(600, 600);
+
+    var option = new EOption().use();
+    option.set("marginBlank", 20)
+      .set("margin", 20)
+      .set("marginTitle", 50)
+      .set("lengthOfRow", 550)
+    //.set("pageRender", function(ctx, p) {
+    //  if (drawBackgrond) {
+    //    var tile = Mozaik;
+    //    tile.onload = function() {
+    //      var imgWidth = tile.img.width;
+    //      var imgHeight = tile.img.height;
+    //      for (var i = 0; i <= Container.clientWidth / imgWidth; i++) {
+    //        for (var j = 0; j <= Container.clientHeight /
+    //          imgHeight; j++) {
+    //          Mozaik.draw(ctx, i * imgWidth, j * imgHeight);
+    //        }
+    //      }
+    //      gct.print();
+    //    }
+    //    tile.draw(ctx, 0, 0);
+    //  }
+    //}).set("titleRender", function(ctx, p) {
+    //  ctx.font = "30px Verdana";
+    //  ctx.textBaseline = 'top';
+    //  ctx.textAlign = 'center';
+    //  ctx.fillText(Melody.name, 300, 18);
+    //});
+
+    var mscore = new MScore();
+    PushMelody(mscore.appendTrack(), Melody);
+    console.log(mscore);
+    var es = EConvert(mscore);
+    console.log(es);
+    es.budget(gct, 20, 0);
+    console.log(gct);
+
+    gct.print();
+    showPage();
+
+    window.onload = function() {
+      MIDI.loadPlugin({
+        soundfontUrl: "../soundfont/",
+        //instrument: "synth_drum",
+        instruments: ["acoustic_grand_piano", "violin"],
+        //    onprogress: function(state, progress) {},
+        //    onsuccess: function() {}
+      });
+    };
+
+    player = new TPlayer(MTConvert(mscore), MIDI.Player);
+  </script>
+</body>
+
+</html>

@@ -9,17 +9,21 @@
  *************************************************************/
 function EBarline(t) {
   this._barlineType = t;
+  this._lineFresh = false;
 }
 exports.EBarline = EBarline;
 impl(EBarline, EScoreElement);
+
+EBarline.prototype._budget = function(ctx, x, trkPos) {
+  this._lineFresh = true;
+}
 
 EBarline.prototype._budget = function(ctx, x, trkPos) {
   var endTrk = trkPos[trkPos.length - 1];
   var oy = trkPos[0].y,
     y = trkPos[trkPos.length - 1].ey;
   var height = y - oy;
-  var line1, line2;
-  var epos;
+  var epos, line1, line2;
   switch (this._barlineType) {
     case 0: // single line
       epos = new EPositionInfo(3, height, x, oy);

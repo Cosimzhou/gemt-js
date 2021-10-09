@@ -1,9 +1,8 @@
-
 function MidiFile(data) {
   function readChunk(stream) {
     var id = stream._read(4);
     var length = stream._readInt32();
-    return {'id': id, 'length': length, _data: stream._read(length)};
+    return { 'id': id, 'length': length, _data: stream._read(length) };
   }
 
   var lastEventTypeByte;
@@ -24,7 +23,7 @@ function MidiFile(data) {
             event._subtype = 'sequenceNumber';
             if (length != 2)
               throw 'Expected length for sequenceNumber event is 2, got ' +
-                  length;
+                length;
             event._number = stream._readInt16();
             return event;
           case 0x01:
@@ -59,7 +58,7 @@ function MidiFile(data) {
             event._subtype = 'midiChannelPrefix';
             if (length != 1)
               throw 'Expected length for midiChannelPrefix event is 1, got ' +
-                  length;
+                length;
             event._channel = stream._readInt8();
             return event;
           case 0x2f:
@@ -72,16 +71,16 @@ function MidiFile(data) {
             if (length != 3)
               throw 'Expected length for setTempo event is 3, got ' + length;
             event._microsecondsPerBeat =
-                ((stream._readInt8() << 16) + (stream._readInt8() << 8) +
-                 stream._readInt8())
+              ((stream._readInt8() << 16) + (stream._readInt8() << 8) +
+                stream._readInt8())
             return event;
           case 0x54:
             event._subtype = 'smpteOffset';
             if (length != 5)
               throw 'Expected length for smpteOffset event is 5, got ' + length;
             var hourByte = stream._readInt8();
-            event._frameRate =
-                {0x00: 24, 0x20: 25, 0x40: 29, 0x60: 30}[hourByte & 0x60];
+            event._frameRate = { 0x00: 24, 0x20: 25, 0x40: 29, 0x60: 30 } [
+              hourByte & 0x60];
             event.hour = hourByte & 0x1f;
             event.min = stream._readInt8();
             event.sec = stream._readInt8();
@@ -92,7 +91,7 @@ function MidiFile(data) {
             event._subtype = 'timeSignature';
             if (length != 4)
               throw 'Expected length for timeSignature event is 4, got ' +
-                  length;
+                length;
             event.numerator = stream._readInt8();
             event.denominator = Math.pow(2, stream._readInt8());
             event._metronome = stream._readInt8();
@@ -102,7 +101,7 @@ function MidiFile(data) {
             event._subtype = 'keySignature';
             if (length != 2)
               throw 'Expected length for keySignature event is 2, got ' +
-                  length;
+                length;
             event.key = stream._readInt8(true);
             event._scale = stream._readInt8();
             console.log('keySignature ', event);
@@ -131,7 +130,7 @@ function MidiFile(data) {
         return event;
       } else {
         throw 'Unrecognised MIDI event type byte: ' + eventTypeByte + '#' +
-            stream._tell();
+          stream._tell();
       }
     } else {
       /* channel event */

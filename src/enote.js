@@ -25,7 +25,7 @@ impl(ENote, EScoreElement);
 
 ENote.prototype.width = function() {
   // note head width
-  return this.nth > 1 ? 7.65 : 12.6;
+  return this.img.width;
 }
 
 ENote.prototype._budget = function(ctx, etrack, x) {

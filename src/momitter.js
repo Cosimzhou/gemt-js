@@ -15,7 +15,8 @@ exports.MOmitter = MOmitter;
 impl(MOmitter, MInterface);
 
 MOmitter.prototype._convertToE = function(clef) {
-  return new EChord(...Array.from(this.notes, n=>new ENote(this.nths, ... clef.noteLine(n.pitch))));
+  return new EChord(...Array.from(this.notes, n => new ENote(this.nths, ...
+    clef.noteLine(n.pitch))));
 }
 
 MOmitter.prototype.clone = function() {

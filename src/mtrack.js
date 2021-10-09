@@ -274,6 +274,7 @@ function PushMelody(mtrack, content) {
       }
     } else if (elem instanceof Object) {
       var m = new MMark(elem.kind, elem.type);
+      m.lf = elem.opt;
       m.beat = new GTimeSlice().follow(mtrack._tailBar.beat)
       mtrack.feed(m);
     } else if (typeof(elem) == 'number') {

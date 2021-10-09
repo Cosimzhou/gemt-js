@@ -10,6 +10,8 @@ function MChord() {
   this.info = "";
   this.tone = 0;
   this.nths = [1];
+
+  this.notes.sort(MNote.comparator);
 }
 
 exports.MChord = MChord;
@@ -79,7 +81,6 @@ MChord.prototype.analysis = function() {
     }
 
     if ((ck1 & (ck1 - 1)) == 0) {
-      //this.notes.sort(function(a,b){return a.pitch-b.pitch});
       var diff = this.notes[0].pitch - this.notes[1].pitch;
       if (diff > 0) {
         this.tone = this.notes[1].pitch;
@@ -100,7 +101,7 @@ MChord.prototype.analysis = function() {
  *******************************/
 MChord.prototype.shift = function(n) {
   for (var e, i = 0; e = this.notes[i]; ++i)
-    e.pitch += n;
+    e.shift(n);
 }
 
 /********************************

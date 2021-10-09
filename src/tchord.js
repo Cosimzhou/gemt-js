@@ -20,7 +20,6 @@ TChord.prototype._match = function(tn) {
 
 TChord.prototype.elapse = function() {
   return this.beat;
-  //return this.endBeat - this.startBeat;
 }
 
 TChord.prototype._sound = function(ctx, offset) {

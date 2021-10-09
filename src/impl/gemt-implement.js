@@ -99,16 +99,14 @@
       }),
 
       "notetail-d": new DImage("note_tail-down.svg", {
-        ax: 0.8,
-        ay: 15,
-        w: 12.6,
-        h: 8.1
+        ay: 20,
+        w: 8,
+        h: 20.6
       }),
       "notetail": new DImage("note_tail-up.svg", {
-        ax: 0.8,
         ay: 0.5,
-        w: 12.6,
-        h: 8.1
+        w: 8,
+        h: 20.8
       }),
 
       "fermata": new DImage("fermata.svg", {
@@ -191,6 +189,13 @@
     ctx.closePath();
   }
 
+
+  exports['GContext'].prototype.clearImpl = function(p) {
+    var ctx = this.context();
+    ctx.restore();
+    ctx.save();
+    ctx.clearRect(0, 0, this._w, this._h);
+  }
 
   exports['GContext'].prototype.printImpl = function(p) {
     var ctx = this.context();
