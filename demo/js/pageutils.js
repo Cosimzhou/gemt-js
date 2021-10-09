@@ -111,9 +111,7 @@ function showPage() {
 }
 
 function redraw() {
-  ctx.restore();
-  ctx.save();
-  ctx.clearRect(0, 0, 800, 800);
+  gct.clear();
   gct.print(gct.pageIndex());
 
   showPage();
@@ -130,10 +128,7 @@ function playRedraw() {
     playIntervalHandle = null;
   }
 
-  ctx.restore();
-  ctx.save();
-  ctx.clearRect(0, 0, 800, 800);
-
+  gct.clear();
   gct.print();
 
   showPage();
@@ -275,7 +270,7 @@ function addButtonBar(content) {
   }
 }
 
-function addScorePanel(w, h) {
+function addScorePanel(w, h, isSvg = false) {
   var content = document.getElementById("content");
   var title = document.createElement("div");
   title.id = "title";
@@ -285,13 +280,36 @@ function addScorePanel(w, h) {
   addButtonBar(content);
   content.appendChild(document.createElement("br"));
 
-  var canvas = document.createElement("canvas");
-  canvas.width = w * 2;
-  canvas.height = h * 2;
-  canvas.id = "myCanvas";
-  canvas.style.width = w;
-  canvas.style.height = h;
-  content.appendChild(canvas);
+  if (isSvg) {
+    var div = document.createElement("div");
+    content.appendChild(div);
+
+    var xhr = new XMLHttpRequest;
+    xhr.open('get', '../svg/template.svg', false);
+    xhr.send();
+
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      var svg = xhr.responseXML.documentElement;
+      svg = document.importNode(svg, true);
+
+      // surprisingly optional in these browsers
+      div.appendChild(svg);
+
+      ctx = svg;
+
+      svg.id = "myCanvas";
+      svg.width.baseVal.valueAsString = "800";
+      svg.height.baseVal.valueAsString = "800";
+    }
+  } else {
+    var canvas = document.createElement("canvas");
+    canvas.width = w * 2;
+    canvas.height = h * 2;
+    canvas.id = "myCanvas";
+    canvas.style.width = w;
+    canvas.style.height = h;
+    content.appendChild(canvas);
+  }
 
   content.appendChild(document.createElement("br"));
   addButtonBar(content);

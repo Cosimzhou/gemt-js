@@ -11,6 +11,7 @@ function GContext(ctx) {
   this._pageIndex = 0;
   this._segs = [];
   this._beatCursor = 0;
+  this._w = this._h = 0;
 
   //this._pageYBase = null;
   //this.rowBaselineY = null;
@@ -183,6 +184,10 @@ GContext.prototype._compress = function(ops, baseX, aimWidth, ubound, si = 0,
 GContext.prototype._settle = function(ops) {
   this._segs.push(this.ops.length);
   this.ops.push(...ops);
+}
+
+GContext.prototype.clear = function() {
+  if (this.clearImpl) this.clearImpl();
 }
 
 GContext.prototype.print = function(pageIdx = null) {

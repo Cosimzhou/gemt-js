@@ -1,0 +1,33 @@
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <title>MIDI files testing - Gemt Score Testbed</title>
+  <!-- Utilities -->
+  <script type="text/javascript" src="js/midi-demo.js"></script>
+  <script type="text/javascript" src="js/pageutils.js"></script>
+  <!-- Play code -->
+  <script src="js/inc/jasmid/stream.js"></script>
+  <script src="js/inc/jasmid/midifile.js"></script>
+  <script src="js/inc/jasmid/replayer.js"></script>
+  <script type="text/javascript" src="js/inc/Base64binary.js"></script>
+  <script type="text/javascript" src="js/inc/MIDI.min.js"></script>
+
+  <script type="text/javascript" src="../build/gemt.js"></script>
+  <!-- -->
+  <script type="text/javascript" src="../src/impl/gemt-implement-svg.js">
+  </script>
+  <!-- -->
+  <!-- -->
+</head>
+
+<body>
+  <center id="content"> </center>
+  <div id="catalog"> </div>
+  <script type="text/javascript">
+    addScorePanel(800, 800, true);
+    MIDIDemoInit();
+  </script>
+</body>
+
+</html>

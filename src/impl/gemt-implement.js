@@ -192,6 +192,13 @@
   }
 
 
+  exports['GContext'].prototype.clearImpl = function(p) {
+    var ctx = this.context();
+    ctx.restore();
+    ctx.save();
+    ctx.clearRect(0, 0, this._w, this._h);
+  }
+
   exports['GContext'].prototype.printImpl = function(p) {
     var ctx = this.context();
     ctx.strokeStyle = "black";
