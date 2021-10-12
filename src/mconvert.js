@@ -25,28 +25,31 @@ function MConvert(tmidi_convertor) {
     });
     mch.beat = new GTimeSlice(ch.beat, ch.startBeat);
     if (ch.beat == 0) {
-      console.error("MConvert ch['beat'] == 0 "+ch+" "+mch);
+      console.error("MConvert ch['beat'] == 0 " + ch + " " + mch);
     }
     mch.analysis();
     return mch;
   }
   var mscore = new MScore();
-  var obj = {keySignature: {}};
+  var obj = {
+    keySignature: {}
+  };
 
   for (var e, i = 0; e = tmidi_convertor.eventList[i]; ++i) {
     if (obj[e.subtype] == null) {
       obj[e.subtype] = [];
     }
     if (e.subtype == 'keySignature') {
-      if (obj[e.subtype][e.trkId] == null) {
-        obj[e.subtype][e.trkId] = [];
+      var trk = e.trkId - 1;
+      if (obj[e.subtype][trk] == null) {
+        obj[e.subtype][trk] = [];
       }
-      obj[e.subtype][e.trkId].push(e);
+      obj[e.subtype][trk].push(e);
     } else
       obj[e.subtype].push(e);
   }
   obj.timeSignature = obj['timeSignature'];
-  obj.keySignature = obj['keySignature']||{};
+  obj.keySignature = obj['keySignature'] || {};
 
   if (obj.timeSignature == null) {
     console.error('');
@@ -82,7 +85,7 @@ function MConvert(tmidi_convertor) {
     // travel every chord in certain track
     for (var ch, ic = 0; ch = t.chords[ic];) {
       if (keySignatures && keySignatures.length &&
-          curBeat > keySignatures[0].startBeat) {
+        curBeat > keySignatures[0].startBeat) {
         var tone = new MTone(0);
         tone.setKeySignature(keySignatures.shift().key);
         mbar._clef = new MClef(mscore._tracks.length == 1 ? 1 : 0, tone);
@@ -96,7 +99,7 @@ function MConvert(tmidi_convertor) {
       if (curBeat < ch.startBeat) {
         var diffBeat = ch.startBeat - curBeat;
         if ((mchord == null && diffBeat < 0.5) ||
-            (mchord && diffBeat < mchord.beat.beatlen / 4)) {
+          (mchord && diffBeat < mchord.beat.beatlen / 4)) {
           if (mchord) {
             // early close
             if (mbar.cap() >= diffBeat) {
@@ -140,8 +143,7 @@ function MConvert(tmidi_convertor) {
 
     if (obj.keySignature == null) {
       mtrack.analysis();
-    } else {
-    }
+    } else {}
     mscore._tracks.push(mtrack);
   }
 
@@ -182,19 +184,28 @@ TEvent.prototype.turnPlain = function() {
 
 }
 
+/********************************
+ *
+ * MTConvert
+ *
+ *******************************/
 function MTConvert(mscore) {
-  var ticksPerBeat = 480;
+  var ticksPerBeat = 120;
   var ttracks = [];
   for (var ti = 0, mtrk; mtrk = mscore._tracks[ti]; ++ti) {
-    var ttrk = [], openChords = new Set(), tmpv;
-    // ttrk.push(tmpv = new TEvent(0, 0, null, 'programChange'));
-    // tmpv.programNumber = 40;
+    var ttrk = [],
+      openChords = new Set(),
+      tmpv;
+    ttrk.push(tmpv = new TEvent(0, 0, null, 'programChange'));
+    tmpv.programNumber = 40;
     for (var bi = 0, mb; mb = mtrk.bars[bi]; ++bi) {
       for (var ci = 0, mch; mch = mb.chords[ci]; ++ci) {
         // Convert MChord to TChord
         if (mch instanceof MChord) {
           if (openChords.has(mch)) continue;
-          var start = mch.beat._start, end = start, gap = 15;
+          var start = mch.beat._start,
+            end = start,
+            gap = 10;
           if (mch._linkObject && mch._linkObject._same) {
             for (var li = 0, lo; lo = mch._linkObject._start[li]; ++li) {
               end += lo.beat.beatlen;
@@ -204,7 +215,7 @@ function MTConvert(mscore) {
             end += mch._linkObject._end.beat.beatlen;
           } else {
             if (mch._linkObject && mch != mch._linkObject._end) {
-              gap = 0;
+              gap = 1;
             }
             end += mch.beat.beatlen;
           }
@@ -213,23 +224,33 @@ function MTConvert(mscore) {
             var on = new TEvent(ticksPerBeat * start, ti, note.pitch, 'noteOn');
             on.velocity = 90;
             ttrk.push(on);
-            ttrk.push(new TEvent(ticksPerBeat * end - gap, ti, note.pitch, 'noteOff'));
+            ttrk.push(new TEvent(ticksPerBeat * end - gap, ti, note.pitch,
+              'noteOff'));
           }
         }
       }
     }
     ttracks.push(ttrk);
-    ttrk.sort(function(a, b) {return a.time - b.time;});
+    ttrk.sort(function(a, b) {
+      return a.time - b.time;
+    });
     ttrk[0].deltaTime = ttrk[0].time;
     for (var ei = 1, ent; ent = ttrk[ei]; ++ei) {
-      ttrk[ei].implement(ttrk[ei-1]);
+      ttrk[ei].implement(ttrk[ei - 1]);
       ttrk[ei].turnPlain();
     }
+    ttrk.push({
+      'deltaTime': 480,
+      'type': 'meta',
+      'subtype': 'endOfTrack'
+    });
   }
 
   console.log(ttracks);
   return {
-    'header': {'ticksPerBeat': ticksPerBeat},
+    'header': {
+      'ticksPerBeat': ticksPerBeat
+    },
     'tracks': ttracks,
   };
 }

@@ -22,28 +22,33 @@
 var Gap = 8;
 
 var gEID = {
-  "g-clef":    ESpace(0,  32,     20,     52),
-  "f-clef":    ESpace(0,  7,      21.6,   24),
-  "c-clef":    ESpace(0,  15.25,  21.7,   31.5),
-  "sharp":     ESpace(0,  8,      5.6,    15.2),
-  "flat":      ESpace(0,  8,      6,      13),
-  "rest-4":    ESpace(0,  13,     8,      24),
-  "rest-8":    ESpace(0,  8,      10,     18),
-  "rest-16":   ESpace(0,  8,      10,     18),
-  "rest-32":   ESpace(0,  8,      10,     18),
-  "rest-64":   ESpace(0,  8,      10,     18),
-  "rest-128":  ESpace(0,  8,      10,     18),
-  "natural":   ESpace(0,  8,      4,      15.2),
-  "note":      ESpace(0,  5,      11,     9.9),
-  "note2":     ESpace(0,  5,      11,     9.9),
-  "fullnote":  ESpace(0,  4,      12.6,   8.1),
-  "brace":     ESpace(0,  0,      8,      82),
-  "num":       ESpace(0,  0,      8,      82),
-  "fermata":   ESpace(0,  8,      6,      13),
+  "g-clef": ESpace(0, 32, 20, 52),
+  "f-clef": ESpace(0, 7, 21.6, 24),
+  "c-clef": ESpace(0, 15.25, 21.7, 31.5),
+  "sharp": ESpace(0, 8, 5.6, 15.2),
+  "flat": ESpace(0, 8, 6, 13),
+  "natural": ESpace(0, 8, 3.62, 15.2),
+  "rest-4": ESpace(0, 13, 8, 24),
+  "rest-8": ESpace(0, 8, 10, 18),
+  "rest-16": ESpace(0, 8, 10, 18),
+  "rest-32": ESpace(0, 8, 10, 18),
+  "rest-64": ESpace(0, 8, 10, 18),
+  "rest-128": ESpace(0, 8, 10, 18),
+  "note": ESpace(0, 3.42, 8.16, 6.84),
+  "note2": ESpace(0, 3.78, 9.01, 7.56),
+  "fullnote": ESpace(0.8, 4, 12.6, 8.1),
+  "brace": ESpace(0, 0, 8, 82),
+  "num": ESpace(0, 0, 8, 82),
+  "fermata": ESpace(0, 8, 6, 13),
+
+  "cadence": ESpace(7.25, 3.25, 14.5, 6.5),
+  "triangle": ESpace(2, 8, 4, 8),
+  "tsuyoi": ESpace(4, 4, 8, 8),
+  "yowai": ESpace(4, 4, 8, 8),
 };
 
-(function(){
-  gEID.get = function(x){
+(function() {
+  gEID.get = function(x) {
     return gEID[x];
   }
   for (var k in gEID) {
@@ -91,8 +96,8 @@ function EOption() {
 exports.EOption = EOption;
 var g_option = new EOption();
 
-EOption.prototype.set = function (varname, value) {
-  switch(varname) {
+EOption.prototype.set = function(varname, value) {
+  switch (varname) {
     case "gapOfLine":
       this.gap = value;
       break;
@@ -136,8 +141,7 @@ EOption.prototype.set = function (varname, value) {
   return this;
 }
 
-EOption.prototype.use = function () {
+EOption.prototype.use = function() {
   g_option = this;
   return this;
 }
-

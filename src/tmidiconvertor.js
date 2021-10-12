@@ -1,3 +1,9 @@
+/********************************
+ *
+ * TMidiConvertor
+ *
+ * @constructor
+ *******************************/
 
 function TMidiConvertor(raw) {
   this.raw = raw;
@@ -10,20 +16,24 @@ TMidiConvertor.prototype.convert = function() {
   var eventList = [];
   var usedChannels = new Set();
   var ticksPerBeat = this._header.ticksPerBeat;
+
   function translate_track(strack, track, trkId) {
-    var currentTime = 0, opened_notes = {}, instrument = null;
+    var currentTime = 0,
+      opened_notes = {},
+      instrument = null;
+
     function getDigest(e) {
-      return e['noteNumber'] +"%"+ e['channel']+"%"+instrument;
+      return e['noteNumber'] + "%" + e['channel'] + "%" + instrument;
     }
 
     for (var event of strack) {
       currentTime += event['deltaTime'];
       var subtype = event['subtype'];
       if (subtype == "setTempo" || subtype == "timeSignature" ||
-          subtype == "keySignature") {
+        subtype == "keySignature") {
         var newEvent = {
-          trkId: trkId, 
-          startBeat: currentTime/ticksPerBeat, 
+          trkId: trkId,
+          startBeat: currentTime / ticksPerBeat,
           stime: currentTime,
           subtype: subtype,
           numerator: event['numerator'],
@@ -32,7 +42,7 @@ TMidiConvertor.prototype.convert = function() {
           microsecondsPerBeat: event['microsecondsPerBeat'],
         };
         eventList.push(newEvent);
-      } else if (subtype == "noteOn"){
+      } else if (subtype == "noteOn") {
         var note = new TNote(event['noteNumber'], currentTime);
         note.startBeat = currentTime / ticksPerBeat;
         note.sveloc = event['velocity'];
@@ -68,12 +78,14 @@ TMidiConvertor.prototype.convert = function() {
           console.error("unopened note turn off!");
         }
       } else if (subtype == "programChange") {
-          instrument = event['programNumber'];
+        instrument = event['programNumber'];
       }
     }
   }
 
-  var cmp = function(a, b) {return a.startBeat - b.startBeat;}
+  var cmp = function(a, b) {
+    return a.startBeat - b.startBeat;
+  }
   this.eventList = eventList;
   this._tracks = [];
   for (var i = 0; i < this._header.trackCount; ++i) {
@@ -96,11 +108,10 @@ TMidiConvertor.prototype.convert = function() {
   console.log(this.eventList)
 }
 
-
 TMidiConvertor.prototype.Play = function() {
   var snd = new TSounder();
   snd.adapt(MIDI);
-  for (var chn of this. channels)
+  for (var chn of this.channels)
     snd.instrument(chn, 0, 0);
   snd.volume(0, 127);
 

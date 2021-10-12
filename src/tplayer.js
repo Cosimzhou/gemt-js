@@ -55,11 +55,25 @@
  * Notice the tpb and mpb.
  ***********************************************/
 
-function TPlayer(player, midi) {
+function TPlayer(midi, player) {
+  if (player == null) {
+    player = exports['MIDI'];
+    if (player == null)
+      console.error("Player not found, defaut MIDI not supported");
+    player = player['Player'];
+    if (player == null)
+      console.error("Player not found, defaut Player not supported");
+  }
   this._player = player;
   this._player.replayer = new Replayer(midi, player.timeWarp);
   this._player.data = this._player.replayer.getData();
+  for (var elem of this._player.data) {
+    if (elem[0]['event']['subtype'] == 'programChange') {
+      elem[0]['event']['programNumber'] = 0;
+    }
+  }
   this._player.endTime = this._player.replayer.getLength();
+  console.log(this._player.data, this._player.endTime);
 }
 exports.TPlayer = TPlayer;
 
@@ -67,7 +81,12 @@ TPlayer.prototype.resume = function () {
   if (this._player['playing']) {
     this._player['pause']();
   } else {
-    this._player['resume']();
+    var me = this;
+    this._player['resume'](function(events) {
+      if (events.length == 0) {
+        console.log("end");
+      }
+    });
   }
 }
 

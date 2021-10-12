@@ -2,17 +2,18 @@
  *
  *  TTrack
  *
+ * @constructor
  *******************************/
 function TTrack() {
   this.notes = [...arguments];
 }
 exports.TTrack = TTrack;
 
-TTrack.prototype.append = function(e){
+TTrack.prototype.append = function(e) {
   this.notes.push(e);
 }
 
-TTrack.prototype.detectBeat = function(){
+TTrack.prototype.detectBeat = function() {
   if (this.notes.length <= 0) {
     return;
   }
@@ -26,8 +27,9 @@ TTrack.prototype.detectBeat = function(){
 
 ///
 //  用于整合多个同时触发的音符，合为一个和弦
-TTrack.prototype.fusion = function () {
-  var arr = [], tch = new TChord();
+TTrack.prototype.fusion = function() {
+  var arr = [],
+    tch = new TChord();
   for (var e, i = 0; e = this.notes[i]; ++i) {
     if (e.endBeat == null) {
       //console.log(e);
@@ -59,10 +61,13 @@ TTrack.prototype.fusion = function () {
   this.chords = arr;
 }
 
-TTrack.prototype.tempoFollow = function (tempos, tpb) {
-  var ci = 0, tempo, next_tempo, spb = 1000000.0 / tpb;
+TTrack.prototype.tempoFollow = function(tempos, tpb) {
+  var ci = 0,
+    tempo, next_tempo, spb = 1000000.0 / tpb;
+
   function tempoTheChords(me) {
-    for (var ni = 0, note, notes = me.chords[ci++].notes; note = notes[ni]; ++ni) {
+    for (var ni = 0, note, notes = me.chords[ci++].notes; note = notes[ni]; ++
+      ni) {
       note._rtstart = tempo._rttime + (note.stime - tempo.stime) * spb;
       note._rtend = tempo._rttime + (note.etime - tempo.stime) * spb;
     }
@@ -76,19 +81,20 @@ TTrack.prototype.tempoFollow = function (tempos, tpb) {
       continue;
     }
     spb = tempo.microsecondsPerBeat / 1000000.0 / tpb;
-    next_tempo._rttime = tempo._rttime + (next_tempo.startBeat - tempo.startBeat) * spb;
+    next_tempo._rttime = tempo._rttime + (next_tempo.startBeat - tempo
+      .startBeat) * spb;
 
-    while(ci < this.chords.length) {
+    while (ci < this.chords.length) {
       if (this.chords[ci].startBeat >= next_tempo.startBeat)
         break;
       tempoTheChords(this);
     }
   }
 
-  if (tempo){
+  if (tempo) {
     spb = tempo.microsecondsPerBeat / 1000000.0 / tpb;
   }
-  while(ci < this.chords.length) {
+  while (ci < this.chords.length) {
     tempoTheChords(this);
   }
 }

@@ -1,4 +1,9 @@
-
+/********************************
+ *
+ * GRect
+ *
+ * @constructor
+ *******************************/
 function GRect(w, h, x = null, y = null) {
   this.width = w;
   this.height = h;
@@ -18,15 +23,15 @@ GRect.prototype.setAnchor = function(ax, ay) {
 GRect.prototype.fix = function() {
   this.top = this.y;
   this.left = this.x;
-  this.right = this.x+this.width;
-  this.bottom = this.y+this.height;
+  this.right = this.x + this.width;
+  this.bottom = this.y + this.height;
   return this;
 }
 
-GRect.prototype._budget = function(x, y, w=null, h=null) {
+GRect.prototype._budget = function(x, y, w = null, h = null) {
   var spc = new GRect(this.width, this.height);
-  spc.x = x-this.ax;
-  spc.y = y-this.ay;
+  spc.x = x - this.ax;
+  spc.y = y - this.ay;
   spc.fix();
   return spc;
 }
@@ -34,9 +39,9 @@ GRect.prototype._budget = function(x, y, w=null, h=null) {
 GRect.prototype.hit = function(spc) {
   //return !(this.left >= spc.right || this.right <= spc.left || this.top >= spc.bottom || this.bottom <= spc.top);
   return this.left < spc.right &&
-      this.right > spc.left &&
-      this.top < spc.bottom &&
-      this.bottom > spc.top;
+    this.right > spc.left &&
+    this.top < spc.bottom &&
+    this.bottom > spc.top;
 }
 
 GRect.prototype.expend = function(gap = 4) {

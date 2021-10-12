@@ -1,203 +1,68 @@
 <html lang="zh-cn">
-  <head>
-    <meta charset="UTF-8">
-    <title>MIDI files testing - Gemt Score Testbed</title>
-    <!-- Utilities -->
-    <script type="text/javascript" src="js/pageutils.js"> </script>
-    <!-- Play code -->
-    <script src="js/inc/jasmid/stream.js"></script>
-    <script src="js/inc/jasmid/midifile.js"></script>
-    <script src="js/inc/jasmid/replayer.js"></script>
-    <script type="text/javascript" src="js/inc/Base64binary.js"> </script>
-    <script type="text/javascript" src="js/inc/MIDI.min.js"> </script>
 
-    <!-- - ->
+<head>
+  <meta charset="UTF-8">
+  <title>MIDI files testing - Gemt Score Testbed</title>
+  <!-- Utilities -->
+  <script type="text/javascript" src="js/midi-demo.js"> </script>
+  <script type="text/javascript" src="js/pageutils.js"> </script>
+  <!-- Play code -->
+  <script src="js/inc/jasmid/stream.js"></script>
+  <script src="js/inc/jasmid/midifile.js"></script>
+  <script src="js/inc/jasmid/replayer.js"></script>
+  <script type="text/javascript" src="js/inc/Base64binary.js"> </script>
+  <script type="text/javascript" src="js/inc/MIDI.min.js"> </script>
+
+  <!-- - ->
     <script type="text/javascript" src="../build/gemt-min.js"> </script>
     <!- - -->
-    <script type="text/javascript" src="../build/gemt.js"> </script>
-    <!-- -->
-    <script type="text/javascript" src="../svg/pic-svg.js"> </script>
-    <script type="text/javascript" src="../src/impl/gemt-implement.js"> </script>
-    <!-- -->
-    <!-- -->
-  </head>
-  <body>
-    <center>
-      <div id="title"></div><br>
-      <a href="#" onClick="firstPage();return false">首页</a>
-      <a href="#" onClick="prevPage();return false">上一页</a>
-      <span class="pageNum">0/0</span>
-      <a href="#" onClick="nextPage();return false">下一页</a>
-      <a href="#" onClick="lastPage();return false">尾页</a>
-      <a href="#" onClick="ldownload();return false">下载</a>
-      <a href="#" onClick="Play();return false" class="play_pause">播放</a>
-      <a href="#" onClick="Stop();return false">停止</a>
-      <br>
-      <canvas id="myCanvas" width="1600px" height="1600px" style="width:800; height:800"></canvas><br>
-      <a href="#" onClick="firstPage();return false">首页</a>
-      <a href="#" onClick="prevPage();return false">上一页</a>
-      <span class="pageNum">0/0</span>
-      <a href="#" onClick="nextPage();return false">下一页</a>
-      <a href="#" onClick="lastPage();return false">尾页</a>
-      <a href="#" onClick="ldownload();return false">下载</a>
-      <a href="#" onClick="Play();return false" class="play_pause">播放</a>
-      <a href="#" onClick="Stop();return false">停止</a>
-    </center>
-    <div id="catalog">
-    </div>
-    <script type="text/javascript">
-var fileIndex, tmp_fileIndex = getParam("mi");
-//var fileIndex = 29;     // time signature test
-//var fileIndex = 16;     // key signature test
-//var fileIndex = 2;
-//var fileIndex = 17;       // conflict between two track
-fileIndex = (tmp_fileIndex != null)? tmp_fileIndex: 17;
+  <script type="text/javascript" src="../build/gemt.js"> </script>
+  <!-- -->
+  <script type="text/javascript" src="../svg/pic-svg.js"> </script>
+  <script type="text/javascript" src="../src/impl/gemt-implement.js"> </script>
+  <!-- -->
+  <!-- -->
+</head>
 
-var filelist = [
-//"Arabian_Dance-Tchaikovsky",  // no time signature
-//"Oriental-Granados",  // no time signature
-//"Rustles_of_Spring_Op-32_No-3",   // no time signature
-//"The_Entertainer-Joplin",   // no time signature
-//"Waltz_of_the_Flowers-Tchaikovsky",   // no time signature
-"七子之歌-澳门",
-"G大调变奏曲",              // single track
-"不想长大",
-"大鱼海棠",
-"天空之城",
-"Scarborough_Fair",
-"极乐净土",
-"爱的供养",
-"U.N.オーエンは彼女なのか",
-"いつも何度でも",
-"加勒比海盗主题曲",
-"only_my_railgun",  // 15
-"檄！帝国華撃団Ⅲ",
-"someone-else",
-"えれくとりっくえんじぇぅ",
-"yyjjxq",
-"幽雅に咲かせ、墨染の桜～Border_of_Life",
-"千本桜",
-"刀剑神域OP",
-"深海少女",
-"CANON IN D",
-"Lemon",
-"Lydia",
-"钟",
-"梁祝",
-"喀秋莎",
-"叶塞尼亚",
-"富士山下",
-"名侦探柯南-主题歌",
-"梦中的婚礼",
-"土耳其进行曲",
-"菊次郎的夏天",
-"轻飘飘的时间",
-"克罗地亚狂想曲",
-"柯南与爱尔兰对峙时的背景音乐",
-"兰的决意",
-"Graduation-三枝夕夏",
-"Time after time~在落花纷飞的街道上~《名侦探柯南——迷宫的十字路口》主题"
-];
+<body>
+  <center id="content"> </center>
+  <div id="catalog"> </div>
+  <script type="text/javascript">
+    var option = new EOption();
+    option.use()
+      //.set("lengthOfRow", 500)
+      .set("marginTitle", 60)
+      .set("indentHeading", 60)
+      .set("pageRender", function(ctx, p) {
+        var tile = Mozaik;
 
-// make catalog
-makeCatalog(filelist, x=>x);
-document.getElementById("title").innerHTML = filelist[fileIndex];
-
-file = "../res/"+filelist[fileIndex]+".mid";
-
-var Container=document.getElementById("myCanvas");
-ctx = Container.getContext("2d");
-ctx.scale(2, 2);
-ctx.save();
-
-var savePages = new Set();
-var option = new EOption();
-option.use()
-//.set("lengthOfRow", 500);
-  .set("marginTitle", 60)
-  .set("indentHeading", 60)
-  .set("pageRender", function(ctx, p) {
-  var tile = Mozaik;
-
-  tile.onload = function() {
-    var imgWidth = tile.img.width;
-    var imgHeight = tile.img.height;
-    for (var i = 0; i <= Container.clientWidth/imgWidth; i++) {
-      for (var j = 0; j <= Container.clientHeight/imgHeight; j++) {
-        Mozaik.draw(ctx, i*imgWidth, j*imgHeight);
-      }
-    }
-    gct.print();
-  }
-  tile.draw(ctx, 0, 0);
-})
-  .set("titleRender", function(ctx, p) {
-  ctx.font="30px Verdana";
-  ctx.textBaseline = 'top';
-  ctx.textAlign = 'center';
-  ctx.fillText(filelist[fileIndex], 400, 18);
-});
+        tile.onload = function() {
+          var imgWidth = tile.img.width;
+          var imgHeight = tile.img.height;
+          for (var i = 0; i <= Container.clientWidth / imgWidth; i++) {
+            for (var j = 0; j <= Container.clientHeight / imgHeight; j++) {
+              Mozaik.draw(ctx, i * imgWidth, j * imgHeight);
+            }
+          }
+          gct.print();
+        }
+        tile.draw(ctx, 0, 0);
+      })
+      .set("titleRender", function(ctx, p) {
+        ctx.font = "30px Verdana";
+        ctx.textBaseline = 'top';
+        ctx.textAlign = 'center';
+        ctx.fillText(filelist[fileIndex], 400, 18);
+      });
 
 
-function ldownload(type = 'png') {
-  if (!savePages.has(pageIdx)) {
-    downloadImage(filelist[fileIndex]+"-"+(pageIdx+1), Container, type);
-    savePages.add(pageIdx);
-  }
-}
+    addScorePanel(800, 800);
+    var Container = document.getElementById("myCanvas");
+    ctx = Container.getContext("2d");
+    ctx.scale(2, 2);
+    ctx.save();
+    MIDIDemoInit();
+  </script>
+</body>
 
-var fetch = new XMLHttpRequest();
-fetch.open('GET', file);
-fetch.overrideMimeType('text/plain; charset=x-user-defined');
-fetch.onreadystatechange = function() {
-  if (this.readyState === 4) {
-    if (this.status === 200) {
-      var ff = [], t = this.responseText || '';
-      for (var z = 0; z < t.length; z++) {
-        ff[z] = String.fromCharCode(t.charCodeAt(z) & 255);
-      }
-      var midi = MidiFile(ff.join(''));
-      var mc = new TMidiConvertor(midi);
-      mc.convert();
-      console.log(mc);
-
-      var ms = MConvert(mc);
-      console.log(ms);
-
-      var es = EConvert(ms);
-      console.log(es);
-
-      gct = new GContext(ctx);
-      gct.beginBudget(800, 800);
-
-      es.budget(gct, 10, 0);
-      console.log(gct);
-
-      gct.print();
-
-      showPage();
-
-      player = new TPlayer(MIDI.Player, midi);
-      console.log(midi.tracks)
-    } else {
-      onerror && onerror('Unable to load MIDI file');
-    }
-  }
-};
-fetch.send();
-
-// Play sounds
-window.onload = function () {
-  MIDI.loadPlugin({
-    soundfontUrl: "../soundfont/",
-    //instrument: "synth_drum",
-    instruments: ["acoustic_grand_piano", "violin"],
-//    onprogress: function(state, progress) {},
-//    onsuccess: function() {}
-  });
-};
-
-    </script>
-  </body>
 </html>
-
