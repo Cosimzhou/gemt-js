@@ -182,8 +182,8 @@
 
     return;
     for (var i = 0, bpo; bpo = this.beatPositions[i]; ++i) {
-      ctx.moveTo(bpo[0], this.rowBaselineY[bpo[1] - 1]);
-      ctx.lineTo(bpo[0], this.rowBaselineY[bpo[1]]);
+      ctx.moveTo(bpo.x, this.rowBaselineY[bpo.rowIndex - 1]);
+      ctx.lineTo(bpo.x, this.rowBaselineY[bpo.rowIndex]);
     }
     ctx.stroke();
     ctx.closePath();
@@ -194,7 +194,7 @@
     var ctx = this.context();
     ctx.restore();
     ctx.save();
-    ctx.clearRect(0, 0, this._w, this._h);
+    ctx.clearRect(0, 0, this.width, this.height);
   }
 
   exports['GContext'].prototype.printImpl = function(p) {
@@ -283,17 +283,17 @@
 
     if (this.cursor) {
       var bpo = this.beatPositions[this.cursor - 1];
-      var y0 = this.rowBaselineY[bpo[1] - 1];
-      var y1 = this.rowBaselineY[bpo[1]];
+      var y0 = this.rowBaselineY[bpo.rowIndex - 1];
+      var y1 = this.rowBaselineY[bpo.rowIndex];
       ctx.beginPath();
-      ctx.moveTo(bpo[0], y0);
-      ctx.lineTo(bpo[0], y1);
+      ctx.moveTo(bpo.x, y0);
+      ctx.lineTo(bpo.x, y1);
 
-      ctx.moveTo(bpo[0] - 5, y0);
-      ctx.lineTo(bpo[0] + 5, y0);
+      ctx.moveTo(bpo.x - 5, y0);
+      ctx.lineTo(bpo.x + 5, y0);
 
-      ctx.moveTo(bpo[0] - 5, y1);
-      ctx.lineTo(bpo[0] + 5, y1);
+      ctx.moveTo(bpo.x - 5, y1);
+      ctx.lineTo(bpo.x + 5, y1);
       ctx.strokeStyle = "red";
       ctx.stroke();
       ctx.closePath();

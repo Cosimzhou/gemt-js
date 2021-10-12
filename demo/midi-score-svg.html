@@ -25,37 +25,15 @@
   <center id="content"> </center>
   <div id="catalog"> </div>
   <script type="text/javascript">
+    addScorePanel(800, 800, true);
+    MIDIDemoInit();
     var option = new EOption();
     option.use()
       //.set("lengthOfRow", 500)
       .set("marginTitle", 60)
       .set("indentHeading", 60)
-      .set("pageRender", function(ctx, p) {
-        //var tile = Mozaik;
-
-        //tile.onload = function() {
-        //  var imgWidth = tile.img.width;
-        //  var imgHeight = tile.img.height;
-        //  for (var i = 0; i <= Container.clientWidth / imgWidth; i++) {
-        //    for (var j = 0; j <= Container.clientHeight / imgHeight; j++) {
-        //      Mozaik.draw(ctx, i * imgWidth, j * imgHeight);
-        //    }
-        //  }
-        //  gct.print();
-        //}
-        //tile.draw(ctx, 0, 0);
-      })
-      .set("titleRender", function(ctx, p) {
-        //ctx.font = "30px Verdana";
-        //ctx.textBaseline = 'top';
-        //ctx.textAlign = 'center';
-        //ctx.fillText(filelist[fileIndex], 400, 18);
-      });
-
-
-
-    addScorePanel(800, 800, true);
-    MIDIDemoInit();
+      .set("pageRender", function(ctx, p) {})
+      .set("titleRender", makeTitleRenderSvg(400, filelist[fileIndex]));
     var Container = ctx;
   </script>
 </body>

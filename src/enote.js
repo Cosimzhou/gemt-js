@@ -7,7 +7,7 @@
 function ENote(ns, l = 0, s = null) {
   var n = ns[0];
   this.imgK = n < 4 ? (n < 2 ? "fullnote" : "note2") : "note";
-  this.img = gEID.get(this.imgK);
+  this.img = g_GInfo.get(this.imgK);
   this.line = l;
   this.nth = n;
   this.sign = s;
@@ -58,7 +58,7 @@ ENote.prototype._budget = function(ctx, etrack, x) {
 
   if (this.sign !== null) {
     // draw sharp or flat symbol
-    var imgS = gEID.get(this.sign);
+    var imgS = g_GInfo.get(this.sign);
     epos.pushOperations(ctx._draw(this.sign, x - 2 - imgS.width, oy));
     epos.shx = {
       x: imgS.width + 2

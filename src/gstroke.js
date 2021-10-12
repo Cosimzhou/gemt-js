@@ -24,6 +24,7 @@ GStroke.Const = {
   ConstraintX: 1,
   ConstraintX2: 2,
   ConstraintParallelHorizon: 4,
+  ConstraintY: 64,
   ConstraintY2: 8,
   ConstraintXCenter: 16,
   ConstraintTopOn: 32,
@@ -127,6 +128,11 @@ GStroke.prototype._settle = function(fn, fny = null) {
       this.args[1] = k * this.args[0] + b;
     }
 
+    // GStroke.Const.ConstraintY
+    if (con._flags & GStroke.Const.ConstraintY) {
+      this.y = con._offset + con.obj.y;
+    }
+
     // GStroke.Const.ConstraintY2
     if (con._flags & GStroke.Const.ConstraintY2) {
       // assert this.kind == 'Vline'
@@ -141,6 +147,11 @@ GStroke.prototype._settle = function(fn, fny = null) {
         var centerX = con._offset + con.obj.x + width;
         this.x = (centerX - (this.args[0] || 0)) / 2;
       } else {
+        if (width == 0 && this.kind == 'draw') {
+          var img = g_GInfo.get(this.args[4]);
+          width = img ? img.width : 0;
+        }
+
         var centerX = con._offset + con.obj.x + width / 2;
         this.x = centerX - (this.args[0] || 0) / 2;
       }

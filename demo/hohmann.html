@@ -20,30 +20,14 @@
   <script type="text/javascript" src="../src/impl/gemt-implement.js"> </script>
   <script type="text/javascript" src="js/pageutils.js"> </script>
   <script type="text/javascript" src="js/hohmann.js"> </script>
+  <script type="text/javascript" src="js/midi-demo.js"> </script>
 </head>
 
 <body>
   <center id="content"> </center>
   <div id="catalog"> </div>
   <script type="text/javascript">
-    function ldownload() {
-      downloadImage(Melody.name + "-" + (gct.pageIndex() + 1), Container,
-        'png');
-    }
-    var mi = getParam("mi");
-    var Melody = MelodyDict[mi != null ? mi : 4];
-    addScorePanel(900, 900);
-    makeCatalog(MelodyDict, function(x) {
-      return x.name;
-    });
-    document.getElementById("title").innerHTML = document.title = Melody.name;
-
-    var Container = document.getElementById("myCanvas");
-    ctx = Container.getContext("2d");
-    ctx.scale(3, 3);
-
-    gct = new GContext(ctx);
-    gct.beginBudget(Container.clientWidth, Container.clientHeight);
+    ManualDemoInit(900, 900);
 
     var option = new EOption().use();
     option.set("marginBlank", 20)
@@ -67,36 +51,10 @@
           }
           tile.draw(ctx, 0, 0);
         }
-      }).set("titleRender", function(ctx, p) {
-        ctx.font = "30px Verdana";
-        ctx.textBaseline = 'top';
-        ctx.textAlign = 'center';
-        ctx.fillText(Melody.name, 300, 18);
-      });
+      })
+      .set("titleRender", makeTitleRenderCanvas(450, Melody.name));
 
-    var mscore = new MScore();
-    for (var i = 0, melody; melody = Melody[i]; ++i)
-      PushMelody(mscore.appendTrack(), melody);
-    console.log(mscore);
-    var es = EConvert(mscore);
-    console.log(es);
-    es.budget(gct, 20, 0);
-    console.log(gct);
-
-    gct.print();
-    showPage();
-
-    window.onload = function() {
-      MIDI.loadPlugin({
-        soundfontUrl: "../soundfont/",
-        //instrument: "synth_drum",
-        instruments: ["acoustic_grand_piano", "violin"],
-        //    onprogress: function(state, progress) {},
-        //    onsuccess: function() {}
-      });
-    };
-
-    player = new TPlayer(MTConvert(mscore), MIDI.Player);
+    ManualDemoShow();
   </script>
 </body>
 

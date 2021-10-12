@@ -21,7 +21,7 @@
  *************************************************************/
 var Gap = 8;
 
-var gEID = {
+var g_GInfo = {
   "g-clef": ESpace(0, 32, 20, 52),
   "f-clef": ESpace(0, 7, 21.6, 24),
   "c-clef": ESpace(0, 15.25, 21.7, 31.5),
@@ -48,53 +48,58 @@ var gEID = {
 };
 
 (function() {
-  gEID.get = function(x) {
-    return gEID[x];
+  g_GInfo.get = function(x) {
+    return g_GInfo[x];
   }
-  for (var k in gEID) {
-    gEID[k].name = k;
+  for (var k in g_GInfo) {
+    g_GInfo[k].name = k;
   }
 })();
 
+var g_option;
 /********************************
  *
  *
  *******************************/
 function EOption() {
-  this.trackWidth = 750;
-  this.gap = 8;
-  this.gapBetweenRows = 30;
-  this.gapMinBetweenRows = 10;
-  /**
-   *
-   */
-  this.margin = 6;
+  if (g_option == null) {
+    this.trackWidth = 750;
+    this.gap = 8;
+    this.gapBetweenRows = 30;
+    this.gapMinBetweenRows = 10;
+    /**
+     *
+     */
+    this.margin = 6;
 
-  this.marginBlank = 20;
+    this.marginBlank = 20;
 
-  this.marginAhead = 7;
+    this.marginAhead = 7;
 
-  this.marginTitle = 0;
+    this.marginTitle = 0;
 
-  this.barNoShowAtRowHeading = true;
-  /**
-   *  heading indent
-   *
-   *  which implies indent just for first row.
-   */
-  this.indentHeading = 0;
+    this.barNoShowAtRowHeading = true;
+    /**
+     *  heading indent
+     *
+     *  which implies indent just for first row.
+     */
+    this.indentHeading = 0;
 
-  this.funcPageRender = null;
-  this.funcTitleRender = null;
-  this.funcTailRender = null;
-  this.funcFootRender = null;
-  this.funcHeadRender = null;
-
-
+    this.funcPageRender = null;
+    this.funcTitleRender = null;
+    this.funcTailRender = null;
+    this.funcFootRender = null;
+    this.funcHeadRender = null;
+  } else {
+    for (var prop in g_option) {
+      this[prop] = g_option[prop];
+    }
+  }
 }
-
 exports.EOption = EOption;
-var g_option = new EOption();
+
+g_option = new EOption();
 
 EOption.prototype.set = function(varname, value) {
   switch (varname) {

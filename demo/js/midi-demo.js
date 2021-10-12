@@ -1,4 +1,5 @@
-var fileIndex, tmp_fileIndex;
+var fileIndex;
+var Melody;
 
 var filelist = [
       //"Arabian_Dance-Tchaikovsky",  // no time signature
@@ -53,7 +54,7 @@ var filelist = [
 
 
 function MIDIDemoInit() {
-  tmp_fileIndex = getParam("mi");
+  var tmp_fileIndex = getParam("mi");
   //var fileIndex = 29;     // time signature test
   //var fileIndex = 16;     // key signature test
   //var fileIndex = 2;
@@ -78,23 +79,12 @@ function MIDIDemoInit() {
         for (var z = 0; z < t.length; z++) {
           ff[z] = String.fromCharCode(t.charCodeAt(z) & 255);
         }
+
         var midi = MidiFile(ff.join(''));
         var mc = new TMidiConvertor(midi);
-        mc.convert();
-        console.log(mc);
 
-        var ms = MConvert(mc);
-        console.log(ms);
-
-        var es = EConvert(ms);
-        console.log(es);
-
-        gct = new GContext(ctx);
-        gct.beginBudget(800, 800);
-
-        es.budget(gct, 10, 0);
-        console.log(gct);
-
+        gct = new GContext(ctx, 800, 800);
+        gct.feedScore(mc, 10);
         gct.print();
 
         showPage();
@@ -117,5 +107,82 @@ function MIDIDemoInit() {
       //    onprogress: function(state, progress) {},
       //    onsuccess: function() {}
     });
+  };
+}
+
+function ManualDemoInit(width, height, svg) {
+  ldownload = function() {
+    downloadImage(Melody.name + "-" + (gct.pageIndex() + 1), Container,
+      svg ? 'svg' : 'png');
+  }
+  var mi = getParam("mi");
+  Melody = MelodyDict[mi != null ? mi : 4];
+  addScorePanel(width, height, svg);
+  makeCatalog(MelodyDict, function(x) {
+    return x.name;
+  });
+  document.getElementById("title").innerHTML = document.title = Melody.name;
+
+  window.onload = function() {
+    MIDI.loadPlugin({
+      soundfontUrl: "../soundfont/",
+      //instrument: "synth_drum",
+      instruments: ["acoustic_grand_piano", "violin"],
+      //    onprogress: function(state, progress) {},
+      //    onsuccess: function() {}
+    });
+  };
+
+
+
+  if (!svg) {
+    Container = document.getElementById("myCanvas");
+    ctx = Container.getContext("2d");
+    ctx.scale(2, 2);
+  }
+
+  gct = new GContext(ctx, width, height);
+}
+
+function ManualDemoShow() {
+  var mscore = new MScore();
+  if (Melody.multitrack) {
+    for (var i = 0, melody; melody = Melody[i]; ++i)
+      PushMelody(mscore.appendTrack(), melody);
+  } else {
+    PushMelody(mscore.appendTrack(), Melody);
+  }
+
+  gct.feedScore(mscore, 30, 0);
+  gct.print();
+  showPage();
+
+  player = new TPlayer(MTConvert(mscore), MIDI.Player);
+}
+
+function makeTitleRenderSvg(x, n) {
+  return function(ctx, p) {
+    var titleElem = document.createElementNS("http://www.w3.org/2000/svg",
+      "text");
+
+    titleElem.style.textAlign = 'center';
+    titleElem.style.fontSize = 30;
+    titleElem.style.fontFamily = "微软雅黑";
+    titleElem.setAttribute("alignment-baseline", "baseline");
+    titleElem.setAttribute("text-anchor", 'middle');
+    titleElem.setAttribute("x", x);
+    titleElem.setAttribute("y", 30);
+    titleElem.innerHTML = n;
+    ctx.appendChild(titleElem);
+  }
+}
+
+
+function makeTitleRenderCanvas(x, n) {
+  return function(ctx, p) {
+    ctx.font = "30px Verdana";
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
+    ctx.fillText(n, x, 18);
   };
 }

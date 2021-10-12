@@ -4,23 +4,27 @@
  *
  * @constructor
  *******************************/
-function GContext(ctx) {
+function GContext(ctx, w, h) {
   this.ops = [];
-  this.context2D = ctx;
+  this._context2D = ctx;
   this.cursor = 0;
   this._pageIndex = 0;
   this._segs = [];
   this._beatCursor = 0;
-  this._w = this._h = 0;
 
   //this._pageYBase = null;
   //this.rowBaselineY = null;
   //this._pageSegs = null;
+
+  if (w != null && h != null) {
+    this.beginBudget(w, h);
+  }
+
 }
 exports.GContext = GContext;
 
 GContext.prototype.context = function() {
-  return this.context2D;
+  return this._context2D;
 }
 
 GContext.prototype.strokes = function() {
@@ -28,6 +32,7 @@ GContext.prototype.strokes = function() {
 }
 
 GContext.prototype.beginBudget = function(w, h) {
+  this.width = w;
   this.height = h;
   this._grid = new GGrid(w, h);
 }
@@ -47,6 +52,31 @@ GContext.prototype.pageIndex = function(pi) {
     return this._pageIndex = pi;
   }
   return null;
+}
+
+GContext.prototype.feedScore = function(score, x, y) {
+  if (score instanceof TMidiConvertor) {
+    score.convert();
+    console.log("TMidiConvertor", score);
+
+    score = MConvert(score);
+    console.log("MConvert result:", score);
+  }
+
+  if (score instanceof MScore) {
+    var mscore = score;
+    console.log("MScore:", score);
+    score = EConvert(mscore);
+    console.log("EScore", score);
+  }
+
+  if (!(score instanceof EScore)) {
+    console.error("feedScore requires MScore or EScore");
+  }
+
+  score.budget(this, x || 0, y || 0);
+
+  console.log(this);
 }
 
 GContext.prototype._slicePages = function() {
@@ -74,9 +104,10 @@ GContext.prototype.getPageOpsSlice = function(p) {
   return [this._pageSegs.slice(p, p + 2), this._pageYBase[p]];
 }
 
-GContext.prototype._xmark = function(x, val) {
+GContext.prototype._xmark = function(x, val, opt = null) {
   var gs = new GStroke('x', x, 0);
   gs.ext = val || 0;
+  gs.opt = opt;
   return gs;
 }
 
@@ -157,16 +188,12 @@ GContext.prototype.shift = function(ops, vx, vy, si = 0, ei = null) {
   }
 }
 
-GContext.prototype._compress = function(ops, baseX, aimWidth, ubound, si = 0,
-  ei = null) {
-  var me = this,
-    rate = aimWidth / ubound;
-
+GContext.prototype._compress = function(ops, baseX, rate, si = 0, ei = null) {
   function rx(x) {
     return typeof x == 'number' ? (x - baseX) * rate + baseX : x;
   }
+
   if (ei == null) ei = ops.length;
-  var debug = ops[ei - 1].x;
   for (var i = si; i < ei; ++i) {
     ops[i]._settle(rx);
   }
@@ -192,13 +219,7 @@ GContext.prototype.clear = function() {
 
 GContext.prototype.print = function(pageIdx = null) {
   if (pageIdx == null) {
-    if (this.cursor > 0) {
-      if (this.cursor >= this.beatPositions.length) {
-        console.log("stop", i, this._pageYBase.length);
-        this.cursor = 0;
-        return;
-      }
-
+    if (this.isPlaying()) {
       var bpo = this.beatPositions[this.cursor - 1];
       var i, rowY = this.rowBaselineY[bpo[1]];
       for (i = 0; i < this._pageYBase.length; ++i) {
@@ -211,6 +232,7 @@ GContext.prototype.print = function(pageIdx = null) {
 
       this._pageIndex = pageIdx;
     } else {
+      this.cursor = 0;
       pageIdx = this._pageIndex;
     }
   } else {
@@ -218,27 +240,27 @@ GContext.prototype.print = function(pageIdx = null) {
   }
 
   if (g_option.funcPageRender != null)
-    g_option.funcPageRender(this.context2D, pageIdx);
+    g_option.funcPageRender(this._context2D, pageIdx);
 
   if (pageIdx == 0 && g_option.funcTitleRender != null)
-    g_option.funcTitleRender(this.context2D, pageIdx);
+    g_option.funcTitleRender(this._context2D, pageIdx);
 
   if (g_option.funcHeadRender != null)
-    g_option.funcHeadRender(this.context2D, pageIdx);
+    g_option.funcHeadRender(this._context2D, pageIdx);
 
   this["printImpl"](pageIdx);
 
-  if (g_option.funcTailRender != null)
-    g_option.funcTailRender(this.context2D, pageIdx);
+  if (g_option.funcTailRender != null && pageIdx == this.pageCount())
+    g_option.funcTailRender(this._context2D, pageIdx);
 
   if (g_option.funcFootRender != null)
-    g_option.funcFootRender(this.context2D, pageIdx);
+    g_option.funcFootRender(this._context2D, pageIdx);
 
   return pageIdx;
 }
 
 GContext.prototype.isPlaying = function() {
-  return this.cursor > 0 && (this.cursor < this.beatPositions.length);
+  return this.cursor > 0 && (this.cursor <= this.beatPositions.length);
 }
 
 GContext.prototype.frameNext = function() {
@@ -260,3 +282,12 @@ GContext.prototype.frameNext = function() {
 GContext.prototype.debug = function() {
   // debug should override by G-Layer
 }
+
+
+// MakeGContext
+function MakeGContext(type, width, height, options) {
+  var gctx = new GContext(ctx, width, height);
+
+  return gctx;
+}
+exports.MakeGContext = MakeGContext;

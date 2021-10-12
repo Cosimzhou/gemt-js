@@ -89,9 +89,20 @@
 
   exports['GContext'].prototype.clearImpl = function(p) {
     var ctx = this.context();
-    if (ctx && ctx.childElementCount > 1) {
-      ctx.removeChild(ctx.children[1]);
+    if (ctx && ctx.children) {
+      for (var i = ctx.children.length - 1; i > 0; --i) {
+        ctx.removeChild(ctx.children[i]);
+      }
     }
+
+    //if (ctx && ctx.querySelector) {
+    //  var array = ctx.querySelectorAll(".score-page");
+    //  if (array && array.length > 0) {
+    //    for (var elem of array) {
+    //      ctx.removeChild(elem);
+    //    }
+    //  }
+    //}
   }
 
   exports['GContext'].prototype.printImpl = function(p) {
@@ -100,12 +111,12 @@
     var page = createSvgElement('g');
 
     page.id = "page-" + p;
+    page.setAttribute("class", "score-page");
     page.setAttribute("transform", "translate(0," + (-range[1]) + ")");
     ctx.appendChild(page);
 
-    for (var op, strk, i = range[0][0], ops = this.strokes(); i < range[0][
-        1]; ++i) {
-      op = ops[i].symbol();
+    for (var i = range[0][0], ops = this.strokes(); i < range[0][1]; ++i) {
+      var strk, op = ops[i].symbol();
       switch (op.kind) {
         case 'line':
           strk = createSvgElement('line');
@@ -201,11 +212,10 @@
           strk = createSvgElement('text');
           strk.setAttribute("x", op.x);
           strk.setAttribute("y", op.y - 6);
-          strk.style.textAlign = 'center';
-          //ctx.textBaseline = 'bottom';
+          strk.setAttribute("text-anchor", "middle");
+          strk.setAttribute("alignment-baseline", "baseline");
           strk.style.fontSize = 12;
           strk.style.fontFamily = "微软雅黑";
-          //strk.style.fontFamily = "Times New Roman";
           strk.style.fill = "black";
           strk.textContent = op.args[2];
 
@@ -218,21 +228,21 @@
 
     if (this.cursor) {
       var bpo = this.beatPositions[this.cursor - 1];
-      var y0 = this.rowBaselineY[bpo[1] - 1];
-      var y1 = this.rowBaselineY[bpo[1]];
+      var y0 = this.rowBaselineY[bpo.rowIndex - 1];
+      var y1 = this.rowBaselineY[bpo.rowIndex];
       var h = y1 - y0;
 
       var cursor = createSvgElement('g');
 
       cursor.id = "cursor";
-      cursor.setAttribute("transform", "translate(" + bpo[0] + "," + y0 +
+      cursor.setAttribute("transform", "translate(" + bpo.x + "," + y0 +
         ")");
       page.appendChild(cursor);
 
 
       var path = createSvgElement('path');
-      path.setAttribute("d", "M 0,0 v" + h + " m -5,0 h10 m 0,-" + h +
-        " h-10");
+      path.setAttribute("d", "M 0,0 v" + h + "m-5,0h10m0,-" + h +
+        "h-10");
       path.style.stroke = "red";
       cursor.appendChild(path);
     }
@@ -251,7 +261,6 @@
     if (h) { h /= img.h; } else { h = 1; }
     w = Math.max(w, h);
     use.setAttribute("transform", "scale(" + w + "," + w + ")");
-
     use.setAttribute("x", (x - (img.ax || 0)) / w);
     use.setAttribute("y", (y - (img.ay || 0)) / w);
     use.setAttribute("href", "#" + img.id);

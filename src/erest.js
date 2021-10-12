@@ -8,7 +8,7 @@ function ERest(n) {
   this.nth = n;
   if (n >= 4) {
     this.imgK = "rest-" + n;
-    this.img = gEID.get(this.imgK);
+    this.img = g_GInfo.get(this.imgK);
   }
 }
 exports.ERest = ERest;

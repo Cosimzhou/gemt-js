@@ -17,3 +17,7 @@ EPositionInfo.prototype.pushOperations = function() {
   this.operations.push(...arguments);
   return this;
 }
+
+EPositionInfo.prototype.length = function() {
+  return this.operations.length;
+}

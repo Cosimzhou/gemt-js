@@ -17,42 +17,26 @@
   <script type="text/javascript" src="../build/gemt.js"> </script>
   <!-- -->
   <script type="text/javascript" src="../svg/pic-svg.js"> </script>
-  <script type="text/javascript" src="../src/impl/gemt-implement.js"> </script>
+  <script type="text/javascript" src="../src/impl/gemt-implement-svg.js">
+  </script>
   <script type="text/javascript" src="js/pageutils.js"> </script>
+  <script type="text/javascript" src="js/hohmann.js"> </script>
   <script type="text/javascript" src="js/midi-demo.js"> </script>
-  <script type="text/javascript" src="js/melody.js"> </script>
 </head>
 
 <body>
   <center id="content"> </center>
   <div id="catalog"> </div>
   <script type="text/javascript">
-    ManualDemoInit(600, 600);
+    ManualDemoInit(800, 800, true);
 
     var option = new EOption().use();
     option.set("marginBlank", 20)
-      .set("margin", 20)
+      .set("margin", 8)
       .set("marginTitle", 50)
-      .set("lengthOfRow", 550)
-      .set("pageRender", function(ctx, p) {
-        if (drawBackgrond) {
-          var tile = Mozaik;
-
-          tile.onload = function() {
-            var imgWidth = tile.img.width;
-            var imgHeight = tile.img.height;
-            for (var i = 0; i <= Container.clientWidth / imgWidth; i++) {
-              for (var j = 0; j <= Container.clientHeight /
-                imgHeight; j++) {
-                Mozaik.draw(ctx, i * imgWidth, j * imgHeight);
-              }
-            }
-            gct.print();
-          }
-          tile.draw(ctx, 0, 0);
-        }
-      })
-      .set("titleRender", makeTitleRenderCanvas(300, Melody.name));
+      .set("lengthOfRow", 650)
+      .set("pageRender", function(ctx, p) {})
+      .set("titleRender", makeTitleRenderSvg(400, Melody.name));
 
     ManualDemoShow();
   </script>

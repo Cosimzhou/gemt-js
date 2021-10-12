@@ -14,11 +14,12 @@ echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <defs>' > $svgfile
 for f in `ls *.svg`; do
   if [ "$f" != "$svgfile" ]; then
-    echo " <g id=\"${f%.svg}\">">> $svgfile
-    tail +3 $f|grep -v "</svg>" >> $svgfile
-    echo " </g>">> $svgfile
+    echo " <g id=\"${f%.svg}\">"
+    tail +3 $f|grep -v "</svg>"
+    echo " </g>"
   fi
 done >> $svgfile
 echo "</defs>
 
 </svg>" >> $svgfile
+#sed "s/^ *//" $svgfile >> $resfile

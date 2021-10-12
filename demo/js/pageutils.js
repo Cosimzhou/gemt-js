@@ -36,17 +36,15 @@ Img.prototype.draw = function(ctx, x, y, w = null, h = null) {
     ctx.drawImage(this.img, x, y, w || this.img.width, h || this.img.height);
   }
 }
+
 Img.prototype.pushOnload = function(f) {
-  if (this.onloads instanceof Array)
-    this.onloads.push(f);
+  if (this.onloads instanceof Array) this.onloads.push(f);
 }
 
 //var Mozaik = new Img("data:image/jpeg;base64,...");
 //var Mozaik = new Img("data:image/svg+xml;base64,...");
 
 var Mozaik = new Img("paper.jpg");
-
-
 var savePages = new Set();
 var pictype = "png";
 
@@ -79,7 +77,7 @@ function downloadImage(filename, container, type = 'png') {
     var r = type.match(/png|jpeg|bmp|gif|svg/)[0];
     return 'image/' + r;
   }
-  imgdata = imgdata.replace(fixtype(type), 'image/octet-stream')
+  imgdata = imgdata.replace(fixtype(type), 'image/octet-stream');
   //将图片保存到本地
   var saveFile = function(data, filename) {
     var link = document.createElement('a');
@@ -143,8 +141,8 @@ function redraw() {
   showPage();
 }
 
-function playRedraw() {
-  if (!gct.frameNext()) {
+function playRedraw(force) {
+  if (!force && !gct.frameNext()) {
     return;
   }
 
@@ -195,11 +193,10 @@ function Stop() {
   for (var elem of document.querySelectorAll(".play_pause")) {
     elem.innerText = "播放";
   }
-  gct.cursor = 0;
-  redraw();
   clearInterval(playIntervalHandle);
   playIntervalHandle = null;
   gct.cursor = 0;
+  redraw();
 }
 
 function Play() {
@@ -211,7 +208,7 @@ function Play() {
 
     if (gct.cursor == 0) {
       gct.cursor = 1;
-      playRedraw();
+      playRedraw(true);
     }
     playIntervalHandle = setInterval(playRedraw, 60000 / 120 / 32);
     hintText = "暂停";
@@ -287,7 +284,6 @@ function addButtonBar(content) {
   a.className = "next_song";
   a.innerHTML = "下一首";
   array.push(a);
-
 
   for (var a of array) {
     content.appendChild(a);

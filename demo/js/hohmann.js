@@ -63,6 +63,7 @@ var MelodyDict = [];
     min: 4,
     dem: 4,
     abs: true,
+    multitrack: true,
   });
 
 

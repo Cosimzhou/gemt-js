@@ -48,12 +48,7 @@
         }
         tile.draw(ctx, 0, 0);
       })
-      .set("titleRender", function(ctx, p) {
-        ctx.font = "30px Verdana";
-        ctx.textBaseline = 'top';
-        ctx.textAlign = 'center';
-        ctx.fillText(filelist[fileIndex], 400, 18);
-      });
+      .set("titleRender", makeTitleRenderCanvas(400, filelist[fileIndex]));
 
 
     addScorePanel(800, 800);

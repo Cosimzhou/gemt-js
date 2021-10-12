@@ -6,7 +6,7 @@
  *******************************/
 function EMark(imgk, l = 0, m = 0) {
   this.imgK = imgk;
-  this.img = gEID.get(imgk);
+  this.img = g_GInfo.get(imgk);
   this.line = l + (m ? 0.5 : 0);
   this.overnote = false;
 }
