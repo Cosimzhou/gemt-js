@@ -6,9 +6,7 @@
  *******************************/
 function EChord() {
   this.nthBeat = 1;
-  this.notes = [...arguments].sort(function(a, b) {
-    return a.line - b.line
-  });
+  this.notes = [...arguments].sort(ENote.comparator);
   if (this.notes.length > 0) {
     this.nthBeat = this.notes[0].nth;
   }

@@ -26,6 +26,9 @@ function EConvert(mscore) {
   var last_bars = null;
   var openTies = {};
 
+  score.mscore = mscore;
+  mscore.makeRepeatCourse();
+
   function feed_bar(bars) {
     function pushSkip(b, n = 1) {
       var marks = score._tracks[b].marks;

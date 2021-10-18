@@ -20,9 +20,7 @@ function MConvert(tmidi_convertor) {
         nset.add(n.nPitch);
       }
     }
-    mch.notes.sort(function(a, b) {
-      return a.pitch - b.pitch
-    });
+    mch.notes.sort(MNote.comparator);
     mch.beat = new GTimeSlice(ch.beat, ch.startBeat);
     if (ch.beat == 0) {
       console.error("MConvert ch['beat'] == 0 " + ch + " " + mch);
@@ -177,11 +175,30 @@ function TEvent(t, ci, nn = null, st = null) {
   this.noteNumber = nn;
 }
 
+TEvent.comparator = function(a, b) {
+  return a.time - b.time;
+}
+TEvent.prototype.clone = function() {
+  var newObj = new TEvent(this.time, this.channel, this.noteNumber, this
+    .subtype);
+  for (var p in this) {
+    newObj[p] = this[p];
+  }
+  return newObj;
+}
+
 TEvent.prototype.implement = function(pre) {
   this.deltaTime = this.time - pre.time;
 }
 TEvent.prototype.turnPlain = function() {
 
+}
+
+TEvent.prototype._seqVal = function() {
+  return this.time;
+}
+TEvent.prototype._shift = function(v) {
+  this.time += v;
 }
 
 /********************************
@@ -192,12 +209,15 @@ TEvent.prototype.turnPlain = function() {
 function MTConvert(mscore) {
   var ticksPerBeat = 120;
   var ttracks = [];
+
+  mscore.makeRepeatCourse();
   for (var ti = 0, mtrk; mtrk = mscore._tracks[ti]; ++ti) {
     var ttrk = [],
       openChords = new Set(),
-      tmpv;
-    ttrk.push(tmpv = new TEvent(0, 0, null, 'programChange'));
+      tmpv = new TEvent(0, 0, null, 'programChange');
     tmpv.programNumber = 40;
+    ttrk.push(tmpv);
+    ttracks.push(ttrk);
     for (var bi = 0, mb; mb = mtrk.bars[bi]; ++bi) {
       for (var ci = 0, mch; mch = mb.chords[ci]; ++ci) {
         // Convert MChord to TChord
@@ -220,25 +240,28 @@ function MTConvert(mscore) {
             end += mch.beat.beatlen;
           }
 
-          for (var ni = 0, note; note = mch.notes[ni]; ++ni) {
-            var on = new TEvent(ticksPerBeat * start, ti, note.pitch, 'noteOn');
+          for (var on, ni = 0, note; note = mch.notes[ni]; ++ni) {
+            on = new TEvent(ticksPerBeat * start, ti, note.pitch, 'noteOn');
             on.velocity = 90;
             ttrk.push(on);
-            ttrk.push(new TEvent(ticksPerBeat * end - gap, ti, note.pitch,
-              'noteOff'));
+
+            on = new TEvent(ticksPerBeat * end - gap, ti, note.pitch,
+              'noteOff');
+            ttrk.push(on);
           }
         }
       }
     }
-    ttracks.push(ttrk);
-    ttrk.sort(function(a, b) {
-      return a.time - b.time;
-    });
+
+    ttrk.sort(TEvent.comparator);
+    mscore._repeatCourse._expand(ttrk, ticksPerBeat);
+
     ttrk[0].deltaTime = ttrk[0].time;
     for (var ei = 1, ent; ent = ttrk[ei]; ++ei) {
       ttrk[ei].implement(ttrk[ei - 1]);
       ttrk[ei].turnPlain();
     }
+
     ttrk.push({
       'deltaTime': 480,
       'type': 'meta',

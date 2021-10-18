@@ -23,6 +23,10 @@ function ENote(ns, l = 0, s = null) {
 exports.ENote = ENote;
 impl(ENote, EScoreElement);
 
+ENote.comparator = function(a, b) {
+  return a.line - b.line;
+}
+
 ENote.prototype.width = function() {
   // note head width
   return this.img.width;

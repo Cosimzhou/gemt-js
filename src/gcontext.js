@@ -221,7 +221,7 @@ GContext.prototype.print = function(pageIdx = null) {
   if (pageIdx == null) {
     if (this.isPlaying()) {
       var bpo = this.beatPositions[this.cursor - 1];
-      var i, rowY = this.rowBaselineY[bpo[1]];
+      var i, rowY = this.rowBaselineY[bpo.rowIndex];
       for (i = 0; i < this._pageYBase.length; ++i) {
         if (rowY <= this._pageYBase[i]) {
           pageIdx = i - 1;
@@ -268,7 +268,7 @@ GContext.prototype.frameNext = function() {
   this._beatCursor += 1 / 32;
   while (this.cursor < this.beatPositions.length) {
     var bpo = this.beatPositions[this.cursor];
-    if (bpo[2] <= this._beatCursor) {
+    if (bpo.beat <= this._beatCursor) {
       this.cursor++;
       ret = true;
     } else {

@@ -203,6 +203,7 @@ EScore.prototype.budget = function(ctx, x, y) {
     y += g_option.gapBetweenRows;
   } while (true);
 
+  this.mscore._repeatCourse._expand(ctx.beatPositions);
   ctx._slicePages();
 }
 
@@ -408,7 +409,7 @@ EScoreBudgetRowContext.prototype._stretchOps = function(endflag) {
     ctx._compress(arr, this.trkOriginX, rate);
 
     for (var bpo of this._beatPositions) {
-      bpo[0] = (bpo[0] - this.trkOriginX) * rate + this.trkOriginX;
+      bpo.x = (bpo.x - this.trkOriginX) * rate + this.trkOriginX;
     }
   }
 }
