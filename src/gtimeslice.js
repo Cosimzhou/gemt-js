@@ -9,6 +9,10 @@ function GTimeSlice(b, s) {
 }
 exports.GTimeSlice = GTimeSlice;
 
+GTimeSlice.prototype._shift = function(offset) {
+  this._start += offset;
+  return this;
+}
 GTimeSlice.prototype._equal = function(diff) {
   return this.beatlen + (diff.beatlen != null ? diff.beatlen : diff);
 }
@@ -41,7 +45,7 @@ GTimeSlice.prototype.movTo = function(diff) {
 }
 
 GTimeSlice.prototype.after = function(obj) {
-  return this._start > obj; // = diff.beatlen != null? diff.beatlen: diff;
+  return this._start > obj;
 }
 
 GTimeSlice.prototype.clone = function() {

@@ -116,7 +116,7 @@ function ManualDemoInit(width, height, svg) {
       svg ? 'svg' : 'png');
   }
   var mi = getParam("mi");
-  Melody = MelodyDict[mi != null ? mi : 4];
+  Melody = MelodyDict[mi != null ? mi : 0];
   addScorePanel(width, height, svg);
   makeCatalog(MelodyDict, function(x) {
     return x.name;

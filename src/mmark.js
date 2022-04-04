@@ -23,6 +23,9 @@ MMark.prototype._convertToE = function() {
     case 'rest':
       newobj = new ERest(-this.type);
       break;
+    case 'dupbar':
+      //newobj = new ERest(-this.type);
+      //break;
     default:
       newobj = new EMark(this.kind, -1.5);
       break;

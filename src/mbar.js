@@ -75,45 +75,45 @@ MBar.prototype.append = function(ch) {
 }
 
 var g_BarCombineID = 0;
-MBar.prototype._settle = function(ch) {
+MBar.prototype._settle = function() {
   var me = this;
   var unseq = [];
   var CompleteBeat = this._timeBeat.numerator,
     unsetBeat = CompleteBeat;
-  for (var sb = 0, ch, i = 0; ch = this.chords[i]; ++i) {
-    if (ch.beat._start == null) {
-      ch.beat._start = sb;
+  for (var sb = 0, mch, i = 0; mch = this.chords[i]; ++i) {
+    if (mch.beat._start == null) {
+      mch.beat._start = sb;
     }
-    if (ch.beat.beatlen == null) {
+    if (mch.beat.beatlen == null) {
       // beatElapser
-      ch.beat.beatlen = 4 / ch.nths[0];
+      mch.beat.beatlen = 4 / mch.nths[0];
     }
-    if (ch.nths.seq == null) {
+    if (mch.nths.seq == null) {
       unseq.push(i);
     } else {
-      unsetBeat = -ch.beat.sub(unsetBeat);
+      unsetBeat = -mch.beat.sub(unsetBeat);
     }
 
-    if (ch instanceof MRest) {
-      if (ch.beat._start != null)
-        sb = ch.beat._start;
-      if (ch.nths.length > 1) {
-        while (ch.nths.length > 1) {
+    if (mch instanceof MRest) {
+      if (mch.beat._start != null)
+        sb = mch.beat._start;
+      if (mch.nths.length > 1) {
+        while (mch.nths.length > 1) {
           var rest = new MRest();
-          rest.nths = [ch.nths.shift()];
+          rest.nths = [mch.nths.shift()];
           rest.beat = new GTimeSlice(4 / rest.nths[0], sb);
           this.chords.splice(i++, 0, rest);
           sb = rest.beat.endBeat();
         }
         //TODO:
-        ch.beat._start = sb;
-        ch.beat.movTo(ch.endBeat - ch.startBeat);
+        mch.beat._start = sb;
+        mch.beat.movTo(mch.endBeat - mch.startBeat);
       } else {
-        ch.beat._start = sb;
+        mch.beat._start = sb;
       }
     }
 
-    sb = ch.beat.add(sb);
+    sb = mch.beat.add(sb);
   }
 
   if (this.beat.less(CompleteBeat)) {
@@ -155,11 +155,11 @@ MBar.prototype._settle = function(ch) {
 
       if (exception == 0) {
         for (var i = 0; i <= schn; ++i) {
-          var ch = me.chords[schi + i];
-          ch.beat.movTo(avgbeat);
-          //ch.endBeat = ch.startBeat + avgbeat;
-          ch.nths = me._timeBeat.nths(ch.beat.beatlen);
-          if (i < schn) me.chords[schi + i + 1].beat.follow(ch.beat);
+          var mch = me.chords[schi + i];
+          mch.beat.movTo(avgbeat);
+          //mch.endBeat = mch.startBeat + avgbeat;
+          mch.nths = me._timeBeat.nths(mch.beat.beatlen);
+          if (i < schn) me.chords[schi + i + 1].beat.follow(mch.beat);
         }
         unsetBeat -= sebeat;
         return;
@@ -189,29 +189,29 @@ MBar.prototype._settle = function(ch) {
 
   // _beamCombine the 8th or shorter note togather.
   var linkArr = [];
-  for (var ch, i = 0; ch = this.chords[i]; ++i) {
-    if (ch instanceof MChord && ch.nths[0] > 4) {
+  for (var mch, i = 0; mch = this.chords[i]; ++i) {
+    if (mch instanceof MChord && mch.nths[0] > 4) {
       linkArr.push(i);
     }
   }
 
   function dealBeams(sb, n) {
     if (n == 0) return;
-    var ch = me.chords[sb],
+    var mch = me.chords[sb],
       nthlines = [],
-      och = ch;
-    ch._beamCombine = {
+      och = mch;
+    mch._beamCombine = {
       _beamPhase: 0,
       id: ++g_BarCombineID
     };
-    nthlines.push(Log2(ch.nths[0]) - 3);
+    nthlines.push(Log2(mch.nths[0]) - 3);
     while (n-- > 0) {
-      ch = me.chords[++sb];
-      ch._beamCombine = {
+      mch = me.chords[++sb];
+      mch._beamCombine = {
         _beamPhase: (n ? 1 : 2),
         id: g_BarCombineID
       };
-      nthlines.push(Log2(ch.nths[0]) - 3);
+      nthlines.push(Log2(mch.nths[0]) - 3);
     }
     var max = Math.max(...nthlines);
 

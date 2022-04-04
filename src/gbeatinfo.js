@@ -3,6 +3,7 @@ function GBeatInfo(x, row, beat) {
   this.rowIndex = row;
   this.beat = beat;
 }
+impl(GBeatInfo, MRepeatElement);
 
 GBeatInfo.prototype._attach = function(barl) {
   this.func = barl._barlineType;

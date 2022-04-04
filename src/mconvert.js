@@ -174,6 +174,7 @@ function TEvent(t, ci, nn = null, st = null) {
   this.subtype = st;
   this.noteNumber = nn;
 }
+impl(TEvent, MRepeatElement);
 
 TEvent.comparator = function(a, b) {
   return a.time - b.time;

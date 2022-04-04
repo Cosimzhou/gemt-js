@@ -85,8 +85,8 @@ var funcs = {
   "e": "restore",
   "c": "bezierCurveTo",
   "s": "bezierCurveTo",
-  "t": "bezierCurveTo",
-  "q": "bezierCurveTo",
+  "t": "quadraticCurveTo",
+  "q": "quadraticCurveTo",
   "m": "moveTo",
   "l": "lineTo",
   "r": "rect",
@@ -165,9 +165,9 @@ function BuildCtrlPoints() {
 document.getElementById("myRange").oninput = function() {
   setScale(this.value);
 }
-document.getElementById("fill_check").oninput = function() {
-  updateScreen();
-}
+document.getElementById("fill_check").oninput = updateScreen;
+document.getElementById("show_points").oninput = updateScreen;
+document.getElementById("vertical_plus").oninput = updateScreen;
 
 Container.addEventListener("mousedown", function(e) {
   var lp = Scr2Lgc(e.offsetX, e.offsetY);
@@ -285,9 +285,13 @@ function updateScreen() {
   ctx.strokeStyle = 'red';
   ctx.stroke();
 
+  var yscale = Scale;
+  if (document.getElementById("vertical_plus").checked) {
+    yscale = -Scale;
+  }
   ctx.strokeStyle = 'black';
   ctx.translate(cx, cy);
-  ctx.scale(Scale, Scale);
+  ctx.scale(Scale, yscale);
   ctx.lineWidth = 1 / Scale;
 
   drawOps(ctx, operations);
@@ -354,6 +358,23 @@ function svgTreat(g) {
   }
 }
 
+function show_path() {
+  var arr, text = document.getElementById("opstext").value;
+
+  showPath(text);
+}
+
+function showPath(path_text) {
+  var url = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(url, "svg");
+  var path = document.createElementNS(url, "path");
+
+  svg.appendChild(path);
+  path.setAttribute("d", path_text);
+
+  loadSVG(svg);
+}
+
 function load(file) {
   var fetch = new XMLHttpRequest();
   fetch.open('GET', "../svg/" + file);
@@ -363,16 +384,7 @@ function load(file) {
       if (this.status === 200) {
         var parser = new DOMParser();
         var data = parser.parseFromString(this.responseText, "text/xml");
-        var g = data.children[0];
-        operations = [];
-        ctrlPoints = [];
-        svgTreat(g);
-        BuildCtrlPoints();
-
-        translate();
-        updateScreen();
-        console.log(operations);
-        textOps();
+        loadSVG(data);
       } else {
         onerror && onerror('Unable to load MIDI file');
       }
@@ -380,6 +392,19 @@ function load(file) {
   };
 
   fetch.send();
+}
+
+function loadSVG(data) {
+  var g = data.children[0];
+  operations = [];
+  ctrlPoints = [];
+  svgTreat(g);
+  BuildCtrlPoints();
+
+  translate();
+  updateScreen();
+  console.log(operations);
+  textOps();
 }
 
 function textOps() {
@@ -509,14 +534,14 @@ function parse(cmd) {
             .length - 1
           ];
         } else {
-          console.error("s must follow c or s");
+          console.error("s must follow c or s, but follows" + pre[0]);
         }
         break;
       case 'Q':
         op = ['q', arr.slice(i, i += 4).map(parseFloat)];
-        op[1] = op[1].slice(0, 2).concat(op[1]);
+        //op[1] = op[1].slice(0, 2).concat(op[1]);
         if (preE) {
-          for (var point_i = 0; point_i < 3; point_i++) {
+          for (var point_i = 0; point_i < 2; point_i++) {
             op[1][point_i * 2] += curpos[0];
             op[1][point_i * 2 + 1] += curpos[1];
           }
@@ -529,21 +554,21 @@ function parse(cmd) {
           op[1][1] += curpos[1];
         }
         pre = result[result.length - 1];
-        if (funcs[pre[0]] == 'bezierCurveTo') {
-          var tmpop = pre[1].slice(4, 6);
-          tmpop[1][0] *= 2, tmpop[1][1] *= 2;
-          tmpop[1][0] -= pre[1][2], tmpop[1][1] -= pre[1][3];
-          op[1] = tmpop.concat(tmpop).concat(op[1]);
+        if (funcs[pre[0]] == 'quadraticCurveTo') {
+          var tmpop = pre[1].slice(2, 4);
+          tmpop[0] *= 2, tmpop[1] *= 2;
+          tmpop[0] -= pre[1][0], tmpop[1] -= pre[1][1];
+          op[1] = tmpop.concat(op[1]);
         } else if (pre[0] == 'l') {
           ppre = result[result.length - 2];
-          var tmpop = pre[1].concat();
-          tmpop[1][0] *= 2, tmpop[1][1] *= 2;
-          tmpop[1][0] -= ppre[1][ppre[1].length - 2], tmpop[1][1] -= ppre[1][
-            ppre[1].length - 1
-          ];
-          op[1] = tmpop.concat(tmpop).concat(op[1]);
+          op[1] = ppre[1].slice(ppre[1].length - 2).concat(pre[1].concat(op[
+            1]));
+          //op[1][0] *= 2, op[1][1] *= 2;
+          //op[1][0] -= ppre[1][ppre[1].length - 2], op[1][1] -= ppre[1][ppre[1]
+          //  .length - 1
+          //];
         } else {
-          console.error("s must follow c or s");
+          console.error("s must follow c or s, but follows " + pre[0]);
         }
         break;
       case 'Z':
@@ -589,19 +614,21 @@ function drawOps(ctx, ops) {
   }
   ctx.closePath();
 
-  ctx.beginPath();
-  for (var cpt of ctrlPoints)
-    cpt.draw(ctx);
-  ctx.closePath();
-  ctx.fillStyle = "green";
-  ctx.fill();
-
-  if (ops.length > 0) {
+  if (document.getElementById("show_points").checked) {
     ctx.beginPath();
-    ctrlPoints[0].draw(ctx);
+    for (var cpt of ctrlPoints)
+      cpt.draw(ctx);
     ctx.closePath();
-    ctx.fillStyle = "red";
+    ctx.fillStyle = "green";
     ctx.fill();
+
+    if (ops.length > 0) {
+      ctx.beginPath();
+      ctrlPoints[0].draw(ctx);
+      ctx.closePath();
+      ctx.fillStyle = "red";
+      ctx.fill();
+    }
   }
 }
 

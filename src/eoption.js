@@ -61,8 +61,8 @@ var g_option;
  *
  *
  *******************************/
-function EOption() {
-  if (g_option == null) {
+function EOption(isDef) {
+  if (isDef || g_option == null) {
     this.trackWidth = 750;
     this.gap = 8;
     this.gapBetweenRows = 30;
