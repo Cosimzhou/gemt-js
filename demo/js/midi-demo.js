@@ -128,7 +128,10 @@ function ManualDemoInit(width, height, svg) {
       soundfontUrl: "../soundfont/",
       //instrument: "synth_drum",
       instruments: ["acoustic_grand_piano", "violin"],
-      //    onprogress: function(state, progress) {},
+      onprogress: function(state, progress) {
+        console.log(state,
+          progress)
+      },
       //    onsuccess: function() {}
     });
   };
