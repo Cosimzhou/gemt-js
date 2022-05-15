@@ -17,22 +17,33 @@ var filelist = [
       "爱的供养",
       "U.N.オーエンは彼女なのか",
       "いつも何度でも",
+      "EVA-残酷な天使のテーゼ",
       "加勒比海盗主题曲",
-      "only_my_railgun", // 15
+      "only_my_railgun",
+      "fripSide-Only_my_railgun",
+      "fripSide-Sisters'_noise",
       "檄！帝国華撃団Ⅲ",
+      "supercell-君の知らない物語",
       "someone-else",
+      "白金ディスコ",
       "electronic_angel",
       "yyjjxq",
+      "巡音ルカ-红一葉",
       "幽雅に咲かせ、墨染の桜～Border_of_Life",
+      "初音ミく-千本桜",
       "千本桜",
       "刀剑神域OP",
       "深海少女",
+      "素敵だね",
+      "あなたがいるから",
       "CANON IN D",
       "Lemon",
       "Lydia",
+      "Bad_Apple",
       "钟",
       "梁祝",
       "喀秋莎",
+      "超级玛莉",
       "叶塞尼亚",
       "富士山下",
       "名侦探柯南-主题歌",
@@ -40,6 +51,8 @@ var filelist = [
       "土耳其进行曲",
       "四季-春",
       "菊次郎的夏天",
+      "summer-菊次郎的夏天",
+      "生物がかり-桜",
       "轻飘飘的时间",
       "克罗地亚狂想曲",
       "Dj_Okawari-Flower_Dance",
@@ -66,8 +79,6 @@ function MIDIDemoInit() {
   document.getElementById("title").innerHTML = filelist[fileIndex];
 
   var file = "../res/" + filelist[fileIndex] + ".mid";
-
-
   var fetch = new XMLHttpRequest();
   fetch.open('GET', file);
   fetch.overrideMimeType('text/plain; charset=x-user-defined');
@@ -126,17 +137,14 @@ function ManualDemoInit(width, height, svg) {
   window.onload = function() {
     MIDI.loadPlugin({
       soundfontUrl: "../soundfont/",
-      //instrument: "synth_drum",
+      // instrument: "synth_drum",
       instruments: ["acoustic_grand_piano", "violin"],
       onprogress: function(state, progress) {
-        console.log(state,
-          progress)
+        console.log(state, progress)
       },
-      //    onsuccess: function() {}
+      // onsuccess: function() {}
     });
   };
-
-
 
   if (!svg) {
     Container = document.getElementById("myCanvas");

@@ -48,3 +48,74 @@ function CountBits(bits) {
 function Log2(n) {
   return n ? CountBits(LargePowerOf2(n) - 1) : -1;
 }
+
+function gcd(m, n) {
+  if (m < n) {
+    var t = m;
+    m = n;
+    n = t;
+  }
+
+  for (var r = 0;
+    (r = m % n) != 0;) {
+    m = n;
+    n = r;
+  }
+
+  return n;
+}
+
+
+function Fraction(num, den) {
+  this._numerator = num || 0;
+  this._denominator = den || 1;
+}
+Fraction.prototype._reduct = function(f) {
+  if (this._denominator == f._denominator) return;
+  var product = f._denominator * this._denominator;
+  var mcp = product / gcd(f._denominator, this._denominator);
+  var rate = mcp / this._denominator;
+  this._denominator = mcp;
+  this._numerator *= rate;
+  return new Fraction(f._numerator * rate, mcp);
+}
+Fraction.prototype._simplify = function() {
+  var rate = 1;
+  while (parseInt(this._numerator) !== this._numerator) {
+    this._numerator *= 10;
+    rate *= 10;
+  }
+  this._denominator *= rate;
+
+  rate = 1;
+  while (parseInt(this._denominator) !== this._denominator) {
+    this._denominator *= 10;
+    rate *= 10;
+  }
+  this._numerator *= rate;
+
+  rate = gcd(this._numerator, this._denominator);
+  this._numerator /= rate;
+  this._denominator /= rate;
+
+  return this;
+}
+
+Fraction.prototype.add = function(f) {
+  f = this._reduct(f);
+  this._numerator += f._numerator;
+  return this._simplify();
+}
+Fraction.prototype.sub = function(f) {
+  f = this._reduct(f);
+  this._numerator -= f._numerator;
+  return this._simplify();
+}
+Fraction.prototype.imul = function(i) {
+  this._numerator *= i;
+  return this._simplify();
+}
+Fraction.prototype.idiv = function(i) {
+  this._denominator *= i;
+  return this._simplify();
+}

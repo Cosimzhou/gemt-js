@@ -278,6 +278,9 @@ GContext.prototype.frameNext = function() {
 
   return ret;
 }
+GContext.prototype.rewind = function() {
+  this._beatCursor = 0;
+}
 
 GContext.prototype.debug = function() {
   // debug should override by G-Layer

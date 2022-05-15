@@ -81,6 +81,8 @@
       args[0]) + "C " + curvepath(args[1]) + "z");
     use.style.fill = "currentColor";
     use.style.stroke = "currentColor";
+
+    use.setAttribute("clip-path", "url(#pageClipPath)");
     ctx.appendChild(use);
   }
 
@@ -109,6 +111,25 @@
     var ctx = this.context();
     var range = this.getPageOpsSlice(p);
     var page = createSvgElement('g');
+
+    var rect;
+    var path = ctx.children[0].querySelector("#pageClipPath");
+    if (path == null) {
+      path = createSvgElement('clipPath');
+      path.setAttribute('id', 'pageClipPath');
+      rect = createSvgElement('rect');
+      path.appendChild(rect);
+      ctx.children[0].appendChild(path);
+    } else {
+      rect = path.children[0];
+    }
+
+    rect.setAttribute('x', '50');
+    rect.setAttribute('y', '50');
+    rect.setAttribute("transform", "translate(0," + (range[1]) + ")");
+    rect.setAttribute('width', '550');
+    rect.setAttribute('height', '550');
+
 
     page.id = "page-" + p;
     page.setAttribute("class", "score-page");
@@ -195,7 +216,6 @@
           strk.setAttribute("height", op.args[1]);
           strk.style.fill = "black";
           page.appendChild(strk);
-
           break;
         case 'dot':
           strk = createSvgElement('circle');

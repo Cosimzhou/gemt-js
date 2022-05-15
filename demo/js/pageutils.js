@@ -207,6 +207,7 @@ function Play() {
       clearInterval(playIntervalHandle);
 
     if (gct.cursor == 0) {
+      gct.rewind();
       gct.cursor = 1;
       playRedraw(true);
     }
@@ -320,8 +321,8 @@ function addScorePanel(w, h, isSvg = false) {
       ctx = svg;
 
       svg.id = "myCanvas";
-      svg.width.baseVal.valueAsString = "800";
-      svg.height.baseVal.valueAsString = "800";
+      svg.width.baseVal.valueAsString = w;
+      svg.height.baseVal.valueAsString = h;
     }
 
     pictype = "svg";
@@ -345,7 +346,7 @@ window.addEventListener("load", function() {
   var mi = getParam("mi");
   var nmi = mi + 1;
   for (var elem of document.querySelectorAll(".next_song")) {
-    if (nmi > 39) elem.style.display = 'none';
+    if (nmi >= filelist.length) elem.style.display = 'none';
     elem.href = location.pathname + "?mi=" + nmi;
   }
 
