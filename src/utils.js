@@ -5,6 +5,7 @@
  *******************************/
 var exports = (typeof window !== 'undefined') ? window : {};
 var _ = 0;
+var MIDI = {};
 
 function extend(child, parent) {
   // add the following into child function at first line:
@@ -28,6 +29,14 @@ function impl(child, interf) {
     child.prototype[k] = T(interf[k]);
   }
 }
+
+function clone(o) {
+  if (typeof o != 'object') return (o);
+  if (o == null) return (o);
+  var ret = (typeof o.length == 'number') ? [] : {};
+  for (var key in o) ret[key] = clone(o[key]);
+  return ret;
+};
 
 function LargePowerOf2(x) {
   x |= (x >> 1);
@@ -119,3 +128,13 @@ Fraction.prototype.idiv = function(i) {
   this._denominator *= i;
   return this._simplify();
 }
+Fraction.prototype.value = function() {
+  return this._numerator / this._denominator;
+}
+
+Fraction.prototype.gt = function(f) { return this.value() > f.value(); }
+Fraction.prototype.ge = function(f) { return this.value() >= f.value(); }
+Fraction.prototype.lt = function(f) { return this.value() < f.value(); }
+Fraction.prototype.le = function(f) { return this.value() <= f.value(); }
+Fraction.prototype.ne = function(f) { return this.value() !== f.value(); }
+Fraction.prototype.eq = function(f) { return this.value() === f.value(); }

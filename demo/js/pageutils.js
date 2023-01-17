@@ -146,7 +146,8 @@ function playRedraw(force) {
     return;
   }
 
-  if (!gct.isPlaying()) {
+  if (('function' === typeof gct.isPlaying && !gct.isPlaying()) ||
+    ('function' !== typeof gct.isPlaying && !gct.isPlaying)) {
     if (playIntervalHandle)
       clearInterval(playIntervalHandle);
     playIntervalHandle = null;

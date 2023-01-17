@@ -118,6 +118,8 @@ function MIDIDemoInit() {
       //    onprogress: function(state, progress) {},
       //    onsuccess: function() {}
     });
+
+    player.player = MIDI.Player;
   };
 }
 

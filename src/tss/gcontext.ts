@@ -1,22 +1,321 @@
-/*************************************************************************
- *  EMT-score.js
+/********************************
  *
+ * GContext
  *
- *  > File Name: gemt-implement-svg.js
- *  > Author: cosim
- *  > Mail: cosimzhou@hotmail.com
- ************************************************************************/
+ * @constructor
+ *******************************/
 
-(function() {
-  var exports = window || {};
+class GContext {
+  cursor : number
+  ops: Array<GStroke>
+  _context2D : object
+  _pageIndex : number
+  _beatCursor : number
+  width: number
+  height: number
+  _segs: Array<number>
+  _grid: GGrid
+  rowBaselineY: Array<number>
+  _pageYBase: Array<number>
+  _pageSegs: Array<number>
+  beatPositions: Array<any>
+  rowOriginPoint: GPoint
 
-  /**
-   * //////////////////////////////////////////////////////////////////////////////
-   *
-   *  E-Layer
-   *
-   * //////////////////////////////////////////////////////////////////////////////
-   */
+  clearImpl: ()=>void
+  printImpl: (p?: number)=>void
+  constructor(ctx: object, w:number, h:number) {
+    this.ops = [];
+    this._context2D = ctx;
+    this.cursor = 0;
+    this._pageIndex = 0;
+    this._segs = [];
+    this._beatCursor = 0;
+
+    //this._pageYBase = null;
+    //this._pageSegs = null;
+
+    if (w != null && h != null) {
+      this.beginBudget(w, h);
+    }
+  }
+
+  context (): object {
+    return this._context2D;
+  }
+
+  strokes(): Array<GStroke> {
+    return this.ops;
+  }
+
+  beginBudget(w: number, h: number): void {
+    this.width = w;
+    this.height = h;
+    this._grid = new GGrid(w, h);
+  }
+
+  rowCount(): number {
+    return this.rowBaselineY.length - 1;
+  }
+
+  pageCount(): number {
+    return this._pageYBase.length - 1;
+  }
+
+  pageIndex(pi):number {
+    if (pi == null) {
+      return this._pageIndex;
+    } else if (0 <= pi && pi < this._pageYBase.length) {
+      return this._pageIndex = pi;
+    }
+    return null;
+  }
+
+  feedScore(score, x: number, y: number): void {
+    // temporary remarked
+    //
+    if (score instanceof TMidiConvertor) {
+      score.convert();
+      console.log("TMidiConvertor", score);
+
+      score = MConvert(score);
+      console.log("MConvert result:", score);
+    }
+
+    if (score instanceof MScore) {
+      var mscore = score;
+      console.log("MScore:", score);
+      score = EConvert(mscore);
+      console.log("EScore", score);
+    }
+
+    if (!(score instanceof EScore)) {
+      console.error("feedScore requires MScore or EScore");
+    }
+
+    score.budget(this, x || 0, y || 0);
+
+    console.log(this);
+  }
+
+  _slicePages(): void {
+    var arr = [0],
+      yarr = [0],
+      startY = 0;
+    for (var i = 0; i < this.rowBaselineY.length; ++i) {
+      if (this.rowBaselineY[i] - startY >= this.height) {
+        arr.push(this._segs[i - 1]);
+        startY = this.rowBaselineY[i - 1];
+        yarr.push(startY);
+      }
+    }
+    arr.push(this.ops.length);
+    yarr.push(startY + this.height);
+    this._pageSegs = arr;
+    this._pageYBase = yarr;
+  }
+
+  getPageOpsSlice(p: number): Array<any> {
+    if (p >= this._pageSegs.length) {
+      p = 0;
+    }
+
+    return [this._pageSegs.slice(p, p + 2), this._pageYBase[p]];
+  }
+
+  _xmark(x: number, val, opt: object = null): GStroke {
+    var gs = new GStroke('x', x, 0);
+    gs.ext = val || 0;
+    gs.opt = opt;
+    return gs;
+  }
+
+  _line(x: number, y: number, x1: number, y1: number): GStroke {
+    return new GStroke('line', x, y, x1, y1);
+  }
+
+  _curve(x: number, y: number, x1: number, y1: number, w: number): GStroke {
+    return new GStroke('curve', x, y, x1, y1, w);
+  }
+
+  _charCurve(x: number, y: number, x1: number, y1: number, w: number): GStroke {
+    return new GStroke('ccurve', x, y, x1, y1, w);
+  }
+
+  _lineWh(x: number, y: number, x1: number, y1: number, w: number): GStroke {
+    // use for beam
+    return new GStroke('lineH', x, y, x1, y1, w);
+  }
+
+  _lineWv(x: number, y: number, x1: number, y1: number, w: number): GStroke {
+    return new GStroke('lineV', x, y, x1, y1, w);
+  }
+
+  _vline(x: number, y: number, h: number): GStroke {
+    return new GStroke('vline', x, y, h);
+  }
+
+  _Vline(x: number, y: number, y1: number): GStroke {
+    // use for EBarline
+    return new GStroke('Vline', x, y, y1);
+  }
+
+  _VlineW(x: number, y: number, y1: number, w: number): GStroke {
+    // use for EBarline, substitution of rect
+    return new GStroke('Vlinew', x, y, y1, w);
+  }
+
+  _hline(x: number, y: number, w: number): GStroke {
+    return new GStroke('hline', x, y, w);
+  }
+
+  _rect(x: number, y: number, w: number, h: number): GStroke {
+    return new GStroke('rect', x, y, w, h);
+  }
+
+  _dot(x: number, y: number, r: number): GStroke {
+    return new GStroke('dot', x, y, r);
+  }
+
+  _draw(name: string, x: number, y: number, w?: number, h?: number): GStroke {
+    return new GStroke('draw', x, y, w, h, name);
+  }
+
+  _text(name: string, x: number, y: number, w?: number, h?: number): GStroke {
+    return new GStroke('text', x, y, w, h, name);
+  }
+
+  _char(name: string, x: number, y: number, w: number, h: number): GStroke {
+    return new GStroke('char', x, y, w, h, name);
+  }
+
+  _attach() {
+
+  }
+
+  shift(ops, vx, vy, si = 0, ei = null): void {
+    if (ei == null) ei = ops.length;
+
+    for (var e, i = si; i < ei; ++i) {
+      ops[i]._settle(
+        function(x) {
+          return x + vx;
+        },
+        function(y) {
+          return y + vy;
+        });
+    }
+  }
+
+  _compress(ops, baseX, rate, si = 0, ei = null) {
+    function rx(x) {
+      return typeof x == 'number' ? (x - baseX) * rate + baseX : x;
+    }
+
+    if (ei == null) ei = ops.length;
+    for (var i = si; i < ei; ++i) {
+      ops[i]._settle(rx);
+    }
+
+    function rt(e) {
+      var w = e.right - e.left;
+      e.left = (e.left - baseX) * rate + baseX;
+      e.right = e.left + w;
+    }
+    for (var i = 0; i < this._grid.array.length; ++i) {
+      rt(this._grid.array[i]);
+    }
+  }
+
+  _settle(ops): void {
+    this._segs.push(this.ops.length);
+    this.ops.push(...ops);
+  }
+
+  clear(): void {
+    if (this.clearImpl) this.clearImpl();
+  }
+
+  print(pageIdx = null): number {
+    if (pageIdx == null) {
+      if (this.isPlaying) {
+        var bpo = this.beatPositions[this.cursor - 1];
+        var i, rowY = this.rowBaselineY[bpo.rowIndex];
+        for (i = 0; i < this._pageYBase.length; ++i) {
+          if (rowY <= this._pageYBase[i]) {
+            pageIdx = i - 1;
+            break;
+          }
+        }
+        if (pageIdx == null) pageIdx = i;
+
+        this._pageIndex = pageIdx;
+      } else {
+        this.cursor = 0;
+        pageIdx = this._pageIndex;
+      }
+    } else {
+      this._pageIndex = pageIdx;
+    }
+
+    if (g_option.funcPageRender != null)
+      g_option.funcPageRender(this._context2D, pageIdx);
+
+    if (pageIdx == 0 && g_option.funcTitleRender != null)
+      g_option.funcTitleRender(this._context2D, pageIdx);
+
+    if (g_option.funcHeadRender != null)
+      g_option.funcHeadRender(this._context2D, pageIdx);
+
+    this.printImpl(pageIdx);
+
+    if (g_option.funcTailRender != null && pageIdx == this.pageCount())
+      g_option.funcTailRender(this._context2D, pageIdx);
+
+    if (g_option.funcFootRender != null)
+      g_option.funcFootRender(this._context2D, pageIdx);
+
+    return pageIdx;
+  }
+
+  get isPlaying(): boolean {
+    return this.cursor > 0 && (this.cursor <= this.beatPositions.length);
+  }
+
+  frameNext(): boolean {
+    var ret = false;
+    this._beatCursor += 1 / 32;
+    while (this.cursor < this.beatPositions.length) {
+      var bpo = this.beatPositions[this.cursor];
+      if (bpo.beat <= this._beatCursor) {
+        this.cursor++;
+        ret = true;
+      } else {
+        return ret;
+      }
+    }
+
+    return ret;
+  }
+  rewind(): void {
+    this._beatCursor = 0;
+  }
+
+  debug(): void {
+    // debug should override by G-Layer
+  }
+
+}
+
+function MakeGContext(ctx: object , width: number, height: number, options) {
+  var gctx = new GContext(ctx, width, height);
+
+  // TODO(): ...
+  return gctx;
+}
+//exports.MakeGContext = MakeGContext;
+//export GContext
+
+
 
   var gEID = {
     "g-clef": { id: "clef_g", ay: 32, w: 20, h: 52 },
@@ -87,9 +386,9 @@
   }
 
 
-  exports['GContext'].prototype.debug = function() {}
+  GContext.prototype.debug = function() {}
 
-  exports['GContext'].prototype.clearImpl = function(p) {
+  GContext.prototype.clearImpl = function() {
     var ctx = this.context();
     if (ctx && ctx.children) {
       for (var i = ctx.children.length - 1; i > 0; --i) {
@@ -107,7 +406,7 @@
     //}
   }
 
-  exports['GContext'].prototype.printImpl = function(p) {
+  GContext.prototype.printImpl = function(p) {
     var ctx = this.context();
     var range = this.getPageOpsSlice(p);
     var page = createSvgElement('g');
@@ -273,7 +572,7 @@
    *  Drawer in SVG
    *
    *******************************/
-  function drawIcon(ctx, img, x, y, w, h) {
+  function drawIcon(ctx, img, x, y, w?: number, h?: number) {
     var use = createSvgElement('use');
     if (w) {
       w /= img.w;
@@ -320,7 +619,6 @@
         use.style.fill = "none";
         use.setAttribute("transform", "translate(" + op.x + "," + op.y + ")");
         ctx.appendChild(use);
-
         break;
       case 'taild':
         for (var y = op.y, img = gEID["notetail-d"], nth = parseInt(arr[
@@ -338,5 +636,3 @@
         break;
     }
   }
-
-})();

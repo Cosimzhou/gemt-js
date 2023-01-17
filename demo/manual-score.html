@@ -27,13 +27,13 @@
   <center id="content"> </center>
   <div id="catalog"> </div>
   <script type="text/javascript">
-    ManualDemoInit(600, 600);
+    ManualDemoInit(700, 600);
 
     var option = new EOption().use();
     option.set("marginBlank", 20)
       .set("margin", 20)
       .set("marginTitle", 50)
-      .set("lengthOfRow", 550)
+      .set("lengthOfRow", 650)
       .set("pageRender", function(ctx, p) {
         if (drawBackgrond) {
           var tile = Mozaik;
@@ -52,7 +52,7 @@
           tile.draw(ctx, 0, 0);
         }
       })
-      .set("titleRender", makeTitleRenderCanvas(300, Melody.name));
+      .set("titleRender", makeTitleRenderCanvas(350, Melody.name));
 
     ManualDemoShow();
   </script>

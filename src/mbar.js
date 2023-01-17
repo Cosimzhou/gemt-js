@@ -107,7 +107,7 @@ MBar.prototype._settle = function() {
         }
         //TODO:
         mch.beat._start = sb;
-        mch.beat.movTo(mch.endBeat - mch.startBeat);
+        //mch.beat.movTo(mch.endBeat - mch.startBeat);
       } else {
         mch.beat._start = sb;
       }

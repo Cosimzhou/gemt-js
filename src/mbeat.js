@@ -33,13 +33,13 @@ MBeat.prototype.nth = function(n) {
   return 4 / beat;
 }
 
-MBeat.prototype.beat = function(n) {
-  if (n == this.denominator) {}
-}
-
-MBeat.prototype.note = function(n) {
-  if (n == this.denominator) {}
-}
+//MBeat.prototype.beat = function(n) {
+//  if (n == this.denominator) {}
+//}
+//
+//MBeat.prototype.note = function(n) {
+//  if (n == this.denominator) {}
+//}
 
 MBeat.prototype.nths = function(beat, limit = null) {
   var primes = [1, 3, 5, 6, 7, 9, 11, 13, 15, 17, 19, 21, 23];

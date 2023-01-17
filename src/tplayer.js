@@ -65,7 +65,7 @@ function TPlayer(midi, player) {
       console.error("Player not found, defaut Player not supported");
   }
   this._player = player;
-  this._player.replayer = new Replayer(midi, player.timeWarp);
+  this._player.replayer = Replayer(midi, player.timeWarp);
   this._player.data = this._player.replayer.getData();
   for (var elem of this._player.data) {
     if (elem[0]['event']['subtype'] == 'programChange') {
@@ -77,7 +77,7 @@ function TPlayer(midi, player) {
 }
 exports.TPlayer = TPlayer;
 
-TPlayer.prototype.resume = function () {
+TPlayer.prototype.resume = function() {
   if (this._player['playing']) {
     this._player['pause']();
   } else {
@@ -90,11 +90,10 @@ TPlayer.prototype.resume = function () {
   }
 }
 
-TPlayer.prototype.playing = function () {
+TPlayer.prototype.playing = function() {
   return this._player['playing'];
 }
 
-TPlayer.prototype.stop = function () {
+TPlayer.prototype.stop = function() {
   this._player['stop']();
 }
-

@@ -2,8 +2,44 @@ BUILD_DIR := build
 
 main: GemtJs
 
+TSC_FLAGS := --downlevelIteration -t es6
+
 prepare:
 	@mkdir -p $(BUILD_DIR)
+
+GLayerTs: prepare
+	@echo "======================================="
+	@echo "=  generate G layer js                ="
+	@echo "======================================="
+	@cat src/tss/g*.ts > $(BUILD_DIR)/GLayer.ts
+
+ELayerTs: prepare
+	@echo "======================================="
+	@echo "=  generate E layer js                ="
+	@echo "======================================="
+	@cat src/tss/e*.ts > $(BUILD_DIR)/ELayer.ts
+
+MLayerTs: prepare
+	@echo "======================================="
+	@echo "=  generate M layer js                ="
+	@echo "======================================="
+	@cat src/tss/m*.ts > $(BUILD_DIR)/MLayer.ts
+
+TLayerTs: prepare
+	@echo "======================================="
+	@echo "=  generate T layer js                ="
+	@echo "======================================="
+	@cat src/tss/t*.ts > $(BUILD_DIR)/TLayer.ts
+
+XLayerTs: prepare
+	@echo "======================================="
+	@echo "=  generate X plugin js               ="
+	@echo "======================================="
+	@cat src/tss/x*.ts > $(BUILD_DIR)/XLayer.ts
+
+GemtTs: GLayerTs ELayerTs MLayerTs TLayerTs XLayerTs
+	@cat src/utils.js $(BUILD_DIR)/XLayer.ts $(BUILD_DIR)/GLayer.ts $(BUILD_DIR)/ELayer.ts $(BUILD_DIR)/MLayer.ts $(BUILD_DIR)/TLayer.ts > $(BUILD_DIR)/GEMT.ts
+	@tsc $(TSC_FLAGS) $(BUILD_DIR)/GEMT.ts
 
 GLayerJs: prepare
 	@echo "======================================="
