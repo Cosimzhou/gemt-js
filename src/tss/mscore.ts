@@ -12,7 +12,7 @@ class MScore {
     this._tracks = [];
   }
 
-  get tracks(): Array<MTrack> {return this._tracks; }
+  get tracks(): Array<MTrack> { return this._tracks; }
   track(idx: number) { return this._tracks[idx]; }
 
   appendTrack(): MTrack {
@@ -27,8 +27,8 @@ class MScore {
     var track = this._tracks[0];
     var cursorBeat = 0;
     var rc = new MRepeatCourse();
-    for (var bi = 0, bar; bar = track.bars[bi]; ++bi) {
-      for (var ci = 0, mch; mch = bar.chords[ci]; ++ci) {
+    for (let bi = 0, bar; bar = track.bars[bi]; ++bi) {
+      for (let ci = 0, mch; mch = bar.chords[ci]; ++ci) {
         // Convert MChord to TChord
         if (mch instanceof MMark) {
           if (mch.kind == 'barline') {
@@ -45,12 +45,12 @@ class MScore {
             }
           }
         } else if (mch instanceof MChord) {
-          var beat = mch.beat.endBeat;
+          let beat = mch.beat.endBeat;
           if (cursorBeat < beat) {
             cursorBeat = beat;
           }
         } else if (mch instanceof MRest) {
-          var beat = mch.beat.endBeat;
+          let beat = mch.beat.endBeat;
           if (cursorBeat < beat) {
             cursorBeat = beat;
           }

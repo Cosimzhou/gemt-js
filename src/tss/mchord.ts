@@ -10,12 +10,13 @@
 //  _end: MChord
 //}
 
-class MChord extends MLayerBase {
+class MChord extends MLayerBase implements EBeamCombinable, EArchCombinable {
   notes: Array<MNote>
   info: string
   tone: number
 
-  //  _linkObject: MChordLinkInfo
+  _linkObject: MChordLinkInfo
+  _beamCombine: EConjunctBeamInfo
 
   constructor(...args: MNote[]) {
     super();
@@ -39,7 +40,7 @@ class MChord extends MLayerBase {
 
   clone(): MChord {
     var nmc = new MChord();
-    for (var n of this.notes) {
+    for (let n of this.notes) {
       nmc.notes.push(n.clone());
     }
     nmc.info = this.info;
@@ -50,7 +51,7 @@ class MChord extends MLayerBase {
 
   linkWith(mchord: MChord, same: boolean = false) {
     if (this._linkObject == null) {
-      let linkObj = new MiChordLinkInfo(mchord, this, same);
+      let linkObj = new MChordLinkInfo(mchord, this, same);
       this._linkObject = linkObj;
       mchord._linkObject = linkObj;
     } else {

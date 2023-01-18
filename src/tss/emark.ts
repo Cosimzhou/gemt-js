@@ -4,7 +4,7 @@
  *
  * @constructor
  *******************************/
-class EMark implements EScoreElement {
+class EMark implements ELayoutBudget {
   imgK: string
   img: GRect
   line: number

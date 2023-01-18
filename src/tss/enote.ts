@@ -4,7 +4,7 @@
  *
  * @constructor
  *******************************/
-class ENote implements EScoreElement {
+class ENote implements ELayoutBudget {
   imgK: string
   img: GRect
   line: number
@@ -13,7 +13,7 @@ class ENote implements EScoreElement {
   float: boolean
   ffloat: boolean
 
-  constructor(ns: MBeatSequence, l: number = 0, s : string = null) {
+  constructor(ns: MBeatSequence, l: number = 0, s: string = null) {
     var n = ns.nths[0];
     this.imgK = n < 4 ? (n < 2 ? "fullnote" : "note2") : "note";
     this.img = g_GInfo.get(this.imgK);

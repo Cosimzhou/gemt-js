@@ -6,23 +6,25 @@
  *******************************/
 
 class GContext {
+  width: number
+  height: number
   cursor : number
   ops: Array<GStroke>
+
   _context2D : object
   _pageIndex : number
   _beatCursor : number
-  width: number
-  height: number
   _segs: Array<number>
   _grid: GGrid
   rowBaselineY: Array<number>
   _pageYBase: Array<number>
   _pageSegs: Array<number>
-  beatPositions: Array<any>
+  beatPositions: Array<GBeatInfo>
   rowOriginPoint: GPoint
 
   clearImpl: ()=>void
   printImpl: (p?: number)=>void
+
   constructor(ctx: object, w:number, h:number) {
     this.ops = [];
     this._context2D = ctx;
@@ -30,9 +32,6 @@ class GContext {
     this._pageIndex = 0;
     this._segs = [];
     this._beatCursor = 0;
-
-    //this._pageYBase = null;
-    //this._pageSegs = null;
 
     if (w != null && h != null) {
       this.beginBudget(w, h);
@@ -61,13 +60,11 @@ class GContext {
     return this._pageYBase.length - 1;
   }
 
-  pageIndex(pi):number {
-    if (pi == null) {
-      return this._pageIndex;
-    } else if (0 <= pi && pi < this._pageYBase.length) {
-      return this._pageIndex = pi;
+  get pageIndex():number { return this._pageIndex; }
+  set pageIndex(pi: number) {
+    if (0 <= pi && pi < this._pageYBase.length) {
+      this._pageIndex = pi;
     }
-    return null;
   }
 
   feedScore(score, x: number, y: number): void {
@@ -82,7 +79,7 @@ class GContext {
     }
 
     if (score instanceof MScore) {
-      var mscore = score;
+      let mscore = score;
       console.log("MScore:", score);
       score = EConvert(mscore);
       console.log("EScore", score);
@@ -188,31 +185,23 @@ class GContext {
     return new GStroke('char', x, y, w, h, name);
   }
 
-  _attach() {
-
-  }
-
-  shift(ops, vx, vy, si = 0, ei = null): void {
+  shift(ops, vx: number, vy: number, si: number = 0, ei: number = null): void {
     if (ei == null) ei = ops.length;
 
-    for (var e, i = si; i < ei; ++i) {
+    for (let i = si; i < ei; ++i) {
       ops[i]._settle(
-        function(x) {
-          return x + vx;
-        },
-        function(y) {
-          return y + vy;
-        });
+        (x: number): number => x + vx,
+        (y: number): number => y + vy);
     }
   }
 
-  _compress(ops, baseX, rate, si = 0, ei = null) {
+  _compress(ops, baseX: number, rate: number, si: number = 0, ei: number = null) {
     function rx(x) {
       return typeof x == 'number' ? (x - baseX) * rate + baseX : x;
     }
 
     if (ei == null) ei = ops.length;
-    for (var i = si; i < ei; ++i) {
+    for (let i = si; i < ei; ++i) {
       ops[i]._settle(rx);
     }
 
@@ -221,7 +210,7 @@ class GContext {
       e.left = (e.left - baseX) * rate + baseX;
       e.right = e.left + w;
     }
-    for (var i = 0; i < this._grid.array.length; ++i) {
+    for (let i = 0; i < this._grid.array.length; ++i) {
       rt(this._grid.array[i]);
     }
   }
@@ -235,7 +224,7 @@ class GContext {
     if (this.clearImpl) this.clearImpl();
   }
 
-  print(pageIdx = null): number {
+  print(pageIdx: number = null): number {
     if (pageIdx == null) {
       if (this.isPlaying) {
         var bpo = this.beatPositions[this.cursor - 1];
@@ -312,12 +301,9 @@ function MakeGContext(ctx: object , width: number, height: number, options) {
   // TODO(): ...
   return gctx;
 }
-//exports.MakeGContext = MakeGContext;
-//export GContext
 
 
-
-  var gEID = {
+const gEID = {
     "g-clef": { id: "clef_g", ay: 32, w: 20, h: 52 },
     "f-clef": { id: "clef_f", ay: 7, w: 21.6, h: 24 },
     "c-clef": { id: "clef_c", ay: 15.25, w: 21.7, h: 31.5 },
@@ -361,6 +347,7 @@ function MakeGContext(ctx: object , width: number, height: number, options) {
   //<svg xmlns="http://www.w3.org/2000/svg" version="1.2" width="10" height="8.77">
   //  <path transform="matrix(0.0044,0,0,-0.0044,0,0.796399923)"
 
+if (1) {
   function createSvgElement(type) {
     return document.createElementNS('http://www.w3.org/2000/svg', type);
   }
@@ -406,7 +393,7 @@ function MakeGContext(ctx: object , width: number, height: number, options) {
     //}
   }
 
-  GContext.prototype.printImpl = function(p) {
+  GContext.prototype.printImpl = function(p: number): void {
     var ctx = this.context();
     var range = this.getPageOpsSlice(p);
     var page = createSvgElement('g');
@@ -436,7 +423,7 @@ function MakeGContext(ctx: object , width: number, height: number, options) {
     ctx.appendChild(page);
 
     for (var i = range[0][0], ops = this.strokes(); i < range[0][1]; ++i) {
-      var strk, op = ops[i].symbol();
+      let strk, op = ops[i].symbol();
       switch (op.kind) {
         case 'line':
           strk = createSvgElement('line');
@@ -534,7 +521,7 @@ function MakeGContext(ctx: object , width: number, height: number, options) {
           strk.setAttribute("text-anchor", "middle");
           strk.setAttribute("alignment-baseline", "baseline");
           strk.style.fontSize = 12;
-          strk.style.fontFamily = "微软雅黑";
+          strk.style.fontFamily = g_option.fontFamily;
           strk.style.fill = "black";
           strk.textContent = op.args[2];
 
@@ -572,11 +559,9 @@ function MakeGContext(ctx: object , width: number, height: number, options) {
    *  Drawer in SVG
    *
    *******************************/
-  function drawIcon(ctx, img, x, y, w?: number, h?: number) {
+  function drawIcon(ctx, img, x: number, y: number, w?: number, h?: number) {
     var use = createSvgElement('use');
-    if (w) {
-      w /= img.w;
-    } else { w = 1; }
+    if (w) { w /= img.w; } else { w = 1; }
     if (h) { h /= img.h; } else { h = 1; }
     w = Math.max(w, h);
     use.setAttribute("transform", "scale(" + w + "," + w + ")");
@@ -587,7 +572,7 @@ function MakeGContext(ctx: object , width: number, height: number, options) {
     ctx.appendChild(use);
   }
 
-  function draw(ctx, op) {
+  function draw(ctx, op: GStroke) {
     var use, img = gEID[op.args[2]];
     if (img) {
       drawIcon(ctx, img, op.x, op.y, ...op.args);
@@ -621,13 +606,13 @@ function MakeGContext(ctx: object , width: number, height: number, options) {
         ctx.appendChild(use);
         break;
       case 'taild':
-        for (var y = op.y, img = gEID["notetail-d"], nth = parseInt(arr[
+        for (let y = op.y, img = gEID["notetail-d"], nth = parseInt(arr[
             1]); nth > 4; nth >>= 1, y -= 3.5) {
           drawIcon(ctx, img, op.x, y);
         }
         break;
       case 'tailu':
-        for (var y = op.y, img = gEID["notetail"], nth = parseInt(arr[
+        for (let y = op.y, img = gEID["notetail"], nth = parseInt(arr[
             1]); nth > 4; nth >>= 1, y += 3.5) {
           drawIcon(ctx, img, op.x, y);
         }
@@ -636,3 +621,5 @@ function MakeGContext(ctx: object , width: number, height: number, options) {
         break;
     }
   }
+
+}

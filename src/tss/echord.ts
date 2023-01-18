@@ -33,13 +33,15 @@ class ENoteTailDirection {
   down: boolean
 }
 
-class EChord extends ELayerBase {
+class EChord extends ELayerBase implements EBeamCombinable {
   nthBeat: number
   notes: Array<ENote>
   epos: EPositionInfo
   force: ENoteTailDirection
 
   arpeggio: boolean
+
+  _beamCombine: EConjunctBeamInfo
 
   constructor(...args: ENote[]) {
     super();
@@ -367,14 +369,16 @@ class EChord extends ELayerBase {
     }
 
     // draw ties
-    if (this._mobj && this._mobj._linkObject && this._mobj._linkObject._end ==
-      this._mobj) {
-      var arr = LinkTies(this, ctx, etrack.score.trackLength, isUp);
-      return epos.pushOperations(...arr);
-    }
+    if (this._mobj instanceof MChord) {
+      let linkObj = this._mobj._linkObject;
+      if (linkObj && linkObj._end === this._mobj) {
+        var arr = LinkTies(this, ctx, etrack.score.trackLength, isUp);
+        return epos.pushOperations(...arr);
+      }
 
-    if (this.arpeggio) {
-      epos.pushOperations(ctx._draw("arpeggio", x, y));
+      if (this.arpeggio) {
+        epos.pushOperations(ctx._draw("arpeggio", x, y));
+      }
     }
 
     if (shiftX > 0) epos.shx = {
@@ -445,17 +449,24 @@ function LinkTies(main, ctx: GContext, trackLength: number, isUp: boolean): Arra
     }
   }
 
-  var tadpo2 = main._mobj._linkObject._start[0]._eobj.epos,
+  let linkObj: MChordLinkInfo
+  if (main._mobj instanceof MChord) {
+    linkObj = main._mobj._linkObject;
+  } else {
+    console.error("unexpected link target", main._mobj);
+  }
+
+  var tadpo2 = linkObj._start[0]._eobj.epos,
     tadpo1;
-  if (main._mobj._linkObject._start.length > 1) {
-    for (var tadi = 1; tadi < main._mobj._linkObject._start.length; tadi++) {
+  if (linkObj._start.length > 1) {
+    for (var tadi = 1; tadi < linkObj._start.length; tadi++) {
       tadpo1 = tadpo2;
-      tadpo2 = main._mobj._linkObject._start[tadi]._eobj.epos;
+      tadpo2 = linkObj._start[tadi]._eobj.epos;
       _addCurve(tadpo1, tadpo2, isUp);
     }
   }
   tadpo1 = tadpo2;
-  tadpo2 = main._mobj._linkObject._end._eobj.epos;
+  tadpo2 = linkObj._end._eobj.epos;
   _addCurve(tadpo1, tadpo2, isUp);
   return epos;
 }

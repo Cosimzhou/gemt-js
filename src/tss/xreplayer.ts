@@ -3,6 +3,7 @@ function Replayer(midiFile, timeWarp, eventProcessor?: any, bpm?: number) {
   var beatsPerMinute = bpm ? bpm : 120;
   var bpmOverride = bpm ? true : false;
 
+  console.log("bpm", beatsPerMinute);
   var ticksPerBeat = midiFile.header.ticksPerBeat;
 
   for (var i = 0; i < midiFile.tracks.length; i++) {
@@ -16,22 +17,25 @@ function Replayer(midiFile, timeWarp, eventProcessor?: any, bpm?: number) {
     };
   }
 
-  var nextEventInfo;
-  var samplesToNextEvent = 0;
+  // var nextEventInfo;
+  // var samplesToNextEvent = 0;
 
+  // interface {
+  //   ticksToEvent: number // ticks to next event
+  //   event: TEvent
+  //   track: number // next event track
+  // }
   function getNextEvent() {
-    var ticksToNextEvent = null;
-    var nextEventTrack = null;
-    var nextEventIndex = null;
+    var ticksToNextEvent: number = null;
+    var nextEventTrack: number = null;
+    var nextEventIndex: number = null;
 
     for (var i = 0; i < trackStates.length; i++) {
-      if (
-        trackStates[i].ticksToNextEvent != null &&
+      if (trackStates[i].ticksToNextEvent != null &&
         (ticksToNextEvent == null || trackStates[i].ticksToNextEvent <
-          ticksToNextEvent)
-      ) {
-        ticksToNextEvent = trackStates[i].ticksToNextEvent;
+          ticksToNextEvent)) {
         nextEventTrack = i;
+        ticksToNextEvent = trackStates[i].ticksToNextEvent;
         nextEventIndex = trackStates[i].nextEventIndex;
       }
     }
@@ -68,20 +72,22 @@ function Replayer(midiFile, timeWarp, eventProcessor?: any, bpm?: number) {
     function processNext() {
       if (!bpmOverride && midiEvent.event.type == "meta" && midiEvent.event
         .subtype == "setTempo") {
-        // tempo change events can occur anywhere in the middle and affect events that follow
+        // tempo change events can occur anywhere in the
+        // middle and affect events that follow
         beatsPerMinute = 60000000 / midiEvent.event.microsecondsPerBeat;
       }
       ///
-      var beatsToGenerate = 0;
-      var secondsToGenerate = 0;
+      let secondsToGenerate = 0;
       if (midiEvent.ticksToEvent > 0) {
-        beatsToGenerate = midiEvent.ticksToEvent / ticksPerBeat;
+        let beatsToGenerate = midiEvent.ticksToEvent / ticksPerBeat;
         secondsToGenerate = beatsToGenerate / (beatsPerMinute / 60);
       }
       ///
-      var time = (secondsToGenerate * 1000 * timeWarp) || 0;
-      temporal.push([midiEvent, time]);
+      let millisecondToGenerate = (secondsToGenerate * 1000 * timeWarp) || 0;
+      temporal.push([midiEvent, millisecondToGenerate]);
       midiEvent = getNextEvent();
+
+      console.log("processNext");
     };
     ///
     if (midiEvent = getNextEvent()) {
@@ -90,6 +96,7 @@ function Replayer(midiFile, timeWarp, eventProcessor?: any, bpm?: number) {
   };
   processEvents();
 
+  console.log("xreplayer", timeWarp, temporal);
   return new XReplayer(temporal);
 };
 

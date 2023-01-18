@@ -4,7 +4,7 @@
  *
  * @constructor
  *******************************/
-class ESkip implements EScoreElement {
+class ESkip implements ELayoutBudget {
   _skipN: number
   constructor(n: number) {
     this._skipN = n;

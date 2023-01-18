@@ -4,7 +4,7 @@
  *
  * @constructor
  *******************************/
-class EBlank implements EScoreElement {
+class EBlank implements ELayoutBudget {
   width: number
   constructor(w?: number) {
     this.width = w || g_option.marginBlank;

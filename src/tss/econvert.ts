@@ -30,9 +30,9 @@ function EConvert(mscore: MScore) {
   mscore.makeRepeatCourse();
 
   function feed_bar(bars) {
-    function pushSkip(b, n = 1) {
-      var marks = score._tracks[b].marks;
-      var lastmark = marks[marks.length - 1];
+    function pushSkip(b: number, n: number = 1) {
+      let marks = score._tracks[b].marks;
+      let lastmark = marks[marks.length - 1];
       if (lastmark instanceof ESkip) {
         if (n > 0) lastmark._skipN++;
       } else {
@@ -44,15 +44,15 @@ function EConvert(mscore: MScore) {
 
     {
       // check and draw clef & beat marks
-      for (var i = 0; i < bars.length; ++i) {
+      for (let i = 0; i < bars.length; ++i) {
         if (bars[i] == null) continue;
         if (!last_bars || !bars[i]._clef._equal(last_bars[i]._clef)) {
-          var arr = bars[i]._clef._convertMark();
+          let arr = bars[i]._clef._convertMark();
           score._tracks[i].clefMarks.push(new ETrackHeaderMark(score._tracks[i].marks.length, arr));
         }
         if ((i == 0) &&
           (!last_bars || !bars[i]._timeBeat._equal(last_bars[i]._timeBeat))) {
-          var arr = bars[i]._timeBeat._convertMark();
+          let arr = bars[i]._timeBeat._convertMark();
           if (arr)
             score._tracks[i].beatMarks.push(new ETrackHeaderMark(score._tracks[i].marks.length, arr));
         }
@@ -65,7 +65,7 @@ function EConvert(mscore: MScore) {
       restbars = 0;
       // get the minimum _start beat chord, which will appear in
       // the most left place in the track.
-      for (var ch, b = 0; b < bars.length; ++b) {
+      for (let ch, b = 0; b < bars.length; ++b) {
         if (bars[b] == null || null == (ch = bars[b].chords[curnote[b]]))
           continue;
         if (ch.beat._start < minBeat) {
@@ -75,26 +75,26 @@ function EConvert(mscore: MScore) {
         restbars++;
       }
 
-      for (var ch, b = 0; restbars && b < bars.length; ++b) {
+      for (let ch, b = 0; restbars && b < bars.length; ++b) {
         if (bars[b] == null) continue;
         ch = bars[b].chords[curnote[b]];
         if (ch == null) {
           pushSkip(b);
-          continue;
-        }
-
-        if (b == 0 && (ch instanceof MMark) && ch.kind == 'barline') {
+        } else if (b == 0 && (ch instanceof MMark) && ch.kind == 'barline') {
           let newobj = ch._convertToE(bars[b]._clef);
-          if (newobj instanceof ELayerBase) {
-          newobj._mobj = ch;
-          ch._eobj = newobj;
-          score._tracks[b].marks.push(newobj);
-          curnote[b]++;
+          if (newobj instanceof EBarline) {
+            newobj._mobj = ch;
+            ch._eobj = newobj;
+            score._tracks[b].marks.push(newobj);
+            curnote[b]++;
           }
+          // Break the loop, because barline will only appear in the first track.
+          // It is unnecessary to check the following ones.
           break;
-        }
+        } else if (ch.beat._start == minBeat) {
+          // newobj: EChord or ERest
+          // ch: MChord or MRest
 
-        if (ch.beat._start == minBeat) {
           //pushSkip(b, 0);
           let newobj = ch._convertToE(bars[b]._clef);
           if (ch._beamCombine) {
@@ -106,7 +106,7 @@ function EConvert(mscore: MScore) {
               newobj._beamCombine = chBeam.follow();
             } else if (chBeam._beamPhase == 1) {
               // beam combining middle
-              var openobj = openBeamCombine[chBeam.id];
+              let openobj = openBeamCombine[chBeam.id];
               openobj._eobjects.push(newobj);
               newobj._beamCombine = openobj.follow(1);
             } else {
@@ -117,7 +117,7 @@ function EConvert(mscore: MScore) {
               newobj._beamCombine = openobj.follow(2);
               openBeamCombine.delete[chBeam.id];
 
-              var upd = 0;
+              let upd = 0;
               for (let e, i = 0; i < openobj._eobjects.length; ++i) {
                 upd += openobj._eobjects[i]._upTailDegree();
               }

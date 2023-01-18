@@ -6,7 +6,7 @@
  *
  *******************************/
 
-class EBeatMark implements EScoreElement {
+class EBeatMark implements ELayoutBudget {
   numerator: number
   denominator: number
 

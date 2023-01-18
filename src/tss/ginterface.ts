@@ -1,10 +1,11 @@
 interface MInterface {
   beat: GTimeSlice
   nths: MBeatSequence
-  _convertToE: (clef?: MClef) => EScoreElement
+  _convertToE: (clef?: MClef) => ELayoutBudget
+  clone: () => MInterface
 };
 
-interface EScoreElement  {
+interface ELayoutBudget  {
   _budget: (ctx: any, track: ETrack, x: number, trkPos?: Array<ETrackPositionInfo>) => EPositionInfo
 };
 
@@ -14,7 +15,7 @@ interface MRepeatElement {
 }
 
 
-interface EConjunctable {
+interface EBeamCombinable {
   _beamCombine: EConjunctBeamInfo
 }
 
@@ -40,9 +41,9 @@ interface GOUAttachable {
   ouattach: GOUAttachment
 }
 
-class MiChordLinkInfo {
-  _start: Array<MLayerBase> //{eobj}
-  _end: MLayerBase
+class MChordLinkInfo {
+  _start: Array<MLayerBase> // Array<EArchCombinable> //{eobj}
+  _end: MLayerBase // EArchCombinable
   _same: boolean
   constructor(m1: MLayerBase, m2: MLayerBase, s: boolean = false) {
     this._start = [m1];
@@ -51,16 +52,20 @@ class MiChordLinkInfo {
   }
 }
 
-class MLayerBase implements MInterface, EConjunctable, GOUAttachable {
+interface EArchCombinable {
+  _linkObject: MChordLinkInfo
+}
+
+class MLayerBase implements MInterface, GOUAttachable {
   // MInterface
   beat: GTimeSlice
   nths: MBeatSequence
-  _convertToE(clef?: MClef): EScoreElement {
+  _convertToE(clef?: MClef): ELayoutBudget {
     return null;
   }
-
-  // EConjunctable
-  _beamCombine: EConjunctBeamInfo
+  clone(): MLayerBase {
+    return null;
+  }
 
   // GOUAttachable
   ouattach: GOUAttachment
@@ -68,10 +73,10 @@ class MLayerBase implements MInterface, EConjunctable, GOUAttachable {
   // ELayerBase
   _eobj: ELayerBase
 
-  _linkObject: MiChordLinkInfo
+  //_linkObject: MiChordLinkInfo
 }
 
-class ELayerBase implements EScoreElement, EConjunctable, GOUAttachable {
+class ELayerBase implements ELayoutBudget, GOUAttachable {
   _mobj: MLayerBase
 
   // EScoreElement
@@ -79,11 +84,10 @@ class ELayerBase implements EScoreElement, EConjunctable, GOUAttachable {
     return null;
   }
 
-  // EConjunctable
-  _beamCombine: EConjunctBeamInfo
-
   // GOUAttachable
   ouattach: GOUAttachment
+
+  epos: EPositionInfo
 }
 
 

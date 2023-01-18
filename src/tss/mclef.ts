@@ -97,7 +97,7 @@ class MClef {
     return mc.type == this.type && mc.tone._equal(this.tone);
   }
 
-  _convertMark(preClef: MClef = null): Array<EScoreElement> {
+  _convertMark(preClef: MClef = null): Array<ELayoutBudget> {
     var ms = [];
 
     if (preClef == null) {

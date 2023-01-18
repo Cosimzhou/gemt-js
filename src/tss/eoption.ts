@@ -84,6 +84,8 @@ class EOption {
   marginTitle : number
   indentHeading : number
 
+  fontFamily: string
+
   barNoShowAtRowHeading : boolean
   /**
    *  heading indent
@@ -111,6 +113,8 @@ class EOption {
       this.marginAhead = 7;
       this.marginTitle = 0;
       this.barNoShowAtRowHeading = true;
+
+      this.fontFamily = "微软雅黑";
       /**
        *  heading indent
        *
@@ -142,6 +146,9 @@ class EOption {
         break;
       case "margin":
         this.margin = value;
+        break;
+      case "fontFamily":
+        this.fontFamily = value;
         break;
       case "marginBlank":
         this.marginBlank = value;

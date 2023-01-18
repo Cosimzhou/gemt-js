@@ -38,27 +38,27 @@ class MBar {
   }
 
   //var g_MBar_feed_NoteID = 0;
-  feed(mtrack: MTrack, ch) {
+  feed(mtrack: MTrack, ch: MLayerBase) {
     var capacity = this._timeBeat.length();
     if (this.beat.add(ch.beat) > capacity) {
       // this bar has no enough space to offer this note,
       // and split the note into pieces to settle.
       if (this.beat.beatlen < capacity) {
-        var lch = ch.clone();
+        let lch = ch.clone();
         this.chords.push(lch);
         lch.beat.follow(this.beat).movTo(-this.beat.sub(capacity));
         ch.beat.follow(lch.beat).subTo(lch.beat);
         lch.nths = this._timeBeat.nths(lch.beat.beatlen);
 
-        ch.linkWith && ch.linkWith(lch, true);
+        if (ch instanceof MChord && lch instanceof MChord) {
+          ch.linkWith(lch, true);
+        }
       }
       this.beat.movTo(capacity);
-      var nb = this.extend(mtrack);
+      let nb = this.extend(mtrack);
       return nb.feed(mtrack, ch);
     } else {
-      if (ch.nths == null || ch.nths.seq == null) {
-        ch.nths = this._timeBeat.nths(ch.beat.beatlen);
-      }
+      ch.nths = this._timeBeat.nths(ch.beat.beatlen);
       this.chords.push(ch);
       ch.beat.follow(this.beat);
       this.beat.addTo(ch.beat);
@@ -195,16 +195,19 @@ class MBar {
 
     function dealBeams(sb, n) {
       if (n == 0) return;
-      let mch = me.chords[sb];
+      let tch = me.chords[sb];
+      let mch: MChord
+      if (tch instanceof MChord) mch = tch; else return;
       let nthlines = [], och = mch;
       mch._beamCombine = new EConjunctBeamInfo(++MBar.g_BarCombineID);
       nthlines.push(Log2(mch.nths.nth) - 3);
       while (n-- > 0) {
-        mch = me.chords[++sb];
+        tch = me.chords[++sb];
+        if (tch instanceof MChord) mch = tch; else console.error("");
         mch._beamCombine = new EConjunctBeamInfo(MBar.g_BarCombineID, (n?1:2));
         nthlines.push(Log2(mch.nths.nth) - 3);
       }
-      var max = Math.max(...nthlines);
+      let max = Math.max(...nthlines);
 
       if (max > 0) {
         // deal with the multi-beam matter

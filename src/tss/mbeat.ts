@@ -63,7 +63,7 @@ class MBeat { //implements MInterface {
     return new MBeatSequence(ns, rseq);
   }
 
-  _convertMark(): EScoreElement {
+  _convertMark(): ELayoutBudget {
     return this.numerator < 100? new EBeatMark(this.numerator, this.denominator): null;
   }
 }

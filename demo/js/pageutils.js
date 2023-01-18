@@ -53,11 +53,11 @@ function ldownload() {
 }
 
 function download(type = 'png') {
-  if (!savePages.has(gct.pageIndex())) {
-    downloadImage(filelist[fileIndex] + "-" + (gct.pageIndex() + 1),
+  if (!savePages.has(gct.pageIndex)) {
+    downloadImage(filelist[fileIndex] + "-" + (gct.pageIndex + 1),
       Container,
       type);
-    savePages.add(gct.pageIndex());
+    savePages.add(gct.pageIndex);
   }
 }
 
@@ -130,13 +130,13 @@ var player;
 
 function showPage() {
   for (var elem of document.querySelectorAll(".pageNum")) {
-    elem.innerText = (gct.pageIndex() + 1) + "/" + gct.pageCount();
+    elem.innerText = (gct.pageIndex + 1) + "/" + gct.pageCount();
   }
 }
 
 function redraw() {
   gct.clear();
-  gct.print(gct.pageIndex());
+  gct.print(gct.pageIndex);
 
   showPage();
 }
@@ -160,29 +160,29 @@ function playRedraw(force) {
 }
 
 function firstPage() {
-  if (gct.pageIndex() > 0) {
-    gct.pageIndex(0);
+  if (gct.pageIndex > 0) {
+    gct.pageIndex = 0;
     redraw();
   }
 }
 
 function prevPage() {
-  if (gct.pageIndex() > 0) {
-    gct.pageIndex(gct.pageIndex() - 1);
+  if (gct.pageIndex > 0) {
+    gct.pageIndex = gct.pageIndex - 1;
     redraw();
   }
 }
 
 function nextPage() {
-  if (gct.pageIndex() < gct.pageCount() - 1) {
-    gct.pageIndex(gct.pageIndex() + 1);
+  if (gct.pageIndex < gct.pageCount() - 1) {
+    gct.pageIndex = gct.pageIndex + 1;
     redraw();
   }
 }
 
 function lastPage() {
-  if (gct.pageIndex() < gct.pageCount() - 1) {
-    gct.pageIndex(gct.pageCount() - 1);
+  if (gct.pageIndex < gct.pageCount() - 1) {
+    gct.pageIndex = gct.pageCount() - 1;
     redraw();
   }
 }

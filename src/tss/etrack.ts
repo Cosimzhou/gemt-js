@@ -11,23 +11,23 @@
 
 class ETrackHeaderMark {
   marksIdx: number
-  headerMarks: Array<EScoreElement>
+  headerMarks: Array<ELayoutBudget>
 
-  constructor(idx:number, marks: Array<EScoreElement>) {
+  constructor(idx: number, marks: Array<ELayoutBudget>) {
     this.marksIdx = idx;
     this.headerMarks = marks;
   }
 }
 
 class ETrack {
-  score: any
+  score: EScore
   x: number
   _y: number
   gap = g_option.gap;
-  marks: Array<EScoreElement>
+  marks: Array<ELayoutBudget>
   clefMarks: Array<ETrackHeaderMark>
   beatMarks: Array<ETrackHeaderMark>
-  constructor(sc) {
+  constructor(sc: EScore) {
     this.score = sc;
     this.x = 0;
     this.gap = g_option.gap;

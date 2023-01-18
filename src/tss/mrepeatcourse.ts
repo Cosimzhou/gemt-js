@@ -73,7 +73,7 @@ class MRepeatCourse {
     End: 2,
   };
 
-  _push(beat, type) {
+  _push(beat: number, type: number) {
     this._timings.push(new MRepeatTiming(beat, type));
   }
 

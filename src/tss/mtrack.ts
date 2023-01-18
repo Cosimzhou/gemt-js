@@ -67,7 +67,7 @@ class MTrack {
     var tensers = [],
       preten, sorbarn = 0;
     tenser.barn = 0;
-    for (var b, bn = 0, i = 0; b = this.bars[i]; ++i, ++bn) {
+    for (let b, bn = 0, i = 0; b = this.bars[i]; ++i, ++bn) {
       if (bn >= 4) {
         if (tenser.conclude()) {
           if (preten && preten.join(tenser)) {
@@ -81,9 +81,9 @@ class MTrack {
         }
       }
 
-      for (var ch, j = 0; ch = b.chords[j]; ++j) {
+      for (let ch, j = 0; ch = b.chords[j]; ++j) {
         if (ch instanceof MChord) {
-          for (var n, k = 0; n = ch.notes[k]; ++k) {
+          for (let n, k = 0; n = ch.notes[k]; ++k) {
             tenser.absorb(n);
           }
         }
@@ -98,7 +98,7 @@ class MTrack {
 
     var bt = tensers[0],
       newtenser = [bt];
-    for (var bt1, i = 1; bt1 = tensers[i]; ++i) {
+    for (let bt1, i = 1; bt1 = tensers[i]; ++i) {
       if (!bt.join(bt1)) {
         if (bt.candidate == null) continue;
         if (bt.candidate && bt.candidate.size == 1) {}
@@ -112,8 +112,7 @@ class MTrack {
     bt._clef = new MClef(bt._clef, new MTone(itone));
     tensers = newtenser;
 
-    for (var ccf = tensers[0]._clef, ncfi = 1, i = 0, b; b = this.bars[i]; ++
-      i) {
+    for (let ccf = tensers[0]._clef, ncfi = 1, i = 0, b; b = this.bars[i]; ++i) {
       if (tensers[ncfi] && i >= tensers[ncfi].barn) {
         ccf = tensers[ncfi++]._clef;
       }
@@ -125,7 +124,7 @@ class MTrack {
     }
   }
 
-  feed(ch): void {
+  feed(ch: MLayerBase): void {
     this._tailBar = this._tailBar.feed(this, ch);
   }
 
@@ -297,6 +296,7 @@ function PushMelody(mtrack, content) {
 }
 
 function DumpMTrack(mtrack, ops) {
+  // TODO():
   var bar = mtrack._tailBar;
   var ret = {
     score: [],

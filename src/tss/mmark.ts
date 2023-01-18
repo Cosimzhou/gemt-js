@@ -16,7 +16,7 @@ class MMark extends MLayerBase {
     this.type = type;
   }
 
-  _convertToE(clef?: MClef): EScoreElement {
+  _convertToE(clef?: MClef): ELayoutBudget {
     var newobj;
     switch (this.kind) {
       case 'barline':

@@ -10,7 +10,7 @@ class GPoint {
 // TODO():
 class AAAA {
   anchorOp: GStroke
-  _eobj: EScoreElement
+  _eobj: ELayoutBudget
 }
 
 class EPositionInfo{
