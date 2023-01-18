@@ -42,16 +42,16 @@ class EScore {
     rowctx._prepareBackgroundForARow(x, y);
     x = rowctx.trkOriginX;
 
-    var EndFlag = false;
+    var EndFlag = false,
+        hasConsective = true;
 
     rowctx._prevRowMark = this._prevRowMark;
 
     {
-      let bakpg = null,
-        me = this;
+      let me = this;
       // arrange the row
       let restTrackNum = me._tracks.length,
-        nextVisualIndex = Array(restTrackNum).fill(0);
+        nextVisualIndex = zarray(restTrackNum);
       let tailBarCompleted = false,
         firstBarInRow = true,
         beginAWholeBar = true,
@@ -98,9 +98,16 @@ class EScore {
             maxWidth = epos.width;
 
             if (x < me.trackLength) {
-              bakpg = noteProgress.concat();
+              rowctx._copyEtracksProgress(noteProgress);
             } else {
               tailBarCompleted = true;
+              hasConsective = false;
+              for (let ti = 0; ti < noteProgress.length; ti++) {
+                if (noteProgress[ti] < me._tracks[ti].marks.length) {
+                  hasConsective = true;
+                  break;
+                }
+              }
             }
 
             rowctx._recordBarSegment(tailBarCompleted);
@@ -156,7 +163,7 @@ class EScore {
             }
             ctx._grid.put(epos.rect);
 
-            if (m._linkObject) {}
+            //if (m._linkObject) {}
           }
           endAWholeBar = false;
         }
@@ -167,14 +174,12 @@ class EScore {
       }
 
       EndFlag = (restTrackNum == 0);
-
-      if (bakpg) {
-        bakpg.forEach(function(elem, idx) { noteProgress[idx] = elem; });
-      }
     }
 
     rowctx._adjustMarginBetweenAdjacentTrack();
-    rowctx._stretchOps(EndFlag);
+    if (rowctx._stretchOps(EndFlag, noteProgress) && !hasConsective) {
+      EndFlag = true;
+    }
 
     rowctx._joinOps();
     rowctx._adjustMarginBetweenAdjacentRow();
@@ -185,7 +190,7 @@ class EScore {
   }
 
   budget(ctx, x: number, y: number): void {
-    var prog = Array(this._tracks.length).fill(0);
+    var prog = zarray(this._tracks.length);
 
     y += g_option.marginTitle;
     x += g_option.indentHeading;
@@ -271,6 +276,7 @@ class EScoreBudgetRowContext {
   _tracksPosInfo: Array<ETrackPositionInfo>
   _legacyMark: EBarline
   _prevRowMark: EBarline
+  _etrackProgressCopy: Array<number>
 
   constructor(escore: EScore, gctx: GContext) {
     this._score = escore;
@@ -292,7 +298,7 @@ class EScoreBudgetRowContext {
 
     score.currentBarIndex = this._currentBarTrialIndex;
 
-    var ctx = this._gctx;
+    let ctx = this._gctx;
     ctx.rowBaselineY.push(ctx._grid.overall.bottom);
     ctx._settle(this.finalOps);
     ctx.beatPositions.push(...this._beatPositions);
@@ -397,12 +403,16 @@ class EScoreBudgetRowContext {
     this.trkOriginX = ox + g_option.marginAhead;
   }
 
+  _copyEtracksProgress(ps: Array<number>): void {
+    this._etrackProgressCopy = ps.concat();
+  }
 
-  _stretchOps(endflag: boolean): void {
+  _stretchOps(endflag: boolean, ps: Array<number>): boolean {
     // Adjust should take out and append to makeplan.
     var score = this._score;
     var ctx = this._gctx;
     var arr = this._postOps;
+    var flag = true;
 
     if (!endflag && this._barSegInfo.length > 1) {
       let barIdx = this._barSegInfo[0].opsIdx == 0 ? 1 : 0;
@@ -412,13 +422,19 @@ class EScoreBudgetRowContext {
       let prevOne = arr[split.opsIdx - 1];
       // TODO: judge cut the last bar or not
 
-      if (1) {
+      // compact or not
+      if (!g_option.compactLayout) {
         // Cut the last bar to the next row
         this._postOps.splice(split.opsIdx);
         this._beatPositions.splice(split.beatIdx);
         ctx._grid.array.splice(split.rectIdx);
 
         this._currentBarTrialIndex--;
+
+        if (this._etrackProgressCopy) {
+          this._etrackProgressCopy.forEach(function(elem, idx) { ps[idx] = elem; });
+        }
+        flag = false;
       }
     }
 
@@ -444,6 +460,8 @@ class EScoreBudgetRowContext {
         bpo.x = (bpo.x - this.trkOriginX) * rate + this.trkOriginX;
       }
     }
+
+    return flag;
   }
 
 

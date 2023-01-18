@@ -86,8 +86,6 @@ function Replayer(midiFile, timeWarp, eventProcessor?: any, bpm?: number) {
       let millisecondToGenerate = (secondsToGenerate * 1000 * timeWarp) || 0;
       temporal.push([midiEvent, millisecondToGenerate]);
       midiEvent = getNextEvent();
-
-      console.log("processNext");
     };
     ///
     if (midiEvent = getNextEvent()) {

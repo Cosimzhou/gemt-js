@@ -87,6 +87,7 @@ class EOption {
   fontFamily: string
 
   barNoShowAtRowHeading : boolean
+  compactLayout: boolean
   /**
    *  heading indent
    *
@@ -112,7 +113,9 @@ class EOption {
       this.marginBlank = 20;
       this.marginAhead = 7;
       this.marginTitle = 0;
+
       this.barNoShowAtRowHeading = true;
+      this.compactLayout = true;
 
       this.fontFamily = "微软雅黑";
       /**
@@ -176,6 +179,9 @@ class EOption {
         break;
       case "barNoShowAtRowHeading":
         this.barNoShowAtRowHeading = value;
+        break;
+      case "compactLayout":
+        this.compactLayout = value;
         break;
       case "openTrack":
         this._openTrack = value;

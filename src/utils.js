@@ -58,6 +58,12 @@ function Log2(n) {
   return n ? CountBits(LargePowerOf2(n) - 1) : -1;
 }
 
+function zarray(num, e = 0) {
+  var arr = [];
+  for (var i = 0; i < num; i++) arr.push(e);
+  return arr;
+}
+
 function gcd(m, n) {
   if (m < n) {
     var t = m;

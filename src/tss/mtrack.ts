@@ -128,11 +128,11 @@ class MTrack {
     this._tailBar = this._tailBar.feed(this, ch);
   }
 
-  currentBeat(): MBeat {
+  get currentBeat(): MBeat {
     return this._tailBar._timeBeat;
   }
 
-  currentBar(): MBar {
+  get currentBar(): MBar {
     return this._tailBar;
   }
 }
@@ -247,8 +247,8 @@ function PushMelody(mtrack, content) {
 
     ch.beat = new GTimeSlice();
     if (timeBeat instanceof Array) {
-      for (var tb of timeBeat) {
-        ch.beat.addTo(mtrack.currentBeat().denominator / tb);
+      for (let tb of timeBeat) {
+        ch.beat.addTo(mtrack.currentBeat.denominator / tb);
       }
       ch.nths = new MBeatSequence(timeBeat);
       // tuplet sound
@@ -257,7 +257,7 @@ function PushMelody(mtrack, content) {
         ch.nths.seq = timeBeat['tuplet'];
       }
     } else if (typeof(timeBeat) == 'number') {
-      ch.beat.movTo(mtrack.currentBeat().denominator / timeBeat);
+      ch.beat.movTo(mtrack.currentBeat.denominator / timeBeat);
     } else {
       console.error();
     }
