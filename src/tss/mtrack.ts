@@ -253,7 +253,8 @@ function PushMelody(mtrack, content) {
       ch.nths = new MBeatSequence(timeBeat);
       // tuplet sound
       if (timeBeat['tuplet']) {
-        ch.beat.movTo(0);
+        // mtrack.currentBar.chords[];
+        ch.beat.movTo(1/3);
         ch.nths.seq = timeBeat['tuplet'];
       }
     } else if (typeof(timeBeat) == 'number') {

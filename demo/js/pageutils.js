@@ -5,6 +5,12 @@
     > Created Time: 四  2/20 23:24:39 2020
  ************************************************************************/
 
+var audioContent =
+  "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjMzLjEwMAAAAAAAAAAAAAAA//NwwAAAAAAAAAAAAEluZm8AAAAPAAAABQAAAsAAaGhoaGhoaGhoaGhoaGhoaGhoaI6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6OtLS0tLS0tLS0tLS0tLS0tLS0tLTa2tra2tra2tra2tra2tra2tra2v//////////////////////////AAAAAExhdmM1OC41OQAAAAAAAAAAAAAAACQEUQAAAAAAAALAB8ADywAAAAAAAAAAAAAAAAD/80DEAAqgAs2fQRgAZOIF9R3XA+rEZ8QVB/iN/B/Jl31v/KAh8u/h/l/D/Wb5Dl3//n+X8//h9W32QEVAaAuYRhFl5OktjkZOYmTrOTCWzQ+FYODDEX7FsKQ/z8gIQN568ckUiW5LNv/zQsQwILIK1MuPeADpWwZ4ctUWto9OTc/fife8/JcFBEbS5tTcr1TLCy9tfFq73uDa2cYfwHf/+d59f////eAtOD90z4nprO61rSFYCknFBjvQBATCAkFWC1X/+FRQWVKmiRABAAgggP/zQMQJFUk+wZWPMAAXE+iyjKK9ZEdCkvXFHmJ6oDHEhzewI1EhRFiJTClEDEiaILjpN9dEm9Mx89qTzcXPovK6tOoTCS6PTnL9p0aLKrren0EkY1n//0O0qgBQ92hTavwgEBAQEBAT//NCxA4X4O6aP8MQABlAJmYCAgJS/1VQICAgICFPmDAQEKNUv/KFAQEp3LA0DQMgqCp2JQVDXkioNA0DT//DuJQaBp9QdgqCoNPWdkeVBXEIKuyoKgrZEQNDhK6CobpMQU1FMy4xMDCq//NAxAoAAANIAAAAAKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqo="
+//var audio = new Audio("../WAVE_SOUND.mp3");
+var audio = new Audio(audioContent);
+audio.controls = true;
+
 function Img(url) {
   this.queue = [];
   this.img = new Image();
@@ -201,6 +207,8 @@ function Stop() {
 }
 
 function Play() {
+  audio.play();
+
   player.resume();
   var hintText;
   if (player.playing()) {
@@ -212,7 +220,7 @@ function Play() {
       gct.cursor = 1;
       playRedraw(true);
     }
-    playIntervalHandle = setInterval(playRedraw, 60000 / 120 / 32);
+    playIntervalHandle = setInterval(playRedraw, 60000 / 120);
     hintText = "暂停";
   } else {
     hintText = "播放";

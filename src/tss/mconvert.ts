@@ -62,7 +62,7 @@ function MConvert(tmidi_convertor) {
     let curBeat = 0;
     let mchord = null;
     let timeSignatures = obj.timeSignature.concat();
-    let keySignatures = obj.keySignature[it] && obj.keySignature[it].concat();
+    let keySignatures = obj.keySignature[0] && obj.keySignature[0].concat();
     let clef = null;
     if (keySignatures != null) {
       let tone = new MTone(0);

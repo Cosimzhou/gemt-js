@@ -6,8 +6,8 @@
  *
  *******************************/
 class MClef {
-  type: number
-  tone: MTone
+  _type: number
+  _tone: MTone
 
   order: number
   o8: number
@@ -18,8 +18,8 @@ class MClef {
   level: number
   line: number
   constructor(n: number, t?: MTone) {
-    this.type = n;
-    this.tone = t;
+    this._type = n;
+    this._tone = t;
     this.load();
   }
 
@@ -44,23 +44,28 @@ class MClef {
     ],
   };
 
+  get tone(): MTone { return this._tone; }
+  set tone(t: MTone) { this._tone = t; this.load() }
+  get type(): number { return this._type; }
+  set type(t: number) { this._type = t; this.load() }
+
   load(): void {
-    var clefData = MClef.Const.clefRange[this.type % 4];
+    var clefData = MClef.Const.clefRange[this._type % 4];
     for (var prop in clefData) this[prop] = clefData[prop];
 
-    let off = this.type >> 4;
-    if (this.type & 8) {
+    let off = this._type >> 4;
+    if (this._type & 8) {
       off = -off;
     }
     this.base += 12 * off;
     this.off = off;
 
-    if (this.tone == null)
+    if (this._tone == null)
       return;
 
-    var order = this.tone.noteOrder(this.base);
+    var order = this._tone.noteOrder(this.base);
     if (order * 2 % 2 == 1) {
-      if (this.tone.flat) {
+      if (this._tone.flat) {
         order -= .5;
         this.base -= 1;
       } else {
@@ -69,14 +74,14 @@ class MClef {
       }
     }
     this.order = order;
-    this.o8 = Math.floor((this.base - this.tone.nTone) / 12);
+    this.o8 = Math.floor((this.base - this._tone.nTone) / 12);
   }
 
   noteLine(n: number): MNoteLineInfo {
-    var order = this.tone.noteOrder(n);
+    var order = this._tone.noteOrder(n);
     var sign = null;
     if (order * 2 % 2 == 1) {
-      if (this.tone.flat) {
+      if (this._tone.flat) {
         order += .5;
         sign = "flat";
       } else {
@@ -84,7 +89,7 @@ class MClef {
         sign = "sharp";
       }
     }
-    var o8 = Math.floor((n - this.tone.nTone) / 12);
+    var o8 = Math.floor((n - this._tone.nTone) / 12);
     var diff = order - this.order + 7 * (o8 - this.o8);
     return new MNoteLineInfo(this.line - diff / 2, sign);
   }
@@ -94,14 +99,14 @@ class MClef {
   }
 
   _equal(mc: MClef): boolean {
-    return mc.type == this.type && mc.tone._equal(this.tone);
+    return mc._type == this._type && mc._tone._equal(this._tone);
   }
 
   _convertMark(preClef: MClef = null): Array<ELayoutBudget> {
     var ms = [];
 
     if (preClef == null) {
-      switch (this.type) {
+      switch (this._type) {
         case 0:
           ms.push(new EMark('g-clef', 3));
           break;
@@ -115,10 +120,10 @@ class MClef {
           ms.push(new EMark('c-clef', 1));
           break;
       }
-      if (this.tone && this.tone.shifts.length) {
-        var sym = this.tone.symbol == '#' ? 'sharp' : 'flat';
-        for (var i = 0; i < this.tone.shifts.length; ++i) {
-          var l = this.line - (this.tone.shifts[i] + 7 - this.level) % 7 / 2;
+      if (this._tone && this._tone.shifts.length) {
+        var sym = this._tone.symbol == '#' ? 'sharp' : 'flat';
+        for (var i = 0; i < this._tone.shifts.length; ++i) {
+          var l = this.line - (this._tone.shifts[i] + 7 - this.level) % 7 / 2;
           if (l >= 3) l -= 3.5;
           if (l <= -1) l += 3.5;
           ms.push(new EMark(sym, l));

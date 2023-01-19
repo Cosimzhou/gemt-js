@@ -43,7 +43,7 @@ class MBar {
     if (this.beat.add(ch.beat) > capacity) {
       // this bar has no enough space to offer this note,
       // and split the note into pieces to settle.
-      if (this.beat.beatlen < capacity) {
+      if (this.beat.beatlen < capacity-1e-10) {
         let lch = ch.clone();
         this.chords.push(lch);
         lch.beat.follow(this.beat).movTo(-this.beat.sub(capacity));

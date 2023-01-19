@@ -30,23 +30,13 @@ class MBeat { //implements MInterface {
     return this.numerator * n / this.denominator;
   }
 
-  //nth(n: number): number { return 4 /  n.beat; }
-
-  //MBeat.prototype.beat(n) {
-  //  if (n == this.denominator) {}
-  //}
-  //
-  //MBeat.prototype.note(n) {
-  //  if (n == this.denominator) {}
-  //}
-
-  nths(beat, limit = null) {
+  nths(beat: number, limit: number = 13) {
     var primes = [1, 3, 5, 6, 7, 9, 11, 13, 15, 17, 19, 21, 23];
     var ns, rseq=1, origin_beat = beat;
     for (var pi = 0, seq; seq = primes[pi]; pi++) {
       ns = [];
       beat = origin_beat * seq;
-      for (var n = 1, i = this.denominator; n < 128; i /= 2, n <<= 1) {
+      for (var n = LargePowerOf2(seq), i = this.denominator; n < 128 && beat > 0; i /= 2, n <<= 1) {
         while (beat >= i) {
           ns.push(n)
           beat -= i;
@@ -73,7 +63,7 @@ class MBeatSequence {
   _nths: Array<number>
   constructor(nths: Array<number> = null, seq: number = 1) {
     this._nths = nths || [1];
-    this.seq = 1;
+    this.seq = seq;
   }
 
   get nth(): number { return this._nths[0]; }

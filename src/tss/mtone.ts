@@ -90,8 +90,8 @@ class MTone {
    * Return:
    *      The order level of the in this tone major.
    *******************************/
-  noteOrder(n: MNote|number): number {
-    var h = MNote.toPitch(n) % 12;
+  noteOrder(n: number): number {
+    var h =n%12;// MNote.toPitch(n) % 12;
     var order = (h + 12 - this.nTone) % 12;
     return (order > 4 ? order + 1 : order) / 2;
   }

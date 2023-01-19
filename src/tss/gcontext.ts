@@ -272,7 +272,7 @@ class GContext {
 
   frameNext(): boolean {
     var ret = false;
-    this._beatCursor += 1 / 32;
+    this._beatCursor += 1;
     while (this.cursor < this.beatPositions.length) {
       var bpo = this.beatPositions[this.cursor];
       if (bpo.beat <= this._beatCursor) {
