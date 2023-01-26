@@ -156,8 +156,9 @@ function playRedraw(force) {
 
 
   // startD
-  if (('function' === typeof gct.isPlaying && !gct.isPlaying()) ||
-    ('function' !== typeof gct.isPlaying && !gct.isPlaying)) {
+  //if (('function' === typeof gct.isPlaying && !gct.isPlaying()) ||
+  //  ('function' !== typeof gct.isPlaying && !gct.isPlaying)) {
+  if (gct.isOver) {
     if (playIntervalHandle)
       clearInterval(playIntervalHandle);
     playIntervalHandle = null;
@@ -168,7 +169,7 @@ function playRedraw(force) {
     gct._beatCursor = beat + startBeat;
   }
 
-  if (!force && !gct.frameRefresh(gct._beatCursor)) {
+  if (!force && !gct.frameRefresh()) {
     return;
   }
 
@@ -233,9 +234,11 @@ function Play() {
     if (gct.cursor == 0) {
       gct.rewind();
       gct.cursor = 1;
+      startBeat = gct._beatCursor;
       playRedraw(true);
     }
-    playIntervalHandle = setInterval(playRedraw, 60000 / 120);
+
+    playIntervalHandle = setInterval(playRedraw, parseInt(60000 / 120 / 8));
     hintText = "暂停";
   } else {
     hintText = "播放";

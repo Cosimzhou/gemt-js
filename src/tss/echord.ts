@@ -28,18 +28,25 @@ class EConjunctBeamInfo {
 }
 
 
-class ENoteTailDirection {
+class ENoteFlagDirection {
   up: boolean
   down: boolean
+}
+
+enum EChordDecorationType {
+  Normal = 0,
+  Arpeggio = 1,
+  Acciaccatura = 2,
+  Appoggatura = 3,
 }
 
 class EChord extends ELayerBase implements EBeamCombinable {
   nthBeat: number
   notes: Array<ENote>
   epos: EPositionInfo
-  force: ENoteTailDirection
+  force: ENoteFlagDirection
 
-  arpeggio: boolean
+  decoration: EChordDecorationType
 
   _beamCombine: EConjunctBeamInfo
 
@@ -52,13 +59,24 @@ class EChord extends ELayerBase implements EBeamCombinable {
     }
   }
 
+  get arpeggio(): boolean {return this.decoration === EChordDecorationType.Arpeggio; }
+  set arpeggio(v: boolean) {
+    if (v) {
+      if (this.decoration !== EChordDecorationType.Arpeggio && this.decoration !== EChordDecorationType.Normal) {
+        console.error("not allow to assign arpeggio to abnormal chord");
+      }
+      this.decoration = EChordDecorationType.Arpeggio;
+    } else if (this.decoration === EChordDecorationType.Arpeggio) {
+      this.decoration = EChordDecorationType.Normal;
+    }
+  }
   _budget(ctx, etrack: ETrack, x: number, trkPos?: Array<ETrackPositionInfo>): EPositionInfo {
     var chordWidth = 0,
       w = 0,
       maxLineOfNote = -100,
       minLineOfNote = 100,
       shiftX = 0;
-    var need_tail = false,
+    var need_Flag = false,
       epos = new EPositionInfo();
     var adjacent_shift = false,
       adjlast_shift = false,
@@ -73,7 +91,7 @@ class EChord extends ELayerBase implements EBeamCombinable {
       var enoteEpos = e._budget(ctx, etrack, x);
       var ew = e.width;
       if (ll + 0.5 == e.line) {
-        enoteEpos.img._attach(noteImg, GStroke.Const.ConstraintX, this.notes[i -
+        enoteEpos.img._attach(noteImg, GStrokeConstraintType.ConstraintX, this.notes[i -
           1].width);
         enoteEpos.width += this.notes[i - 1].width;
         adjlast_shift = adjacent_shift = true;
@@ -89,7 +107,7 @@ class EChord extends ELayerBase implements EBeamCombinable {
       epos.pushOperations(...enoteEpos.operations);
       if (e.line > maxLineOfNote) maxLineOfNote = e.line;
       if (e.line < minLineOfNote) minLineOfNote = e.line;
-      if (e.nth > 1) need_tail = true;
+      if (e.nth > 1) need_Flag = true;
       if (ew > w) w = ew;
 
       if (enoteEpos.width > chordWidth) chordWidth = enoteEpos.width;
@@ -101,31 +119,31 @@ class EChord extends ELayerBase implements EBeamCombinable {
       // overlines
       for (var i = -1; i >= minLineOfNote; --i) {
         epos.pushOperations(ctx._hline(x - 4, etrack.translate(i), w + 8)
-          ._attach(noteImg, GStroke.Const.ConstraintX, -4));
+          ._attach(noteImg, GStrokeConstraintType.ConstraintX, -4));
       }
       // underlines
       for (var i = 5; i <= maxLineOfNote; ++i) {
         epos.pushOperations(ctx._hline(x - 4, etrack.translate(i), w + 8)
-          ._attach(noteImg, GStroke.Const.ConstraintX, -4));
+          ._attach(noteImg, GStrokeConstraintType.ConstraintX, -4));
       }
     }
 
     this.epos = epos;
-    // is tadpo tail upwards
+    // is tadpo flag upwards
     var isUp = this.force ? this.force.up : (maxLineOfNote > 4 - minLineOfNote);
-    if (need_tail) {
-      var leverX = x,
-        leverEndY, y, leverNoteY, leverMinY, h;
+    if (need_Flag) {
+      var stemX = x,
+        stemEndY, y, stemNoteY, stemMinY, h;
       var maxYOfNote = etrack.translate(maxLineOfNote),
         minYOfNote = etrack.translate(minLineOfNote);
-      var maxYOfLever = maxYOfNote + 3 * etrack.gap,
-        minYOfLever = minYOfNote - 3 * etrack.gap;
+      var maxYOfStem = maxYOfNote + 3 * etrack.gap,
+        minYOfStem = minYOfNote - 3 * etrack.gap;
       var midYOfTrack = etrack.translate(2),
         opl;
       if (isUp) {
-        leverX -= 0.6;
+        stemX -= 0.6;
         //if (adjacent_shift) {
-        //    //leverX += w;
+        //    //stemX += w;
         //    for (var adjnote of adjnote_heads) {
         //        adjnote.pos.img.detach(1)._attach(noteImg, -w);//adjnote.pos.img.width());
         //    }
@@ -133,34 +151,34 @@ class EChord extends ELayerBase implements EBeamCombinable {
         //        ctx.shift(rnote.pos.ops, w, 0);
         //    }
         //}
-        leverX += w;
-        leverMinY = y = midYOfTrack > minYOfLever ? minYOfLever : midYOfTrack;
-        leverNoteY = maxYOfNote - 0.5, leverEndY = y;
+        stemX += w;
+        stemMinY = y = midYOfTrack > minYOfStem ? minYOfStem : midYOfTrack;
+        stemNoteY = maxYOfNote - 0.5, stemEndY = y;
         h = maxYOfNote - y;
       } else {
-        leverX += 0.6;
+        stemX += 0.6;
         if (adjacent_shift) {
-          //leverX += w;
+          //stemX += w;
           for (var adjnote of adjnote_heads) {
-            adjnote.img.detach(1)._attach(noteImg, GStroke.Const.ConstraintX, -
+            adjnote.img.detach(1)._attach(noteImg, GStrokeConstraintType.ConstraintX, -
               w);
           }
           for (var rnote of note_heads) {
             ctx.shift(rnote.operations, w, 0);
           }
         }
-        y = midYOfTrack < maxYOfLever ? maxYOfLever : midYOfTrack;
-        leverNoteY = leverMinY = minYOfNote + 0.5, leverEndY = y;
+        y = midYOfTrack < maxYOfStem ? maxYOfStem : midYOfTrack;
+        stemNoteY = stemMinY = minYOfNote + 0.5, stemEndY = y;
         h = y - minYOfNote;
         // fix
       }
       epos.maxYOfNote = maxYOfNote;
       epos.minYOfNote = minYOfNote;
 
-      // draw lever
-      epos.rect.union(new GRect(w, h, x, leverMinY));
-      epos.pushOperations(opl = ctx._Vline(leverX, leverNoteY, leverEndY));
-      opl._attach(noteImg, GStroke.Const.ConstraintX, leverX - x);
+      // draw stem
+      epos.rect.union(new GRect(w, h, x, stemMinY));
+      epos.pushOperations(opl = ctx._Vline(stemX, stemNoteY, stemEndY));
+      opl._attach(noteImg, GStrokeConstraintType.ConstraintX, stemX - x);
 
       if (this.nthBeat > 4) {
         if (this._beamCombine) { // draw beam
@@ -245,24 +263,24 @@ class EChord extends ELayerBase implements EBeamCombinable {
             // draw base beam of the combined chords
             var baseBeam = ctx._lineWh(0, sy, 0, ey, 3);
             baseBeam._attach(originCombo.epos._end.anchorOp,
-              GStroke.Const.ConstraintX)._attach(opl, GStroke.Const
+              GStrokeConstraintType.ConstraintX)._attach(opl, GStrokeConstraintType
               .ConstraintX2);
             epos.pushOperations(baseBeam);
-            epos.rects.push(new GRect(10, 10)._budget(x, leverMinY + (
+            epos.rects.push(new GRect(10, 10)._budget(x, stemMinY + (
               isUp ? 0 : h)));
 
             if (originCombo._eobjects[1]._mobj.nths.seq > 2) {
               var num = originCombo._eobjects[1]._mobj.nths.seq;
               epos.pushOperations(ctx._draw("num-" + num, 0, (sy + ey) / 2 + (
-                isUp ? -15 : 6), 8, 12)._attach(baseBeam, GStroke.Const
+                isUp ? -15 : 6), 8, 12)._attach(baseBeam, GStrokeConstraintType
                 .ConstraintXCenter));
             }
 
-            // _linkObject levers middle note of to beam
+            // _linkObject stems middle note of to beam
             for (var i = 1; i < eoArr.length - 1; ++i) {
-              var lever = eoArr[i]._beamCombine._opl;
-              var lambda = (lever.x - sx) / dx;
-              lever.args[0] = (1 - lambda) * sy + lambda * ey;
+              var stem = eoArr[i]._beamCombine._opl;
+              var lambda = (stem.x - sx) / dx;
+              stem.args[0] = (1 - lambda) * sy + lambda * ey;
             }
 
             if (originCombo._subBeamLayout) {
@@ -279,22 +297,22 @@ class EChord extends ELayerBase implements EBeamCombinable {
                       lvr2 = eoArr[bms[cn] - 1]._beamCombine._opl;
                       line2.x = (lvr1.x + lvr2.x) / 2;
 
-                      line2._attach(lvr1, GStroke.Const.ConstraintX2).
-                      _attach(baseBeam, GStroke.Const.ConstraintParallelHorizon,
+                      line2._attach(lvr1, GStrokeConstraintType.ConstraintX2).
+                      _attach(baseBeam, GStrokeConstraintType.ConstraintParallelHorizon,
                         offy);
                     } else {
                       lvr2 = eoArr[bms[cn] + 1]._beamCombine._opl;
                       line2.args[0] = (lvr1.x + lvr2.x) / 2;
 
-                      line2._attach(lvr1, GStroke.Const.ConstraintX).
-                      _attach(baseBeam, GStroke.Const.ConstraintParallelHorizon,
+                      line2._attach(lvr1, GStrokeConstraintType.ConstraintX).
+                      _attach(baseBeam, GStrokeConstraintType.ConstraintParallelHorizon,
                         offy);
                     }
                   } else {
-                    // set the beam two ends upon the anchor lever
-                    line2._attach(lvr1, GStroke.Const.ConstraintX).
-                    _attach(lvr2, GStroke.Const.ConstraintX2).
-                    _attach(baseBeam, GStroke.Const.ConstraintParallelHorizon,
+                    // set the beam two ends upon the anchor stem
+                    line2._attach(lvr1, GStrokeConstraintType.ConstraintX).
+                    _attach(lvr2, GStrokeConstraintType.ConstraintX2).
+                    _attach(baseBeam, GStrokeConstraintType.ConstraintParallelHorizon,
                       offy);
                   }
                   epos.pushOperations(line2);
@@ -307,16 +325,16 @@ class EChord extends ELayerBase implements EBeamCombinable {
               anchorOp: opl
             };
           }
-        } else { // draw tail
-          var tail;
+        } else { // draw flag
+          var flag;
           if (isUp) {
-            tail = ctx._draw("tailu-" + this.nthBeat, leverX, y);
+            flag = ctx._draw("flagu-" + this.nthBeat, stemX, y);
             chordWidth += 5;
           } else {
-            tail = ctx._draw("taild-" + this.nthBeat, leverX, y);
+            flag = ctx._draw("flagd-" + this.nthBeat, stemX, y);
           }
-          tail._attach(opl, GStroke.Const.ConstraintX);
-          epos.pushOperations(tail);
+          flag._attach(opl, GStrokeConstraintType.ConstraintX);
+          epos.pushOperations(flag);
         }
       }
     }
@@ -337,8 +355,8 @@ class EChord extends ELayerBase implements EBeamCombinable {
         for (let oum of overmarks) {
           l0y -= 4;
           epos.pushOperations(omk = ctx._draw(oum, 0, l0y)
-            ._attach(noteImg, GStroke.Const.ConstraintXCenter)
-            ._attach(pmk, GStroke.Const.ConstraintTopOn, l0y));
+            ._attach(noteImg, GStrokeConstraintType.ConstraintXCenter)
+            ._attach(pmk, GStrokeConstraintType.ConstraintTopOn, l0y));
           pmk = omk;
           l0y = 0;
         }
@@ -353,7 +371,7 @@ class EChord extends ELayerBase implements EBeamCombinable {
           for (let oum of oumark) {
             l0y -= 16;
             epos.pushOperations(ctx._draw(oum, 0, l0y)
-              ._attach(noteImg, GStroke.Const.ConstraintXCenter));
+              ._attach(noteImg, GStrokeConstraintType.ConstraintXCenter));
           }
         } else {
           var l4y = etrack.translate(0);
@@ -362,7 +380,7 @@ class EChord extends ELayerBase implements EBeamCombinable {
           for (let oum of oumark) {
             l0y += 16;
             epos.pushOperations(ctx._draw(oum, 0, l4y)
-              ._attach(noteImg, GStroke.Const.ConstraintXCenter));
+              ._attach(noteImg, GStrokeConstraintType.ConstraintXCenter));
           }
         }
       }
@@ -388,7 +406,7 @@ class EChord extends ELayerBase implements EBeamCombinable {
     return epos;
   }
 
-  _upTailDegree(): number {
+  _upFlagDegree(): number {
     var Mdf = -100,
       mdf = 100;
     for (var e, i = 0; e = this.notes[i]; i++) {
@@ -416,11 +434,11 @@ function LinkTies(main, ctx: GContext, trackLength: number, isUp: boolean): Arra
 
       if (isUp) {
         curve = ctx._curve(dummyTadpo.x, dummyTadpo.y + 8, tadpo1.x, tadpo1.y +
-          8, 2)._attach(tadpo1, GStroke.Const.ConstraintX2);
+          8, 2)._attach(tadpo1, GStrokeConstraintType.ConstraintX2);
       } else {
         curve = ctx._curve(tadpo1.x, tadpo1.y - 6, dummyTadpo.x, dummyTadpo.y -
           6, 2).
-        _attach(tadpo1, GStroke.Const.ConstraintX);
+        _attach(tadpo1, GStrokeConstraintType.ConstraintX);
       }
       epos.push(curve);
 
@@ -429,21 +447,21 @@ function LinkTies(main, ctx: GContext, trackLength: number, isUp: boolean): Arra
       dummyTadpo.y = epos2.rowOriginPoint.y + tadpo1.y - epos1.rowOriginPoint.y;
       if (isUp) {
         curve = ctx._curve(tadpo2.x, tadpo2.y + 8, dummyTadpo.x, dummyTadpo.y +
-          8, 2)._attach(tadpo2, GStroke.Const.ConstraintX);
+          8, 2)._attach(tadpo2, GStrokeConstraintType.ConstraintX);
       } else {
         curve = ctx._curve(dummyTadpo.x, dummyTadpo.y - 6, tadpo2.x, tadpo2.y -
-          6, 2)._attach(tadpo2, GStroke.Const.ConstraintX2);
+          6, 2)._attach(tadpo2, GStrokeConstraintType.ConstraintX2);
       }
       epos.push(curve);
     } else {
       if (isUp) {
         curve = ctx._curve(tadpo2.x, tadpo2.y + 8, tadpo1.x, tadpo1.y + 8, 2)
-          ._attach(tadpo1, GStroke.Const.ConstraintX2)
-          ._attach(tadpo2, GStroke.Const.ConstraintX);
+          ._attach(tadpo1, GStrokeConstraintType.ConstraintX2)
+          ._attach(tadpo2, GStrokeConstraintType.ConstraintX);
       } else {
         curve = ctx._curve(tadpo1.x, tadpo1.y - 6, tadpo2.x, tadpo2.y - 6, 2)
-          ._attach(tadpo1, GStroke.Const.ConstraintX)
-          ._attach(tadpo2, GStroke.Const.ConstraintX2);
+          ._attach(tadpo1, GStrokeConstraintType.ConstraintX)
+          ._attach(tadpo2, GStrokeConstraintType.ConstraintX2);
       }
       epos.push(curve);
     }

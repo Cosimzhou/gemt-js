@@ -232,3 +232,204 @@ Glossary
 | oct | ottava | 写在音符上方表示奏高八度 | 简记为“8va”或“8”|
 | position |  | 把位 | |
 | fingering |  | 指法| |
+
+
+
+ELEMENTS OF PITCH
+pitch 音
+
+note 音符
+
+small c 小字组c
+
+c one 小字一组c
+
+great c 大字组c
+
+contra c 大字一组c
+
+octave 八度
+
+octave register 音组
+
+notation 记谱法
+
+staff/stave 乐谱
+
+ledger line 上/下加线
+
+clef 谱号
+
+treble clef 高音谱号
+
+bass clef 低音谱号
+
+alto clef 中音谱号
+
+tenor clef 次中音谱号
+
+grand clef 大谱表
+
+brace 大括弧
+
+scale 音阶
+
+half step 半音
+
+whole step 全音
+
+scale degree number 简谱音名
+
+accidental 变音记号
+
+double sharp 重升记号
+
+sharp 升号
+
+natural 还原记号
+
+flat 降号
+
+double flat 重降记号
+
+key 调式主音
+
+key signature 调号
+
+enharmonic 等音的
+
+transposition 异主音调
+
+transpose 转调
+
+circle of fifths 五度循环圈
+
+relatives 关系大小调
+
+parallels 同主音平行大小调
+
+interval 音程
+
+harmonic interval 和声音程
+
+melodic interval 旋律音程
+
+numerical name 度数
+
+unison 同度
+
+compound interval 复音程
+
+simple interval 单音程
+
+4th 四度音程
+
+perfect 纯音程
+
+P4 纯四度音程
+
+inversion 转位
+
+augmented interval 增音程
+
+diminished interval 减音程
+
+ELEMENTS OF RHYTHM
+duration 时值
+
+breve 二全音符
+
+whole 全音符
+
+half 二分音符
+
+quarter 四分音符
+
+eighth 八分音符
+
+sixteenth 十六分音符
+
+thirty-second 三十二分音符
+
+tie 连线
+
+dot 附点
+
+beat 节拍/律动
+
+tempo 速度
+
+metronome 节拍器
+
+meter 一小节内的拍数
+
+bar/measure 小节
+
+duple 两拍一小节
+
+triple 三拍一小节
+
+quadruple 四拍一小节
+
+strong 强拍
+
+weak 弱拍
+
+less strong 次强拍
+
+time signature 拍号
+
+simple beat 单拍子
+
+compound beat 复拍子
+
+beat note 单拍子中的单位拍音符（拍号中横线下面的“以XX音符为一拍”的音符）/复拍子中时值较大的单位拍音符（基本律动）
+
+division of beat 单拍子中单位拍音符的分拍/复拍子中的单位拍音符*
+
+*这里需要强调的是国内的主流乐理理论在单拍子与复拍子的定义与国际学界有明显区别，而且笔者认为这个关乎这个定义的争论没什么必要（因为在音乐实践中甚少用到）。simple beat的定义是每一个基本律动拍（beat note）如果可以均分成两部分，compound beat则是可均分成三部分。如2/4拍就是simple duple，3/8拍和3/4拍都是simple triple，4/4拍也是simple quardruple.
+
+根据国际学界对6/8的定义它可以被先看做一个大的2/4拍，因此它的基本律动拍（beat note）是一个附点四分音符，可以均分成三个八分音符（division of the beat），所以是compound duple,6/4拍也是compound duple；9/8拍就是compound triple，12/4拍就是compound quardruple.
+
+beam 符杠
+
+stem 符杆
+
+grouplet 等分音（X连音）
+
+staff: 五线谱
+
+time signature: 拍号
+clef: 谱号
+key signature: 调号
+key: 调
+tempo: 速度
+metronome: 节拍器
+
+note: 音符
+rest: 休止符
+note head: 符头
+flag: 符尾
+beam: 符杠
+stem: 符干
+dot: 点，附点
+dotted note: 附点音符
+duration: 时值
+interval: 音程
+pitch: 音高
+
+measure: 小节
+accent: 重音
+tenuto: 连音，持续音
+grace note: 花音，装饰音
+acciaccatura: 短倚音
+appoggatura: 长倚音
+tuplet: 修拍，N连音
+triplet: 三连音
+slur: 圆滑连线
+tie: 延音线，连音线
+fermata: 延长记号，停留记号
+arpeggio: 琶音
+natural: 还原记号，自然音
+accidental: 临时变化音记号
+

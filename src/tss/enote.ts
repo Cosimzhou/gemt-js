@@ -53,13 +53,13 @@ class ENote implements ELayoutBudget {
       y = oy + ((this.line * 2) % 2 == 0 ? 4 : 0);
       var dot;
       epos.pushOperations(dot = ctx._dot(x + w + 3, y, 1));
-      dot._attach(noteImg, GStroke.Const.ConstraintX, w + 3);
+      dot._attach(noteImg, GStrokeConstraintType.ConstraintX, w + 3);
       epos.width += 4;
       epos.rect.width += 4;
       if (this.ffloat) {
         // draw double float point
         epos.pushOperations(dot = ctx._dot(x + w + 7, y, 1));
-        dot._attach(noteImg, GStroke.Const.ConstraintX, w + 7);
+        dot._attach(noteImg, GStrokeConstraintType.ConstraintX, w + 7);
         epos.width += 5;
         epos.rect.width += 5;
       }

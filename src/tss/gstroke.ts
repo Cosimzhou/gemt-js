@@ -31,6 +31,15 @@ class GStrokeFix {
   push(c: GStrokeConstraint): void { this._constraints.push(c);}
 }
 
+  enum GStrokeConstraintType {
+    ConstraintX = 1,
+    ConstraintX2 = 2,
+    ConstraintParallelHorizon = 4,
+    ConstraintY = 64,
+    ConstraintY2 = 8,
+    ConstraintXCenter = 16,
+    ConstraintTopOn = 32,
+  };
 class GStroke {
   kind: string
   x: number
@@ -49,15 +58,6 @@ class GStroke {
     this.args = ops;
   }
 
-  static Const = {
-    ConstraintX: 1,
-    ConstraintX2: 2,
-    ConstraintParallelHorizon: 4,
-    ConstraintY: 64,
-    ConstraintY2: 8,
-    ConstraintXCenter: 16,
-    ConstraintTopOn: 32,
-  };
 
   symbol = function() {
     var sym = {
@@ -127,18 +127,18 @@ class GStroke {
     }
 
     for (var con, i = 0; con = this.fix._constraints[i]; i++) {
-      // GStroke.Const.ConstraintX
-      if (con._flags & GStroke.Const.ConstraintX) {
+      // GStrokeConstraint.ConstraintX
+      if (con._flags & GStrokeConstraintType.ConstraintX) {
         this.x = con._offset + con.obj.x;
       }
 
-      // GStroke.Const.ConstraintX2
-      if (con._flags & GStroke.Const.ConstraintX2) {
+      // GStrokeConstraint.ConstraintX2
+      if (con._flags & GStrokeConstraintType.ConstraintX2) {
         this.args[0] = con._offset + con.obj.x;
       }
 
-      // GStroke.Const.ConstraintParallelHorizon
-      if (con._flags & GStroke.Const.ConstraintParallelHorizon) {
+      // GStrokeConstraint.ConstraintParallelHorizon
+      if (con._flags & GStrokeConstraintType.ConstraintParallelHorizon) {
         // assert this.kind == 'lineH' and con.obj.kind == 'lineH'
         // special treat for parallel horizontal lines
         var ow = con.obj.args[0] - con.obj.x,
@@ -151,19 +151,19 @@ class GStroke {
         this.args[1] = k * this.args[0] + b;
       }
 
-      // GStroke.Const.ConstraintY
-      if (con._flags & GStroke.Const.ConstraintY) {
+      // GStrokeConstraint.ConstraintY
+      if (con._flags & GStrokeConstraintType.ConstraintY) {
         this.y = con._offset + con.obj.y;
       }
 
-      // GStroke.Const.ConstraintY2
-      if (con._flags & GStroke.Const.ConstraintY2) {
+      // GStrokeConstraint.ConstraintY2
+      if (con._flags & GStrokeConstraintType.ConstraintY2) {
         // assert this.kind == 'Vline'
         this.args[0] = con._offset + con.obj.y;
       }
 
-      // GStroke.Const.ConstraintXCenter
-      if (con._flags & GStroke.Const.ConstraintXCenter) {
+      // GStrokeConstraint.ConstraintXCenter
+      if (con._flags & GStrokeConstraintType.ConstraintXCenter) {
         // assert this.kind == 'lineWh'
         var width = con.obj.args[0] || 0;
         if (con.obj.kind == 'lineH') {
@@ -180,8 +180,8 @@ class GStroke {
         }
       }
 
-      // GStroke.Const.ConstraintTopOn
-      if (con._flags & GStroke.Const.ConstraintTopOn) {
+      // GStrokeConstraint.ConstraintTopOn
+      if (con._flags & GStrokeConstraintType.ConstraintTopOn) {
         // assert this.kind == 'draw'
         var h = 6; //this.args[1];
         this.y = con._offset - h;

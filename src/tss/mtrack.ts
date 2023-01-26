@@ -276,6 +276,11 @@ function PushMelody(mtrack, content) {
     if (elem instanceof Array) {
       var ch = pushNote(elem[0], elem[1], elem['linkPrev']);
       ch.ouattach = GOUAttachment.make(elem['oum'], elem['overmarks'], elem['undermarks']);
+      if (elem['acciaccatura']) {
+        if (ch instanceof MChord) {
+        //ch.decoration = EChordDecorationType.Acciaccatura;
+        }
+      }
     } else if (elem instanceof Object) {
       var m = new MMark(elem.kind, elem.type);
       m.lf = elem.opt;

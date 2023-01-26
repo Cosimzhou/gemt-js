@@ -270,6 +270,14 @@ class GContext {
     return this.cursor > 0 && (this.cursor <= this.beatPositions.length);
   }
 
+  get isOver(): boolean {
+    var bp = this.beatPositions[this.beatPositions.length - 1];
+    if (bp != null) {
+      return this._beatCursor >= bp.beat;
+    }
+    return false;
+  }
+
   frameNext(): boolean {
     var ret = false;
     this._beatCursor += 1;
@@ -286,20 +294,20 @@ class GContext {
     return ret;
   }
 
-  frameRefresh(beat: number): boolean {
-    this._beatCursor += beat;
+  frameRefresh(beat?: number): boolean {
+    if (beat != null) this._beatCursor = beat;
     var l = 0, h = this.beatPositions.length;
     var cursor = 0;
     while (l < h - 1) {
       let m = (l + h) >> 1;
       let bpo = this.beatPositions[m];
-      if (bpo.beat > this._beatCursor) {
-        h = m;
-      } else if (bpo.beat == this._beatCursor) {
+      if (bpo.beat < this._beatCursor) {
+        l = m;
+      } else if (bpo.beat === this._beatCursor) {
         l = m;
         break;
       } else {
-        l = m + 1;
+        h = m;
       }
     }
 
@@ -347,8 +355,8 @@ const gEID = {
     "note2": { id: "note_2th", ay: 3.78, w: 9.01, h: 7.56 },
     "fullnote": { id: "note_full", ax: 0.8, ay: 4, w: 12.6, h: 8.1 },
 
-    "notetail-d": { id: "note_tail-down", ay: 20, w: 8, h: 20.8 },
-    "notetail": { id: "note_tail-up", ay: 0.5, w: 8, h: 20.8 },
+    "noteflag-d": { id: "note_flag-down", ay: 20, w: 8, h: 20.8 },
+    "noteflag": { id: "note_flag-up", ay: 0.5, w: 8, h: 20.8 },
 
     "fermata": { id: "fermata", ax: 0.8, ay: 5, w: 17, h: 12 },
 
@@ -631,14 +639,14 @@ if (1) {
         use.setAttribute("transform", "translate(" + op.x + "," + op.y + ")");
         ctx.appendChild(use);
         break;
-      case 'taild':
-        for (let y = op.y, img = gEID["notetail-d"], nth = parseInt(arr[
+      case 'flagd':
+        for (let y = op.y, img = gEID["noteflag-d"], nth = parseInt(arr[
             1]); nth > 4; nth >>= 1, y -= 3.5) {
           drawIcon(ctx, img, op.x, y);
         }
         break;
-      case 'tailu':
-        for (let y = op.y, img = gEID["notetail"], nth = parseInt(arr[
+      case 'flagu':
+        for (let y = op.y, img = gEID["noteflag"], nth = parseInt(arr[
             1]); nth > 4; nth >>= 1, y += 3.5) {
           drawIcon(ctx, img, op.x, y);
         }

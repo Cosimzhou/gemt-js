@@ -111,7 +111,7 @@ function EConvert(mscore: MScore) {
               newobj._beamCombine = openobj.follow(1);
             } else {
               // beam combining end
-              // uniform the tail direction
+              // uniform the flag direction
               let openobj = openBeamCombine[chBeam.id];
               openobj._eobjects.push(newobj);
               newobj._beamCombine = openobj.follow(2);
@@ -119,7 +119,7 @@ function EConvert(mscore: MScore) {
 
               let upd = 0;
               for (let e, i = 0; i < openobj._eobjects.length; ++i) {
-                upd += openobj._eobjects[i]._upTailDegree();
+                upd += openobj._eobjects[i]._upFlagDegree();
               }
 
               for (let i = 0, up = upd > 0; i < openobj._eobjects.length; ++i) {

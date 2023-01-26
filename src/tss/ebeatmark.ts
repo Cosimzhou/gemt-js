@@ -25,7 +25,7 @@ class EBeatMark implements ELayoutBudget {
       preImg, img;
     while (num) {
       img = ctx._draw("num-" + (num % 10), 0, y);
-      if (preImg) preImg._attach(img, GStroke.Const.ConstraintX, 6);
+      if (preImg) preImg._attach(img, GStrokeConstraintType.ConstraintX, 6);
       arr.push(preImg = img);
       num = Math.floor(num / 10.0);
     }
@@ -37,7 +37,7 @@ class EBeatMark implements ELayoutBudget {
     preImg = null;
     while (num) {
       img = ctx._draw("num-" + (num % 10), 0, ym);
-      if (preImg) preImg._attach(img, GStroke.Const.ConstraintX, 6);
+      if (preImg) preImg._attach(img, GStrokeConstraintType.ConstraintX, 6);
       arr.push(preImg = img);
       num = Math.floor(num / 10.0);
     }

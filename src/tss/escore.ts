@@ -384,9 +384,9 @@ class EScoreBudgetRowContext {
     if (!g_option._openTrack) {
       // Draw the vertical closed line in the two ends of the row.
       this._preOps.push(ctx._Vline(x, oy, y)._attach(
-        lastTrackInfo.bl, GStroke.Const.ConstraintY2));
+        lastTrackInfo.bl, GStrokeConstraintType.ConstraintY2));
       this._preOps.push(ctx._Vline(x + score.trackLength, oy, y)
-        ._attach(lastTrackInfo.bl, GStroke.Const.ConstraintY2));
+        ._attach(lastTrackInfo.bl, GStrokeConstraintType.ConstraintY2));
     }
 
     // draw bracket of _tracks

@@ -10,7 +10,7 @@ class MClef {
   _tone: MTone
 
   order: number
-  o8: number
+  octave: number
   high: number
   low: number
   base: number
@@ -74,7 +74,7 @@ class MClef {
       }
     }
     this.order = order;
-    this.o8 = Math.floor((this.base - this._tone.nTone) / 12);
+    this.octave = Math.floor((this.base - this._tone.nTone) / 12);
   }
 
   noteLine(n: number): MNoteLineInfo {
@@ -90,7 +90,7 @@ class MClef {
       }
     }
     var o8 = Math.floor((n - this._tone.nTone) / 12);
-    var diff = order - this.order + 7 * (o8 - this.o8);
+    var diff = order - this.order + 7 * (o8 - this.octave);
     return new MNoteLineInfo(this.line - diff / 2, sign);
   }
 
