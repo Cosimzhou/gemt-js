@@ -51,7 +51,7 @@ class MClef {
 
   load(): void {
     var clefData = MClef.Const.clefRange[this._type % 4];
-    for (var prop in clefData) this[prop] = clefData[prop];
+    for (let prop in clefData) this[prop] = clefData[prop];
 
     let off = this._type >> 4;
     if (this._type & 8) {
@@ -121,9 +121,9 @@ class MClef {
           break;
       }
       if (this._tone && this._tone.shifts.length) {
-        var sym = this._tone.symbol == '#' ? 'sharp' : 'flat';
-        for (var i = 0; i < this._tone.shifts.length; ++i) {
-          var l = this.line - (this._tone.shifts[i] + 7 - this.level) % 7 / 2;
+        let sym = this._tone.symbol == '#' ? 'sharp' : 'flat';
+        for (let i = 0; i < this._tone.shifts.length; ++i) {
+          let l = this.line - (this._tone.shifts[i] + 7 - this.level) % 7 / 2;
           if (l >= 3) l -= 3.5;
           if (l <= -1) l += 3.5;
           ms.push(new EMark(sym, l));
@@ -137,7 +137,7 @@ class MClef {
   countExtraLine(mchord: MChord): number {
     var overline = 0,
       underline = 0;
-    for (var n of mchord.notes) {
+    for (let n of mchord.notes) {
       if (n.pitch > this.high) {
         overline += Math.floor(-this.noteLine(n.pitch).line);
       } else if (n.pitch < this.low) {

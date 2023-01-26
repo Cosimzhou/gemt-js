@@ -285,6 +285,32 @@ class GContext {
 
     return ret;
   }
+
+  frameRefresh(beat: number): boolean {
+    this._beatCursor += beat;
+    var l = 0, h = this.beatPositions.length;
+    var cursor = 0;
+    while (l < h - 1) {
+      let m = (l + h) >> 1;
+      let bpo = this.beatPositions[m];
+      if (bpo.beat > this._beatCursor) {
+        h = m;
+      } else if (bpo.beat == this._beatCursor) {
+        l = m;
+        break;
+      } else {
+        l = m + 1;
+      }
+    }
+
+    if (l != this.cursor) {
+      this.cursor = l;
+      return true;
+    }
+
+    return false;
+  }
+
   rewind(): void {
     this._beatCursor = 0;
   }

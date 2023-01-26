@@ -143,13 +143,12 @@ function EConvert(mscore: MScore) {
     }
 
     { // add bar line
-      var trk0Marks = score._tracks[0].marks;
+      let marks = score._tracks[0].marks;
       if (bars[0] && bars[0]._timeBeat._unlimited()) {
-        trk0Marks.push(new EBarline(6));
+        marks.push(new EBarline(6));
       } else {
-        if (trk0Marks.length == 0 || !(trk0Marks[trk0Marks.length -
-            1] instanceof EBarline))
-          trk0Marks.push(new EBarline(0));
+        if (marks.length == 0 || !(marks[marks.length - 1] instanceof EBarline))
+          marks.push(new EBarline(0));
       }
     }
   }

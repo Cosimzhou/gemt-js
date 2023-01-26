@@ -133,6 +133,7 @@ function makeCatalog(array, func) {
 
 var gct, ctx;
 var player;
+var startTime, startBeat;
 
 function showPage() {
   for (var elem of document.querySelectorAll(".pageNum")) {
@@ -148,15 +149,27 @@ function redraw() {
 }
 
 function playRedraw(force) {
-  if (!force && !gct.frameNext()) {
-    return;
-  }
+  //if (!force && !gct.frameNext()) {
+  //  return;
+  //}
 
+
+
+  // startD
   if (('function' === typeof gct.isPlaying && !gct.isPlaying()) ||
     ('function' !== typeof gct.isPlaying && !gct.isPlaying)) {
     if (playIntervalHandle)
       clearInterval(playIntervalHandle);
     playIntervalHandle = null;
+  } else {
+    var now = Date.now();
+    var duration = now - startTime;
+    var beat = duration / (60000 / 120);
+    gct._beatCursor = beat + startBeat;
+  }
+
+  if (!force && !gct.frameRefresh(gct._beatCursor)) {
+    return;
   }
 
   gct.clear();
@@ -209,6 +222,8 @@ function Stop() {
 function Play() {
   audio.play();
 
+  startTime = Date.now();
+  startBeat = gct._beatCursor;
   player.resume();
   var hintText;
   if (player.playing()) {
