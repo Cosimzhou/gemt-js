@@ -100,7 +100,8 @@ function MIDIDemoInit() {
 
         showPage();
 
-        player = new TPlayer(midi, MIDI.Player);
+        player.player = new TPlayer(midi, MIDI.Player);
+        player.context = gct;
         console.log(midi.tracks)
       } else {
         onerror && onerror('Unable to load MIDI file');
@@ -154,7 +155,7 @@ function ManualDemoInit(width, height, svg) {
     ctx.scale(2, 2);
   }
 
-  gct = new GContext(ctx, width, height);
+  player.context = gct = new GContext(ctx, width, height);
 }
 
 function ManualDemoShow() {
@@ -170,7 +171,7 @@ function ManualDemoShow() {
   gct.print();
   showPage();
 
-  player = new TPlayer(MTConvert(mscore), MIDI.Player);
+  player.player = new TPlayer(MTConvert(mscore), MIDI.Player);
 }
 
 function makeTitleRenderSvg(x, n) {

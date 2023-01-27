@@ -33,7 +33,7 @@ var MelodyDict = [];
   ////////////////////////////////////////////////////////////
   // Dev-test
   m = [
-    bvz(14, acc), [12, [2, 4]],
+    bvz(14, acc), bvz([12, [2, 4]]),
     //  three note in a beat
     [7, l3], [7, l3], [7, l3],
   ];
@@ -48,15 +48,15 @@ var MelodyDict = [];
   ////////////////////////////////////////////////////////////
   // test
   m = [
-  bvz([4, 2], { "oum": ["fermata", "triangle", "tsuyoi", "yowai"] }),
-  // bar
-  //  three note in a beat
-  [7, l3], [7, l3], [7, l3], [7, l3], [7, l3], [7, l3],
-  // bar
-  [4, [8, 16]], [4, 16], [0, [8, 16]], [4, 16],
-  // bar
-  [2, 4], [0, 8], [null, 8],
-  barl(2), bvz([2, 1], { linkPrev: 4, "oum": ["tsuyoi"] }),
+    bvz([4, 2], { "oum": ["fermata", "triangle", "tsuyoi", "yowai"] }),
+    // bar
+    //  three note in a beat
+    [7, l3], [7, l3], [7, l3], [7, l3], [7, l3], [7, l3],
+    // bar
+    [4, [8, 16]], [4, 16], [0, [8, 16]], [4, 16],
+    // bar
+    [2, 4], [0, 8], [null, 8],
+    barl(2), bvz([2, 1], { linkPrev: 4, "oum": ["tsuyoi"] }),
 ];
 
   m.base = 62;

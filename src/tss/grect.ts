@@ -41,7 +41,7 @@ class GRect {
   }
 
   _budget(x: number, y: number, w: number = null, h: number = null): GRect {
-    var spc = new GRect(this.width, this.height);
+    var spc = new GRect(w||this.width, h||this.height);
     spc.x = x - this.ax;
     spc.y = y - this.ay;
     spc.fix();

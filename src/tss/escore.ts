@@ -324,29 +324,29 @@ class EScoreBudgetRowContext {
 
 
   _adjustMarginBetweenAdjacentTrack(): void {
-      // Adjust margin between adjacent track.
-      // move the under one lower
-      var ctx = this._gctx;
-      var trackShiftY = 0
-      for (let i = 1; i < this._tracksPosInfo.length; ++i) {
-        let diff = this._tracksPosInfo[i].rec.top - this._tracksPosInfo[i - 1]
-          .rec.bottom;
-        if (diff <= 0) {
-          trackShiftY += g_option.gapMinBetweenRows - diff;
-        }
-
-        if (trackShiftY > 0) {
-          this._tracksPosInfo[i].y += trackShiftY;
-          this._tracksPosInfo[i].ey += trackShiftY;
-          ctx.shift(this._tracksPosInfo[i].ops, 0, trackShiftY);
-        }
+    // Adjust margin between adjacent track.
+    // move the under one lower
+    var ctx = this._gctx;
+    var trackShiftY = 0
+    for (let i = 1; i < this._tracksPosInfo.length; ++i) {
+      let diff = this._tracksPosInfo[i].rec.top - this._tracksPosInfo[i - 1]
+        .rec.bottom;
+      if (diff <= 0) {
+        trackShiftY += g_option.gapMinBetweenRows - diff;
       }
 
       if (trackShiftY > 0) {
-        for (let op, i = 0; op = this._preOps[i]; i++) op._settle();
-        ctx._grid.overall.bottom += trackShiftY;
+        this._tracksPosInfo[i].y += trackShiftY;
+        this._tracksPosInfo[i].ey += trackShiftY;
+        ctx.shift(this._tracksPosInfo[i].ops, 0, trackShiftY);
       }
     }
+
+    if (trackShiftY > 0) {
+      for (let op, i = 0; op = this._preOps[i]; i++) op._settle();
+      ctx._grid.overall.bottom += trackShiftY;
+    }
+  }
 
 
   _adjustMarginBetweenAdjacentRow(): void {

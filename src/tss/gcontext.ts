@@ -273,7 +273,7 @@ class GContext {
   get isOver(): boolean {
     var bp = this.beatPositions[this.beatPositions.length - 1];
     if (bp != null) {
-      return this._beatCursor >= bp.beat;
+      return this._beatCursor >= bp.beat+1;
     }
     return false;
   }
@@ -311,7 +311,7 @@ class GContext {
       }
     }
 
-    if (l != this.cursor) {
+    if (++l != this.cursor) {
       this.cursor = l;
       return true;
     }
@@ -576,14 +576,11 @@ if (1) {
       let cursor = createSvgElement('g');
 
       cursor.id = "cursor";
-      cursor.setAttribute("transform", "translate(" + bpo.x + "," + y0 +
-        ")");
+      cursor.setAttribute("transform", "translate(" + bpo.x + "," + y0 + ")");
       page.appendChild(cursor);
 
-
       let path = createSvgElement('path');
-      path.setAttribute("d", "M 0,0 v" + h + "m-5,0h10m0,-" + h +
-        "h-10");
+      path.setAttribute("d", "M 0,0 v" + h + "m-5,0h10m0,-" + h + "h-10");
       path.style.stroke = "red";
       cursor.appendChild(path);
     }
@@ -643,13 +640,13 @@ if (1) {
       case 'flagd':
         for (let y = op.y, img = gEID["noteflag-d"], nth = parseInt(arr[
             1]); nth > 4; nth >>= 1, y -= 3.5) {
-          drawIcon(ctx, img, op.x, y);
+          drawIcon(ctx, img, op.x, y, op.args[0], op.args[1]);
         }
         break;
       case 'flagu':
         for (let y = op.y, img = gEID["noteflag"], nth = parseInt(arr[
             1]); nth > 4; nth >>= 1, y += 3.5) {
-          drawIcon(ctx, img, op.x, y);
+          drawIcon(ctx, img, op.x, y, op.args[0], op.args[1]);
         }
         break;
       case 'bracket':

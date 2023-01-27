@@ -177,35 +177,26 @@ class MTrackFeeder {
     return new MNote(n);
   }
 
-  pushNote(notes, timeBeat: Array<number>|number = 4, linkToObjIdx = null) {
+  pushNote(notes, params?: any): MLayerBase {
+    if (params == null) params = {};
     var ch;
+    let timeBeat = params[1] || 4;
     if (notes == null || (notes == 0 && this.mabs)) {
+      // make a MRest instance
       if (typeof timeBeat === 'number') {
         ch = new MRest(timeBeat);
       } else console.error('');
-    } else {
+    } else { // make a MChord instance
       if (notes instanceof Array) {
         ch = new MChord(...notes.map(this.makeNotef));
       } else {
         ch = new MChord(this.makeNotef(notes));
       }
 
-      // link
-      if (linkToObjIdx != null) {
-        let bidx = this.track.bars.length - 1;
-        while (linkToObjIdx > 0 && bidx >= 0) {
-          let chds = this.track.bars[bidx].chords;
-          if (chds.length < linkToObjIdx) {
-            linkToObjIdx -= chds.length;
-            bidx--;
-          } else {
-            ch.linkWith(chds[chds.length - linkToObjIdx]);
-            break;
-          }
-        }
-      }
+      this._linkToPreviousChords(ch, params['linkPrev']);
     }
 
+    // set beat
     ch.beat = new GTimeSlice();
     if (timeBeat instanceof Array) {
       for (let tb of timeBeat) {
@@ -218,11 +209,24 @@ class MTrackFeeder {
         ch.beat.movTo(1/3);
         ch.nths.seq = timeBeat['tuplet'];
       }
-    } else if (typeof(timeBeat) == 'number') {
+    } else if (typeof(timeBeat) === 'number') {
       ch.beat.movTo(this.track.currentBeat.denominator / timeBeat);
-    } else {
-      console.error();
+    } else console.error('time beat should be either an array or a number');
+
+    if (params) {
+      if (ch instanceof MChord) {
+        ch.ouattach = GOUAttachment.make(params['oum'], params['overmarks'], params['undermarks']);
+        if (params['acciaccatura']) {
+          if (ch instanceof MChord) {
+            ch._decoration = EChordDecorationType.Acciaccatura;
+            ch.beat.movTo(0);
+            ch.nths = new MBeatSequence([8]);
+            ch.nths.seq = 1;
+          }
+        }
+      }
     }
+
     this.track.feed(ch);
     return ch;
   }
@@ -236,6 +240,7 @@ class MTrackFeeder {
       dem = params['dem'] || 4;
     this.track._tailBar.timeBeat = new MBeat(min, dem);
     this.mabs = !params['abs'];
+    this.makeNotef = this.mabs ? MTrackFeeder.makeNoteIn7 : MTrackFeeder.makeNote;
 
     // Pickup bar
     if (params['pickup']) {
@@ -243,40 +248,53 @@ class MTrackFeeder {
       this.track._tailBar.beat.beatlen = params['pickup'];
     }
 
-    this.base = params['base'] || 60;
+    let t = params['base'];
+    if (t === 0) {
+      this.base = 0;
+    } else {
+      this.base = t || 60;
+    }
   }
 
-  feed(content: Array<any>, params?: any) {
-    if (params == null) params = {};
+  _linkToPreviousChords(ch: MChord, linkToObjIdx: number) {
+    if (linkToObjIdx == null) return;
+    let bidx = this.track.bars.length - 1;
+    while (linkToObjIdx > 0 && bidx >= 0) {
+      let chds = this.track.bars[bidx].chords;
+      if (chds.length < linkToObjIdx) {
+        linkToObjIdx -= chds.length;
+        bidx--;
+      } else {
+        let tmp = chds[chds.length - linkToObjIdx];
+        if (tmp instanceof MChord) {
+          ch.linkWith(tmp);
+        } else console.error("MChord instance expected, but ", tmp);
+        break;
+      }
+    }
+  }
 
-    this.makeNotef = this.mabs ? MTrackFeeder.makeNoteIn7 : MTrackFeeder.makeNote;
+  feed(content: Array<any>) {
     for (let elem of content) {
-      if (elem instanceof Array) {
-        let ch = this.pushNote(elem[0], elem[1], elem['linkPrev']);
-        ch.ouattach = GOUAttachment.make(elem['oum'], elem['overmarks'], elem['undermarks']);
-        if (elem['acciaccatura']) {
-          if (ch instanceof MChord) {
-            ch._decoration = EChordDecorationType.Acciaccatura;
-          }
-        }
+      if (typeof(elem) == 'number') {
+        this.pushNote(elem);
+      } else if (elem instanceof Array) {
+        this.pushNote(elem[0], elem);
       } else if (elem instanceof Object) {
         let m = new MMark(elem.kind, elem.type);
         m.lf = elem.opt;
         m.beat = new GTimeSlice().follow(this.track._tailBar.beat)
         this.track.feed(m);
-      } else if (typeof(elem) == 'number') {
-        this.pushNote(elem);
       }
-    }
-
-
-    if (this.base) {
-      this.track.shift(this.base);
     }
   }
 
 
   _settle() {
+    if (this.base) {
+      this.track.shift(this.base);
+    }
+
     for (let bar of this.track.bars) {
       bar._settle();
     }
@@ -295,6 +313,8 @@ class MTrackFeeder {
  *        min: number,
  *        dem: number,
  *        base: number,
+ *        pickup: number,
+ *        abs: boolean,
  *
  *        0...n: number | array | object,
  *     }
@@ -309,18 +329,16 @@ class MTrackFeeder {
  *     }
  ****************************************/
 function PushMelody(mtrack, content) {
+  let score = content, params = content;
   if (content['score'] instanceof Array && content['param'] instanceof Object) {
-    content = content['score'];
-    for (var prop in content['param']) {
-      content[prop] = content['param'][prop];
-    }
+    score = content['score'];
+    params = content['param'];
   }
 
   let feeder = new MTrackFeeder(mtrack);
-  feeder.preset(content);
-  feeder.feed(content);
+  feeder.preset(params);
+  feeder.feed(score);
   feeder._settle();
-
 }
 
 function DumpMTrack(mtrack, ops) {
@@ -333,6 +351,7 @@ function DumpMTrack(mtrack, ops) {
       clef: bar._clef.type,
       min: bar._timeBeat.numerator,
       dem: bar._timeBeat.denominator,
+      pickup: mtrack.bars[0].chords[0].beat._start,
     }
   };
 

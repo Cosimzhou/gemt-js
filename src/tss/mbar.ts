@@ -58,7 +58,9 @@ class MBar {
       let nb = this.extend(mtrack);
       return nb.feed(mtrack, ch);
     } else {
-      ch.nths = this._timeBeat.nths(ch.beat.beatlen);
+      if (ch instanceof MChord && ch._decoration == EChordDecorationType.Acciaccatura) {
+        ;
+      } else ch.nths = this._timeBeat.nths(ch.beat.beatlen);
       this.chords.push(ch);
       ch.beat.follow(this.beat);
       this.beat.addTo(ch.beat);

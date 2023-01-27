@@ -12,6 +12,7 @@ class ENote implements ELayoutBudget {
   sign: string
   float: boolean
   ffloat: boolean
+  small: boolean
 
   constructor(ns: MBeatSequence, l: number = 0, s: string = null) {
     var n = ns.nths[0];
@@ -35,16 +36,23 @@ class ENote implements ELayoutBudget {
   }
 
   // note head width
-  get width(): number { return this.img.width; }
+  get width(): number { return this.small? 4: this.img.width; }
 
-  _budget(ctx, etrack, x: number): EPositionInfo {
+  _budget(ctx, etrack: ETrack, x: number): EPositionInfo {
     // budget note head, float point and flat/sharp symbol only
-    var w = this.width,
+    let w = this.width,
       y = etrack.translate(this.line),
       oy = y;
-    var noteImg = ctx._draw(this.imgK, x, oy);
-    var epos = new EPositionInfo();
-    epos.rect = this.img._budget(x, y);
+    let epos = new EPositionInfo();
+    let noteImg;
+    if (this.small) {
+      oy += 2; // TODO(): this is little tricky
+      noteImg = ctx._draw(this.imgK, x, oy, 4, 4);
+      epos.rect = this.img._budget(x, y, 4, 4);
+    } else {
+      noteImg = ctx._draw(this.imgK, x, oy);
+      epos.rect = this.img._budget(x, y);
+    }
     epos.width = epos.rect.width;
     epos.pushOperations(noteImg);
 

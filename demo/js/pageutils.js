@@ -132,8 +132,23 @@ function makeCatalog(array, func) {
 }
 
 var gct, ctx;
-var player;
-var startTime, startBeat;
+var player = new GPlayer();
+
+player.onStop = function() {
+  for (var elem of document.querySelectorAll(".play_pause")) {
+    elem.innerText = "播放";
+  }
+}
+
+player.onPlay = function() {
+  for (var elem of document.querySelectorAll(".play_pause")) {
+    elem.innerText = "暂停";
+  }
+}
+
+player.onRefresh = function() {
+  showPage();
+}
 
 function showPage() {
   for (var elem of document.querySelectorAll(".pageNum")) {
@@ -144,26 +159,6 @@ function showPage() {
 function redraw() {
   gct.clear();
   gct.print(gct.pageIndex);
-
-  showPage();
-}
-
-function playRedraw(force) {
-  if (gct.isOver) {
-    if (playIntervalHandle)
-      clearInterval(playIntervalHandle);
-    playIntervalHandle = null;
-  } else {
-    var beat = (Date.now() - startTime) / (60000 / 120);
-    gct._beatCursor = beat + startBeat;
-  }
-
-  if (!force && !gct.frameRefresh()) {
-    return;
-  }
-
-  gct.clear();
-  gct.print();
 
   showPage();
 }
@@ -200,44 +195,14 @@ var playIntervalHandle;
 
 function Stop() {
   player.stop();
-  for (var elem of document.querySelectorAll(".play_pause")) {
-    elem.innerText = "播放";
-  }
-  clearInterval(playIntervalHandle);
-  playIntervalHandle = null;
-  gct.cursor = 0;
   redraw();
 }
 
 function Play() {
-  audio.play();
+  //audio.play();
 
-  startTime = Date.now();
-  startBeat = gct._beatCursor;
   player.resume();
-  var hintText;
-  if (player.playing()) {
-    if (playIntervalHandle)
-      clearInterval(playIntervalHandle);
-
-    if (gct.cursor == 0) {
-      gct.rewind();
-      gct.cursor = 1;
-      startBeat = gct._beatCursor;
-      playRedraw(true);
-    }
-
-    playIntervalHandle = setInterval(playRedraw, parseInt(60000 / 120 / 8));
-    hintText = "暂停";
-  } else {
-    hintText = "播放";
-    clearInterval(playIntervalHandle);
-    playIntervalHandle = null;
-  }
-
-  for (var elem of document.querySelectorAll(".play_pause")) {
-    elem.innerText = hintText;
-  }
+  redraw();
 }
 
 function addButtonBar(content) {

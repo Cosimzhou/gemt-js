@@ -40,6 +40,45 @@ enum EChordDecorationType {
   Appoggatura = 3,
 }
 
+class EChordBudgetContext {
+    chordWidth: number
+    w: number
+    incrh: number
+    maxLineOfNote: number
+    minLineOfNote: number
+    shiftX: number
+    needFlag: boolean
+    isUp: boolean
+    small: boolean
+    epos: EPositionInfo
+    adjacentShift: boolean
+    adjlastShift: boolean
+    noteImg: GStroke
+    noteHeads: Array<any>
+    adjnoteHeads: Array<any>
+    adjnoteHndices: Array<any>
+
+    constructor(c: EChord) {
+      this.maxLineOfNote = -100;
+      this.minLineOfNote = 100;
+      this.shiftX = 0;
+      this.needFlag = false;
+      this.isUp = false;
+      this.w = 0;
+      this.chordWidth = 0;
+      this.epos = new EPositionInfo();
+      this.adjacentShift = false;
+      this.adjlastShift = false;
+      this.small = c.small;
+      //this.noteImg;
+      this.noteHeads = [];
+      this.adjnoteHeads = [];
+      this.adjnoteHndices = [];
+
+      this.epos.rect.clear();
+    }
+}
+
 class EChord extends ELayerBase implements EBeamCombinable {
   nthBeat: number
   notes: Array<ENote>
@@ -70,292 +109,165 @@ class EChord extends ELayerBase implements EBeamCombinable {
       this._decoration = EChordDecorationType.Normal;
     }
   }
+
+  get small(): boolean{return this._decoration > EChordDecorationType.Arpeggio;}
+
   _budget(ctx, etrack: ETrack, x: number, trkPos?: Array<ETrackPositionInfo>): EPositionInfo {
-    var chordWidth = 0,
-      w = 0,
-      maxLineOfNote = -100,
-      minLineOfNote = 100,
-      shiftX = 0;
-    var need_Flag = false,
-      epos = new EPositionInfo();
-    var adjacent_shift = false,
-      adjlast_shift = false,
-      noteImg;
-    var note_heads = [],
-      adjnote_heads = [],
-      adjnote_indices = [];
-    epos.rect.clear();
+    let b = new EChordBudgetContext(this);
+    this.epos = b.epos;
 
+    // draw note heads
+    this._budgetHeads(ctx, etrack, b, x);
 
+    // draw extra line
+    this._budgetExtraLines(ctx, etrack, b, x);
+
+    // is tadpo flag upwards
+    b.isUp = this.force ? this.force.up : (b.maxLineOfNote > 4 - b.minLineOfNote);
+
+    this._budgetFlags(ctx, etrack, b, x);
+
+    b.epos.width = b.chordWidth;
+    b.epos.rowIndex = ctx.rowIndex;
+    b.epos.rowOriginPoint = ctx.rowOriginPoint;
+
+    // budget over or under marks
+    this._budgetOUAttachment(ctx, etrack, b);
+
+    // budget the slur or tie on the notes
+    this._budgetSlurTie(ctx, etrack, b);
+
+    if (this.arpeggio) {
+      //b.epos.pushOperations(ctx._draw("arpeggio", x, y));
+    }
+
+    if (b.shiftX > 0) b.epos.shx = {
+      x: b.shiftX
+    };
+
+    return b.epos;
+  }
+
+  _budgetHeads(ctx, etrack: ETrack, b: EChordBudgetContext, x: number) {
     for (let e, ll = -100, i = 0; e = this.notes[i]; i++) {
+      e.small = b.small;
       let enoteEpos = e._budget(ctx, etrack, x);
       let ew = e.width;
       if (ll + 0.5 == e.line) {
-        enoteEpos.img._attach(noteImg, GStrokeConstraintType.ConstraintX, this.notes[i -
-          1].width);
-        enoteEpos.width += this.notes[i - 1].width;
-        adjlast_shift = adjacent_shift = true;
-        adjnote_heads.push(enoteEpos);
-        adjnote_indices.push(i);
+        let nwidth = this.notes[i - 1].width;
+        enoteEpos.img._attach(b.noteImg, GStrokeConstraintType.ConstraintX, nwidth);
+        enoteEpos.width += nwidth;
+        b.adjlastShift = b.adjacentShift = true;
+        b.adjnoteHeads.push(enoteEpos);
+        // adjnoteHndices.push(i);
       } else {
-        adjlast_shift = false;
+        b.adjlastShift = false;
         ll = e.line;
-        note_heads.push(enoteEpos);
+        b.noteHeads.push(enoteEpos);
       }
 
-      epos.rect.union(enoteEpos.rect);
-      epos.pushOperations(...enoteEpos.operations);
-      if (e.line > maxLineOfNote) maxLineOfNote = e.line;
-      if (e.line < minLineOfNote) minLineOfNote = e.line;
-      if (e.nth > 1) need_Flag = true;
-      if (ew > w) w = ew;
+      b.epos.rect.union(enoteEpos.rect);
+      b.epos.pushOperations(...enoteEpos.operations);
+      if (e.line > b.maxLineOfNote) b.maxLineOfNote = e.line;
+      if (e.line < b.minLineOfNote) b.minLineOfNote = e.line;
+      if (e.nth > 1) b.needFlag = true;
+      if (ew > b.w) b.w = ew;
 
-      if (enoteEpos.width > chordWidth) chordWidth = enoteEpos.width;
-      if (enoteEpos.shx && enoteEpos.shx.x > shiftX) shiftX = enoteEpos.shx.x;
-      if (!noteImg && enoteEpos.img) noteImg = enoteEpos.img;
+      if (enoteEpos.width > b.chordWidth) b.chordWidth = enoteEpos.width;
+      if (enoteEpos.shx && enoteEpos.shx.x > b.shiftX) b.shiftX = enoteEpos.shx.x;
+      if (!b.noteImg && enoteEpos.img) b.noteImg = enoteEpos.img;
+    }
+  }
+
+  _budgetFlags(ctx, etrack, b: EChordBudgetContext, x: number) {
+    if (!b.needFlag) return;
+    let  stemEndY, y, stemNoteY, stemMinY, maxYOfStem, minYOfStem, opl;
+    let stemX = x,
+      maxYOfNote = etrack.translate(b.maxLineOfNote),
+      minYOfNote = etrack.translate(b.minLineOfNote),
+      midYOfTrack = etrack.translate(2);
+    if (b.small) {
+      maxYOfStem = maxYOfNote + 2 * etrack.gap,
+      minYOfStem = minYOfNote - 2 * etrack.gap;
+    } else {
+      maxYOfStem = maxYOfNote + 3 * etrack.gap,
+      minYOfStem = minYOfNote - 3 * etrack.gap;
     }
 
-    { // draw extra line
-      // overlines
-      for (let i = -1; i >= minLineOfNote; --i) {
-        epos.pushOperations(ctx._hline(x - 4, etrack.translate(i), w + 8)
-          ._attach(noteImg, GStrokeConstraintType.ConstraintX, -4));
-      }
-      // underlines
-      for (let i = 5; i <= maxLineOfNote; ++i) {
-        epos.pushOperations(ctx._hline(x - 4, etrack.translate(i), w + 8)
-          ._attach(noteImg, GStrokeConstraintType.ConstraintX, -4));
-      }
-    }
-
-    this.epos = epos;
-    // is tadpo flag upwards
-    var isUp = this.force ? this.force.up : (maxLineOfNote > 4 - minLineOfNote);
-    if (need_Flag) {
-      let stemX = x,
-        stemEndY, y, stemNoteY, stemMinY, h;
-      let maxYOfNote = etrack.translate(maxLineOfNote),
-        minYOfNote = etrack.translate(minLineOfNote);
-      let maxYOfStem = maxYOfNote + 3 * etrack.gap,
-        minYOfStem = minYOfNote - 3 * etrack.gap;
-      let midYOfTrack = etrack.translate(2),
-        opl;
-      if (isUp) {
-        stemX -= 0.6;
-        //if (adjacent_shift) {
-        //    //stemX += w;
-        //    for (var adjnote of adjnote_heads) {
-        //        adjnote.pos.img.detach(1)._attach(noteImg, -w);//adjnote.pos.img.width());
-        //    }
-        //    for (var rnote of note_heads) {
-        //        ctx.shift(rnote.pos.ops, w, 0);
-        //    }
-        //}
-        stemX += w;
-        stemMinY = y = midYOfTrack > minYOfStem ? minYOfStem : midYOfTrack;
-        stemNoteY = maxYOfNote - 0.5, stemEndY = y;
-        h = maxYOfNote - y;
-      } else {
-        stemX += 0.6;
-        if (adjacent_shift) {
-          //stemX += w;
-          for (let adjnote of adjnote_heads) {
-            adjnote.img.detach(1)._attach(noteImg, GStrokeConstraintType.ConstraintX, -
-              w);
-          }
-          for (let rnote of note_heads) {
-            ctx.shift(rnote.operations, w, 0);
-          }
+    if (b.isUp) {
+      stemX -= 0.6;
+      //if (b.adjacentShift) {
+      //    //stemX += b.w;
+      //    for (var adjnote of b.adjnoteHeads) {
+      //        adjnote.pos.img.detach(1)._attach(noteImg, -b.w);//adjnote.pos.img.width());
+      //    }
+      //    for (var rnote of b.noteHeads) {
+      //        ctx.shift(rnote.pos.ops, b.w, 0);
+      //    }
+      //}
+      stemX += b.w;
+      y = b.small? minYOfStem: Math.min(midYOfTrack, minYOfStem);
+      stemNoteY = maxYOfNote - 0.5, stemMinY = stemEndY = y;
+      b.incrh = maxYOfNote - y;
+    } else {
+      stemX += 0.6;
+      if (b.adjacentShift) {
+        //stemX += b.w;
+        for (let adjnote of b.adjnoteHeads) {
+          adjnote.img.detach(1)._attach(b.noteImg, GStrokeConstraintType.ConstraintX, -b.w);
         }
-        y = midYOfTrack < maxYOfStem ? maxYOfStem : midYOfTrack;
-        stemNoteY = stemMinY = minYOfNote + 0.5, stemEndY = y;
-        h = y - minYOfNote;
-        // fix
-      }
-      epos.maxYOfNote = maxYOfNote;
-      epos.minYOfNote = minYOfNote;
-
-      // draw stem
-      epos.rect.union(new GRect(w, h, x, stemMinY));
-      epos.pushOperations(opl = ctx._Vline(stemX, stemNoteY, stemEndY));
-      opl._attach(noteImg, GStrokeConstraintType.ConstraintX, stemX - x);
-
-      if (this.nthBeat > 4) {
-        if (this._beamCombine) { // draw beam
-          this._beamCombine._opl = opl;
-          if (this._beamCombine._beamPhase == 2) {
-            let originCombo = this._beamCombine._originBeamComb;
-            let sx = originCombo.epos._end.anchorOp.x,
-              dy = y - originCombo.epos._end.anchorOp.args[0],
-              dx = opl.x - sx, // assert dx > 0
-              ldy = dx * Math.tan(Math.PI / 12),
-              k = Math.atan2(dy, dx);
-            // Whether the slope is too sharp, if so, try to it.slope
-            if (k < -Math.PI / 12) {
-              if (isUp) {
-                originCombo.epos._end.anchorOp.args[0] = opl.args[0] + ldy;
-              } else {
-                opl.args[0] = originCombo.epos._end.anchorOp.args[0] - ldy;
-              }
-              dy = -ldy;
-            } else if (k > Math.PI / 12) {
-              if (isUp) {
-                opl.args[0] = originCombo.epos._end.anchorOp.args[0] + ldy;
-              } else {
-                originCombo.epos._end.anchorOp.args[0] = opl.args[0] - ldy;
-              }
-              dy = ldy;
-            }
-
-            let sy = originCombo.epos._end.anchorOp.args[0],
-              ey = opl.args[0];
-            let eoArr = originCombo._eobjects;
-
-            {
-              // avoid middle note crash with beam
-              let semy = sy,
-                seMy = ey,
-                dmargin = -Infinity;
-              if (sy > ey) seMy = sy, semy = ey;
-              if (isUp) {
-                for (let diffm, i = 0; i < eoArr.length; ++i) {
-                  diffm = seMy - eoArr[i].epos.minYOfNote;
-                  if (diffm > dmargin) {
-                    dmargin = diffm;
-                  }
-                }
-                if (dmargin >= -5) {
-                  if (dmargin <= 0)
-                    dmargin = 2;
-                  dmargin += 8;
-                  sy -= dmargin;
-                  ey -= dmargin;
-                  originCombo.epos._end.anchorOp.args[0] = sy, opl.args[0] = ey;
-                }
-              } else {
-                for (let diffm, i = 0; i < eoArr.length; ++i) {
-                  diffm = eoArr[i].epos.maxYOfNote - semy;
-                  if (diffm > dmargin) {
-                    dmargin = diffm;
-                  }
-                }
-                if (dmargin >= -5) {
-                  if (dmargin <= 0)
-                    dmargin = 2;
-                  dmargin += 8;
-                  sy += dmargin;
-                  ey += dmargin;
-                  originCombo.epos._end.anchorOp.args[0] = sy, opl.args[0] = ey;
-                }
-              }
-            }
-            if (originCombo._subBeamLayout) {
-              // adjust the beam position for multi-beam
-              let offy = originCombo._subBeamLayout.length * 3;
-              if (isUp) {
-                sy -= offy, ey -= offy;
-              } else {
-                sy += offy, ey += offy;
-              }
-              originCombo.epos._end.anchorOp.args[0] = sy, opl.args[0] = ey;
-            }
-
-            // draw base beam of the combined chords
-            let baseBeam = ctx._lineWh(0, sy, 0, ey, 3);
-            baseBeam._attach(originCombo.epos._end.anchorOp,
-              GStrokeConstraintType.ConstraintX)._attach(opl, GStrokeConstraintType
-              .ConstraintX2);
-            epos.pushOperations(baseBeam);
-            epos.rects.push(new GRect(10, 10)._budget(x, stemMinY + (
-              isUp ? 0 : h)));
-
-            if (originCombo._eobjects[1]._mobj.nths.seq > 2) {
-              let num = originCombo._eobjects[1]._mobj.nths.seq;
-              epos.pushOperations(ctx._draw("num-" + num, 0, (sy + ey) / 2 + (
-                isUp ? -15 : 6), 8, 12)._attach(baseBeam, GStrokeConstraintType
-                .ConstraintXCenter));
-            }
-
-            // _linkObject stems middle note of to beam
-            for (let i = 1; i < eoArr.length - 1; ++i) {
-              let stem = eoArr[i]._beamCombine._opl;
-              let lambda = (stem.x - sx) / dx;
-              stem.args[0] = (1 - lambda) * sy + lambda * ey;
-            }
-
-            if (originCombo._subBeamLayout) {
-              // draw beams stand for 16th, 32th and so on
-              for (let bms, i = 0; bms = originCombo._subBeamLayout[i]; ++i) {
-                for (let cn = 0; cn < bms.length; cn += 2) {
-                  let line2 = ctx._lineWh(0, 0, 0, 0, 3);
-                  let lvr1 = eoArr[bms[cn]]._beamCombine._opl;
-                  let lvr2 = eoArr[bms[cn + 1]]._beamCombine._opl;
-                  let offy = isUp ? (i + 1) * 3 : 3 - 6 * (i + 1);
-                  if (bms[cn] == bms[cn + 1]) {
-                    // broken beam, which has an _end without setting up
-                    if (bms[cn] == eoArr.length - 1) {
-                      lvr2 = eoArr[bms[cn] - 1]._beamCombine._opl;
-                      line2.x = (lvr1.x + lvr2.x) / 2;
-
-                      line2._attach(lvr1, GStrokeConstraintType.ConstraintX2).
-                      _attach(baseBeam, GStrokeConstraintType.ConstraintParallelHorizon,
-                        offy);
-                    } else {
-                      lvr2 = eoArr[bms[cn] + 1]._beamCombine._opl;
-                      line2.args[0] = (lvr1.x + lvr2.x) / 2;
-
-                      line2._attach(lvr1, GStrokeConstraintType.ConstraintX).
-                      _attach(baseBeam, GStrokeConstraintType.ConstraintParallelHorizon,
-                        offy);
-                    }
-                  } else {
-                    // set the beam two ends upon the anchor stem
-                    line2._attach(lvr1, GStrokeConstraintType.ConstraintX).
-                    _attach(lvr2, GStrokeConstraintType.ConstraintX2).
-                    _attach(baseBeam, GStrokeConstraintType.ConstraintParallelHorizon,
-                      offy);
-                  }
-                  epos.pushOperations(line2);
-                }
-              }
-            }
-          } else if (this._beamCombine._beamPhase == 0) {
-            this._beamCombine._originBeamComb.epos = epos;
-            epos._end = {
-              anchorOp: opl
-            };
-          }
-        } else { // draw flag
-          let flag;
-          if (isUp) {
-            flag = ctx._draw("flagu-" + this.nthBeat, stemX, y);
-            chordWidth += 5;
-          } else {
-            flag = ctx._draw("flagd-" + this.nthBeat, stemX, y);
-          }
-          flag._attach(opl, GStrokeConstraintType.ConstraintX);
-          epos.pushOperations(flag);
+        for (let rnote of b.noteHeads) {
+          ctx.shift(rnote.operations, b.w, 0);
         }
       }
+      y = b.small? maxYOfStem: Math.max(midYOfTrack, maxYOfStem);
+      stemNoteY = stemMinY = minYOfNote + 0.5, stemEndY = y;
+      b.incrh = y - minYOfNote;
+      // fix
     }
+    b.epos.maxYOfNote = maxYOfNote;
+    b.epos.minYOfNote = minYOfNote;
 
-    epos.width = chordWidth;
-    epos.rowIndex = ctx.rowIndex;
-    epos.rowOriginPoint = ctx.rowOriginPoint;
+    // draw stem
+    b.epos.rect.union(new GRect(b.w, b.incrh, x, stemMinY));
+    b.epos.pushOperations(opl = ctx._Vline(stemX, stemNoteY, stemEndY));
+    opl._attach(b.noteImg, GStrokeConstraintType.ConstraintX, stemX - x);
 
-    // budget over or under marks
+    if (this.nthBeat > 4) {
+      if (this._beamCombine) { // draw beam
+        this._budgetBeam(ctx, b, opl, x, y, stemMinY);
+      } else { // draw flag
+        let flag;
+        let args = [,stemX, y];
+        if (b.isUp) {
+          args[0] = "flagu-" + this.nthBeat;
+          b.chordWidth += 5;
+        } else {
+          args[0] = "flagd-" + this.nthBeat;
+          if (b.small) {
+            args[2]+=10;
+          }
+        }
+        if (b.small) args.push(4, 10);
+        flag = ctx._draw(...args);
+        flag._attach(opl, GStrokeConstraintType.ConstraintX);
+        b.epos.pushOperations(flag);
+      }
+    }
+  }
 
+  _budgetOUAttachment(ctx, etrack, b: EChordBudgetContext) {
     if (this.ouattach) {
       let overmarks = this.ouattach._overmarks;
       if (overmarks) {
         let l0y = etrack.translate(0);
-        let ouy = noteImg.y;
+        let ouy = b.noteImg.y;
         let omk, pmk = null;
         if (l0y > ouy) l0y = ouy;
         for (let oum of overmarks) {
           l0y -= 4;
-          epos.pushOperations(omk = ctx._draw(oum, 0, l0y)
-            ._attach(noteImg, GStrokeConstraintType.ConstraintXCenter)
+          b.epos.pushOperations(omk = ctx._draw(oum, 0, l0y)
+            ._attach(b.noteImg, GStrokeConstraintType.ConstraintXCenter)
             ._attach(pmk, GStrokeConstraintType.ConstraintTopOn, l0y));
           pmk = omk;
           l0y = 0;
@@ -364,46 +276,51 @@ class EChord extends ELayerBase implements EBeamCombinable {
 
       let oumark = this.ouattach._oumark;
       if (oumark) {
-        if (isUp) {
+        if (b.isUp) {
           let l0y = etrack.translate(0);
-          let ouy = noteImg.y;
+          let ouy = b.noteImg.y;
           if (l0y > ouy) l0y = ouy;
           for (let oum of oumark) {
             l0y -= 16;
-            epos.pushOperations(ctx._draw(oum, 0, l0y)
-              ._attach(noteImg, GStrokeConstraintType.ConstraintXCenter));
+            b.epos.pushOperations(ctx._draw(oum, 0, l0y)
+              ._attach(b.noteImg, GStrokeConstraintType.ConstraintXCenter));
           }
         } else {
           let l4y = etrack.translate(0);
-          let ouy = noteImg.y;
+          let ouy = b.noteImg.y;
           if (l4y < ouy) l4y = ouy;
           for (let oum of oumark) {
             l4y += 16;
-            epos.pushOperations(ctx._draw(oum, 0, l4y)
-              ._attach(noteImg, GStrokeConstraintType.ConstraintXCenter));
+            b.epos.pushOperations(ctx._draw(oum, 0, l4y)
+              ._attach(b.noteImg, GStrokeConstraintType.ConstraintXCenter));
           }
         }
       }
     }
+  }
 
-    // draw ties
+  _budgetExtraLines(ctx, etrack: ETrack, b: EChordBudgetContext, x: number) {
+    // overlines
+    for (let i = -1; i >= b.minLineOfNote; --i) {
+      b.epos.pushOperations(ctx._hline(x - 4, etrack.translate(i), b.w + 8)
+        ._attach(b.noteImg, GStrokeConstraintType.ConstraintX, -4));
+    }
+    // underlines
+    for (let i = 5; i <= b.maxLineOfNote; ++i) {
+      b.epos.pushOperations(ctx._hline(x - 4, etrack.translate(i), b.w + 8)
+        ._attach(b.noteImg, GStrokeConstraintType.ConstraintX, -4));
+    }
+  }
+
+  _budgetSlurTie(ctx,  etrack: ETrack, b: EChordBudgetContext) {
     if (this._mobj instanceof MChord) {
+      // draw ties
       let linkObj = this._mobj._linkObject;
       if (linkObj && linkObj._end === this._mobj) {
-        let arr = LinkTies(this, ctx, etrack.score.trackLength, isUp);
-        return epos.pushOperations(...arr);
-      }
-
-      if (this.arpeggio) {
-        //epos.pushOperations(ctx._draw("arpeggio", x, y));
+        let arr = LinkTies(this, ctx, etrack.score.trackLength, b.isUp);
+        b.epos.pushOperations(...arr);
       }
     }
-
-    if (shiftX > 0) epos.shx = {
-      x: shiftX
-    };
-
-    return epos;
   }
 
   _upFlagDegree(): number {
@@ -416,18 +333,160 @@ class EChord extends ELayerBase implements EBeamCombinable {
 
     return Mdf + mdf - 4;
   }
+
+
+  _budgetBeam(ctx, b: EChordBudgetContext, opl: GStroke, x: number, y: number, stemMinY: number) {
+    // draw beam
+    this._beamCombine._opl = opl;
+    if (this._beamCombine._beamPhase == 2) {
+      let originCombo = this._beamCombine._originBeamComb;
+      let sx = originCombo.epos._end.anchorOp.x,
+        dy = y - originCombo.epos._end.anchorOp.args[0],
+        dx = opl.x - sx, // assert dx > 0
+        ldy = dx * Math.tan(Math.PI / 12),
+        k = Math.atan2(dy, dx);
+      // Whether the slope is too sharp, if so, try to it.slope
+      if (k < -Math.PI / 12) {
+        if (b.isUp) {
+          originCombo.epos._end.anchorOp.args[0] = opl.args[0] + ldy;
+        } else {
+          opl.args[0] = originCombo.epos._end.anchorOp.args[0] - ldy;
+        }
+        dy = -ldy;
+      } else if (k > Math.PI / 12) {
+        if (b.isUp) {
+          opl.args[0] = originCombo.epos._end.anchorOp.args[0] + ldy;
+        } else {
+          originCombo.epos._end.anchorOp.args[0] = opl.args[0] - ldy;
+        }
+        dy = ldy;
+      }
+
+      let sy = originCombo.epos._end.anchorOp.args[0],
+        ey = opl.args[0];
+      let eoArr = originCombo._eobjects;
+
+      {
+        // avoid middle note crash with beam
+        let semy = sy,
+          seMy = ey,
+          dmargin = -Infinity;
+        if (sy > ey) seMy = sy, semy = ey;
+        if (b.isUp) {
+          for (let diffm, i = 0; i < eoArr.length; ++i) {
+            diffm = seMy - eoArr[i].epos.minYOfNote;
+            if (diffm > dmargin) {
+              dmargin = diffm;
+            }
+          }
+          if (dmargin >= -5) {
+            if (dmargin <= 0) dmargin = 2;
+            dmargin += 8;
+            sy -= dmargin;
+            ey -= dmargin;
+            originCombo.epos._end.anchorOp.args[0] = sy, opl.args[0] = ey;
+          }
+        } else {
+          for (let diffm, i = 0; i < eoArr.length; ++i) {
+            diffm = eoArr[i].epos.maxYOfNote - semy;
+            if (diffm > dmargin) {
+              dmargin = diffm;
+            }
+          }
+          if (dmargin >= -5) {
+            if (dmargin <= 0) dmargin = 2;
+            dmargin += 8;
+            sy += dmargin;
+            ey += dmargin;
+            originCombo.epos._end.anchorOp.args[0] = sy, opl.args[0] = ey;
+          }
+        }
+      }
+      if (originCombo._subBeamLayout) {
+        // adjust the beam position for multi-beam
+        let offy = originCombo._subBeamLayout.length * 3;
+        if (b.isUp) {
+          sy -= offy, ey -= offy;
+        } else {
+          sy += offy, ey += offy;
+        }
+        originCombo.epos._end.anchorOp.args[0] = sy, opl.args[0] = ey;
+      }
+
+      // draw base beam of the combined chords
+      let baseBeam = ctx._lineWh(0, sy, 0, ey, 3);
+      baseBeam._attach(originCombo.epos._end.anchorOp,
+        GStrokeConstraintType.ConstraintX)._attach(opl, GStrokeConstraintType
+        .ConstraintX2);
+      b.epos.pushOperations(baseBeam);
+      b.epos.rects.push(new GRect(10, 10)._budget(x, stemMinY + (
+        b.isUp ? 0 : b.incrh)));
+
+      if (originCombo._eobjects[1]._mobj.nths.seq > 2) {
+        let num = originCombo._eobjects[1]._mobj.nths.seq;
+        b.epos.pushOperations(ctx._draw("num-" + num, 0, (sy + ey) / 2 + (
+          b.isUp ? -15 : 6), 8, 12)._attach(baseBeam, GStrokeConstraintType.ConstraintXCenter));
+      }
+
+      // _linkObject stems middle note of to beam
+      for (let i = 1; i < eoArr.length - 1; ++i) {
+        let stem = eoArr[i]._beamCombine._opl;
+        let lambda = (stem.x - sx) / dx;
+        stem.args[0] = (1 - lambda) * sy + lambda * ey;
+      }
+
+      if (originCombo._subBeamLayout) {
+        // draw beams stand for 16th, 32th and so on
+        for (let bms, i = 0; bms = originCombo._subBeamLayout[i]; ++i) {
+          for (let cn = 0; cn < bms.length; cn += 2) {
+            let line2 = ctx._lineWh(0, 0, 0, 0, 3);
+            let lvr1 = eoArr[bms[cn]]._beamCombine._opl;
+            let lvr2 = eoArr[bms[cn + 1]]._beamCombine._opl;
+            let offy = b.isUp ? (i + 1) * 3 : 3 - 6 * (i + 1);
+            if (bms[cn] == bms[cn + 1]) {
+              // broken beam, which has an _end without setting up
+              if (bms[cn] == eoArr.length - 1) {
+                lvr2 = eoArr[bms[cn] - 1]._beamCombine._opl;
+                line2.x = (lvr1.x + lvr2.x) / 2;
+
+                line2._attach(lvr1, GStrokeConstraintType.ConstraintX2).
+                _attach(baseBeam, GStrokeConstraintType.ConstraintParallelHorizon, offy);
+              } else {
+                lvr2 = eoArr[bms[cn] + 1]._beamCombine._opl;
+                line2.args[0] = (lvr1.x + lvr2.x) / 2;
+
+                line2._attach(lvr1, GStrokeConstraintType.ConstraintX).
+                _attach(baseBeam, GStrokeConstraintType.ConstraintParallelHorizon, offy);
+              }
+            } else {
+              // set the beam two ends upon the anchor stem
+              line2._attach(lvr1, GStrokeConstraintType.ConstraintX).
+              _attach(lvr2, GStrokeConstraintType.ConstraintX2).
+              _attach(baseBeam, GStrokeConstraintType.ConstraintParallelHorizon, offy);
+            }
+            b.epos.pushOperations(line2);
+          }
+        }
+      }
+    } else if (this._beamCombine._beamPhase == 0) {
+      this._beamCombine._originBeamComb.epos = b.epos;
+      b.epos._end = {
+        anchorOp: opl
+      };
+    }
+  }
 }
 
 function LinkTies(main, ctx: GContext, trackLength: number, isUp: boolean): Array<GStroke> {
   var epos = [];
 
   function _addCurve(epos1, epos2, isUp) {
-    var curve, tadpo1 = epos1.operations[0],
+    let curve, tadpo1 = epos1.operations[0],
       tadpo2 = epos2.operations[0];
-    var interRowTies = epos1.rowIndex != epos2.rowIndex;
+    let interRowTies = epos1.rowIndex != epos2.rowIndex;
     if (interRowTies) {
       console.log("inter-row ties");
-      var dummyTadpo: GPoint = new GPoint();
+      let dummyTadpo: GPoint = new GPoint();
       dummyTadpo.x = epos1.rowOriginPoint.x + trackLength + tadpo2.x - epos2
         .rowOriginPoint.x;
       dummyTadpo.y = epos1.rowOriginPoint.y + tadpo2.y - epos2.rowOriginPoint.y;
@@ -474,10 +533,10 @@ function LinkTies(main, ctx: GContext, trackLength: number, isUp: boolean): Arra
     console.error("unexpected link target", main._mobj);
   }
 
-  var tadpo2 = linkObj._start[0]._eobj.epos,
+  let tadpo2 = linkObj._start[0]._eobj.epos,
     tadpo1;
   if (linkObj._start.length > 1) {
-    for (var tadi = 1; tadi < linkObj._start.length; tadi++) {
+    for (let tadi = 1; tadi < linkObj._start.length; tadi++) {
       tadpo1 = tadpo2;
       tadpo2 = linkObj._start[tadi]._eobj.epos;
       _addCurve(tadpo1, tadpo2, isUp);
