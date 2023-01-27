@@ -47,6 +47,7 @@ class GUIInfo {
   "brace": ESpace(0, 0, 8, 82),
   "num": ESpace(0, 0, 8, 82),
   "fermata": ESpace(0, 8, 6, 13),
+  "segno": ESpace(5, 8, 10, 18),
 
   "cadence": ESpace(7.25, 3.25, 14.5, 6.5),
   "triangle": ESpace(2, 8, 4, 8),

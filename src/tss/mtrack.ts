@@ -151,6 +151,137 @@ function MakeMTrack() {
   return mtrk;
 }
 
+class MTrackFeeder {
+  track: MTrack
+  makeNotef: (any)=>MNote
+  mabs: boolean
+  base: number
+  constructor(track: MTrack) {
+    this.track = track;
+  }
+
+  static makeNote(x): MNote {
+    return new MNote(x);
+  }
+
+  static makeNoteIn7(x: number): MNote {
+    let idx = x % 10;
+    let n = Math.trunc(x / 10);
+    if (idx < 0) {
+      n--;
+      idx = -idx;
+    }
+    n = n * 12 + (--idx) * 2;
+    if (idx >= 3) n--;
+
+    return new MNote(n);
+  }
+
+  pushNote(notes, timeBeat: Array<number>|number = 4, linkToObjIdx = null) {
+    var ch;
+    if (notes == null || (notes == 0 && this.mabs)) {
+      if (typeof timeBeat === 'number') {
+        ch = new MRest(timeBeat);
+      } else console.error('');
+    } else {
+      if (notes instanceof Array) {
+        ch = new MChord(...notes.map(this.makeNotef));
+      } else {
+        ch = new MChord(this.makeNotef(notes));
+      }
+
+      // link
+      if (linkToObjIdx != null) {
+        let bidx = this.track.bars.length - 1;
+        while (linkToObjIdx > 0 && bidx >= 0) {
+          let chds = this.track.bars[bidx].chords;
+          if (chds.length < linkToObjIdx) {
+            linkToObjIdx -= chds.length;
+            bidx--;
+          } else {
+            ch.linkWith(chds[chds.length - linkToObjIdx]);
+            break;
+          }
+        }
+      }
+    }
+
+    ch.beat = new GTimeSlice();
+    if (timeBeat instanceof Array) {
+      for (let tb of timeBeat) {
+        ch.beat.addTo(this.track.currentBeat.denominator / tb);
+      }
+      ch.nths = new MBeatSequence(timeBeat);
+      // tuplet sound
+      if (timeBeat['tuplet']) {
+        // this.track.currentBar.chords[];
+        ch.beat.movTo(1/3);
+        ch.nths.seq = timeBeat['tuplet'];
+      }
+    } else if (typeof(timeBeat) == 'number') {
+      ch.beat.movTo(this.track.currentBeat.denominator / timeBeat);
+    } else {
+      console.error();
+    }
+    this.track.feed(ch);
+    return ch;
+  }
+
+  preset(params: any) {
+    let tone = params['tone'] || 0,
+      clef = params['clef'] || 0;
+    this.track._tailBar.clef = new MClef(clef, new MTone(tone));
+
+    let min = params['min'] || 2,
+      dem = params['dem'] || 4;
+    this.track._tailBar.timeBeat = new MBeat(min, dem);
+    this.mabs = !params['abs'];
+
+    // Pickup bar
+    if (params['pickup']) {
+      //  this.track._tailBar.pickup = params['pickup'];
+      this.track._tailBar.beat.beatlen = params['pickup'];
+    }
+
+    this.base = params['base'] || 60;
+  }
+
+  feed(content: Array<any>, params?: any) {
+    if (params == null) params = {};
+
+    this.makeNotef = this.mabs ? MTrackFeeder.makeNoteIn7 : MTrackFeeder.makeNote;
+    for (let elem of content) {
+      if (elem instanceof Array) {
+        let ch = this.pushNote(elem[0], elem[1], elem['linkPrev']);
+        ch.ouattach = GOUAttachment.make(elem['oum'], elem['overmarks'], elem['undermarks']);
+        if (elem['acciaccatura']) {
+          if (ch instanceof MChord) {
+            ch._decoration = EChordDecorationType.Acciaccatura;
+          }
+        }
+      } else if (elem instanceof Object) {
+        let m = new MMark(elem.kind, elem.type);
+        m.lf = elem.opt;
+        m.beat = new GTimeSlice().follow(this.track._tailBar.beat)
+        this.track.feed(m);
+      } else if (typeof(elem) == 'number') {
+        this.pushNote(elem);
+      }
+    }
+
+
+    if (this.base) {
+      this.track.shift(this.base);
+    }
+  }
+
+
+  _settle() {
+    for (let bar of this.track.bars) {
+      bar._settle();
+    }
+  }
+}
 /****************************************
  *
  * PushMelody
@@ -184,121 +315,12 @@ function PushMelody(mtrack, content) {
       content[prop] = content['param'][prop];
     }
   }
-  var tone = content['tone'] || 0,
-    clef = content['clef'] || 0;
-  mtrack._tailBar.clef = new MClef(clef, new MTone(tone));
 
-  var min = content['min'] || 2,
-    dem = content['dem'] || 4;
-  mtrack._tailBar.timeBeat = new MBeat(min, dem);
+  let feeder = new MTrackFeeder(mtrack);
+  feeder.preset(content);
+  feeder.feed(content);
+  feeder._settle();
 
-  function makeNote(x) {
-    return new MNote(x);
-  }
-
-  function makeNoteIn7(x) {
-    var idx = x % 10;
-    var n = Math.trunc(x / 10);
-    if (idx < 0) {
-      n--;
-      x = -idx;
-    } else {
-      x = idx;
-    }
-    x--;
-    n = n * 12 + x * 2;
-    if (x >= 3) {
-      n--;
-    }
-    return new MNote(n);
-  }
-  var mabs = !content['abs'];
-  var make_note = mabs ? makeNoteIn7 : makeNote;
-
-  function pushNote(notes, timeBeat: Array<number>|number = 4, linkToObjIdx = null) {
-    var ch;
-    if (notes == null || (notes == 0 && mabs)) {
-      if (typeof timeBeat === 'number')
-        ch = new MRest(timeBeat);
-      else
-        console.error('');
-    } else {
-      if (notes instanceof Array) {
-        ch = new MChord(...notes.map(make_note));
-      } else {
-        ch = new MChord(make_note(notes));
-      }
-
-      // link
-      if (linkToObjIdx != null) {
-        var bidx = mtrack.bars.length - 1;
-        while (linkToObjIdx > 0 && bidx >= 0) {
-          var chds = mtrack.bars[bidx].chords;
-          if (chds.length < linkToObjIdx) {
-            linkToObjIdx -= chds.length;
-            bidx--;
-          } else {
-            ch.linkWith(chds[chds.length - linkToObjIdx]);
-            break;
-          }
-        }
-      }
-    }
-
-    ch.beat = new GTimeSlice();
-    if (timeBeat instanceof Array) {
-      for (let tb of timeBeat) {
-        ch.beat.addTo(mtrack.currentBeat.denominator / tb);
-      }
-      ch.nths = new MBeatSequence(timeBeat);
-      // tuplet sound
-      if (timeBeat['tuplet']) {
-        // mtrack.currentBar.chords[];
-        ch.beat.movTo(1/3);
-        ch.nths.seq = timeBeat['tuplet'];
-      }
-    } else if (typeof(timeBeat) == 'number') {
-      ch.beat.movTo(mtrack.currentBeat.denominator / timeBeat);
-    } else {
-      console.error();
-    }
-    mtrack.feed(ch);
-    return ch;
-  }
-
-  // Pickup bar
-  if (content['pickup']) {
-    //  mtrack._tailBar.pickup = content['pickup'];
-    mtrack._tailBar.beat.beatlen = content['pickup'];
-  }
-
-  for (var elem of content) {
-    if (elem instanceof Array) {
-      var ch = pushNote(elem[0], elem[1], elem['linkPrev']);
-      ch.ouattach = GOUAttachment.make(elem['oum'], elem['overmarks'], elem['undermarks']);
-      if (elem['acciaccatura']) {
-        if (ch instanceof MChord) {
-        //ch.decoration = EChordDecorationType.Acciaccatura;
-        }
-      }
-    } else if (elem instanceof Object) {
-      var m = new MMark(elem.kind, elem.type);
-      m.lf = elem.opt;
-      m.beat = new GTimeSlice().follow(mtrack._tailBar.beat)
-      mtrack.feed(m);
-    } else if (typeof(elem) == 'number') {
-      pushNote(elem);
-    }
-  }
-
-  var base = content['base'] || 60;
-  if (base) {
-    mtrack.shift(base);
-  }
-
-  for (var bar of mtrack.bars) {
-    bar._settle();
-  }
 }
 
 function DumpMTrack(mtrack, ops) {

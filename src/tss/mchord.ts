@@ -17,6 +17,7 @@ class MChord extends MLayerBase implements EBeamCombinable, EArchCombinable {
 
   _linkObject: MChordLinkInfo
   _beamCombine: EConjunctBeamInfo
+  _decoration: EChordDecorationType
 
   constructor(...args: MNote[]) {
     super();
@@ -35,6 +36,7 @@ class MChord extends MLayerBase implements EBeamCombinable, EArchCombinable {
       return new ENote(nths, nli.line, nli.sign);
     }));
     newobj.ouattach = this.ouattach;
+    newobj._decoration = this._decoration;
     return newobj;
   }
 

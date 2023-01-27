@@ -301,13 +301,13 @@ class GContext {
     while (l < h - 1) {
       let m = (l + h) >> 1;
       let bpo = this.beatPositions[m];
-      if (bpo.beat < this._beatCursor) {
-        l = m;
-      } else if (bpo.beat === this._beatCursor) {
+      if (bpo.beat === this._beatCursor) {
         l = m;
         break;
-      } else {
+      } else if (bpo.beat > this._beatCursor) {
         h = m;
+      } else {
+        l = m;
       }
     }
 
@@ -359,6 +359,7 @@ const gEID = {
     "noteflag": { id: "note_flag-up", ay: 0.5, w: 8, h: 20.8 },
 
     "fermata": { id: "fermata", ax: 0.8, ay: 5, w: 17, h: 12 },
+    "segno": {id: "segno_teken", w: 10, h: 18},
 
     "num-0": { id: "num-0", w: 12.5, h: 17.5 },
     "num-1": { id: "num-1", w: 12.5, h: 17.5 },
@@ -567,12 +568,12 @@ if (1) {
     }
 
     if (this.cursor) {
-      var bpo = this.beatPositions[this.cursor - 1];
-      var y0 = this.rowBaselineY[bpo.rowIndex - 1];
-      var y1 = this.rowBaselineY[bpo.rowIndex];
-      var h = y1 - y0;
+      let bpo = this.beatPositions[this.cursor - 1];
+      let y0 = this.rowBaselineY[bpo.rowIndex - 1];
+      let y1 = this.rowBaselineY[bpo.rowIndex];
+      let h = y1 - y0;
 
-      var cursor = createSvgElement('g');
+      let cursor = createSvgElement('g');
 
       cursor.id = "cursor";
       cursor.setAttribute("transform", "translate(" + bpo.x + "," + y0 +
@@ -580,7 +581,7 @@ if (1) {
       page.appendChild(cursor);
 
 
-      var path = createSvgElement('path');
+      let path = createSvgElement('path');
       path.setAttribute("d", "M 0,0 v" + h + "m-5,0h10m0,-" + h +
         "h-10");
       path.style.stroke = "red";
@@ -594,7 +595,7 @@ if (1) {
    *
    *******************************/
   function drawIcon(ctx, img, x: number, y: number, w?: number, h?: number) {
-    var use = createSvgElement('use');
+    let use = createSvgElement('use');
     if (w) { w /= img.w; } else { w = 1; }
     if (h) { h /= img.h; } else { h = 1; }
     w = Math.max(w, h);
