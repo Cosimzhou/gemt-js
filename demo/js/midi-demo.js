@@ -120,7 +120,6 @@ function MIDIDemoInit() {
       //    onsuccess: function() {}
     });
 
-    player.player = MIDI.Player;
   };
 }
 
@@ -155,7 +154,7 @@ function ManualDemoInit(width, height, svg) {
     ctx.scale(2, 2);
   }
 
-  player.context = gct = new GContext(ctx, width, height);
+  gct = new GContext(ctx, width, height);
 }
 
 function ManualDemoShow() {
@@ -169,6 +168,7 @@ function ManualDemoShow() {
 
   gct.feedScore(mscore, 30, 0);
   gct.print();
+  player.context = gct;
   showPage();
 
   player.player = new TPlayer(MTConvert(mscore), MIDI.Player);

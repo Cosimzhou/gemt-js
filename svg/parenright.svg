@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" width="8" height="30">
+  <path transform="matrix(0.03125,0,0,-0.03125,0,22)"
+    d="M40 -193q124 183 124 431q0 215 -124 415h30q71 -79 118.5 -189.5t47.5 -232.5q0 -111 -40 -223t-121 -201h-35z"
+     style="fill:currentColor" />
+</svg>

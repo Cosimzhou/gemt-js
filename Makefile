@@ -38,6 +38,9 @@ XLayerTs: prepare
 	@cat src/tss/x*.ts > $(BUILD_DIR)/XLayer.ts
 
 GemtTs: GLayerTs ELayerTs MLayerTs TLayerTs XLayerTs
+	@echo "======================================="
+	@echo "=  convert TS to JS                   ="
+	@echo "======================================="
 	@cat src/utils.js $(BUILD_DIR)/XLayer.ts $(BUILD_DIR)/GLayer.ts $(BUILD_DIR)/ELayer.ts $(BUILD_DIR)/MLayer.ts $(BUILD_DIR)/TLayer.ts > $(BUILD_DIR)/GEMT.ts
 	@tsc $(TSC_FLAGS) $(BUILD_DIR)/GEMT.ts
 

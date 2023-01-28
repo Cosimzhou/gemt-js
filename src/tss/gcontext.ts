@@ -20,6 +20,8 @@ class GContext {
   _pageYBase: Array<number>
   _pageSegs: Array<number>
   beatPositions: Array<GBeatInfo>
+  eventList: Array<any>
+  tempoList: Array<any>
   rowOriginPoint: GPoint
 
   clearImpl: ()=>void
@@ -74,6 +76,10 @@ class GContext {
       score.convert();
       console.log("TMidiConvertor", score);
 
+      this.eventList = score.eventList;
+      this.tempoList = this.eventList.filter(x => x.subtype==="setTempo");
+
+      console.log("MConvert tempo:", this.tempoList);
       score = MConvert(score);
       console.log("MConvert result:", score);
     }
@@ -206,7 +212,7 @@ class GContext {
     }
 
     function rt(e) {
-      var w = e.right - e.left;
+      let w = e.right - e.left;
       e.left = (e.left - baseX) * rate + baseX;
       e.right = e.left + w;
     }
@@ -227,8 +233,8 @@ class GContext {
   print(pageIdx: number = null): number {
     if (pageIdx == null) {
       if (this.isPlaying) {
-        var bpo = this.beatPositions[this.cursor - 1];
-        var i, rowY = this.rowBaselineY[bpo.rowIndex];
+        let bpo = this.beatPositions[this.cursor - 1];
+        let i, rowY = this.rowBaselineY[bpo.rowIndex];
         for (i = 0; i < this._pageYBase.length; ++i) {
           if (rowY <= this._pageYBase[i]) {
             pageIdx = i - 1;
@@ -359,7 +365,7 @@ const gEID = {
     "noteflag": { id: "note_flag-up", ay: 0.5, w: 8, h: 20.8 },
 
     "fermata": { id: "fermata", ax: 0.8, ay: 5, w: 17, h: 12 },
-    "segno": {id: "segno_teken", w: 10, h: 18},
+    "segno": {id: "segno_teken", ay: 18, w: 10, h: 18},
 
     "num-0": { id: "num-0", w: 12.5, h: 17.5 },
     "num-1": { id: "num-1", w: 12.5, h: 17.5 },
@@ -371,6 +377,9 @@ const gEID = {
     "num-7": { id: "num-7", w: 12.5, h: 17.5 },
     "num-8": { id: "num-8", w: 12.5, h: 17.5 },
     "num-9": { id: "num-9", w: 12.5, h: 17.5 },
+
+    "parenleft": { id: "parenleft", ay: 15, w: 8, h: 30 },
+    "parenright": { id: "parenright", ay: 15, w: 8, h: 30 },
 
     "brace": { id: "brace", w: 8, h: 82 },
     "mordant": { id: "mordant", w: 13, h: 6 },
@@ -574,7 +583,6 @@ if (1) {
       let h = y1 - y0;
 
       let cursor = createSvgElement('g');
-
       cursor.id = "cursor";
       cursor.setAttribute("transform", "translate(" + bpo.x + "," + y0 + ")");
       page.appendChild(cursor);

@@ -141,6 +141,8 @@ class EBarline extends ELayerBase {// implements EScoreElement {
         break;
     }
 
+    epos.mainStroke = line1;
+
     return epos;
   }
 }

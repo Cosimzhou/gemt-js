@@ -18,15 +18,15 @@ class EMark implements ELayoutBudget {
   }
 
   _budget(ctx, etrack: ETrack, x: number, trkPos?: Array<ETrackPositionInfo>): EPositionInfo {
-    var y = etrack.translate(this.line);
-    var epos = new EPositionInfo();
+    let y = etrack.translate(this.line);
+    let epos = new EPositionInfo();
     epos.rect = this.img._budget(x, y);
     epos.width = this.img.width;
-    if (this.imgK == 'flat' || this.imgK == 'sharp') {
+    if (this.imgK === 'flat' || this.imgK === 'sharp' || this.imgK === 'natural') {
       epos.noMargin = true;
     }
 
-    epos.pushOperations(ctx._draw(this.imgK, x, y));
+    epos.pushOperations(epos.mainStroke = ctx._draw(this.imgK, x, y));
 
     return epos;
   }

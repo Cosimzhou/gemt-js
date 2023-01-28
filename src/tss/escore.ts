@@ -37,156 +37,145 @@ class EScore {
    ******************************/
   budgetARow(ctx, x: number, y: number, noteProgress: Array<number>): number {
     ctx.rowOriginPoint = { x: x, y: y };
-
-    var rowctx = new EScoreBudgetRowContext(this, ctx);
+    let rowctx = new EScoreBudgetRowContext(this, ctx);
     rowctx._prepareBackgroundForARow(x, y);
+    rowctx._prevRowMark = this._prevRowMark;
     x = rowctx.trkOriginX;
 
-    var EndFlag = false,
-        hasConsective = true;
-
-    rowctx._prevRowMark = this._prevRowMark;
-
-    {
-      let me = this;
-      // arrange the row
-      let restTrackNum = me._tracks.length,
-        nextVisualIndex = zarray(restTrackNum);
-      let tailBarCompleted = false,
-        firstBarInRow = true,
-        beginAWholeBar = true,
-        endAWholeBar = false;
-      for (let maxWidth, visualIndex = 0, lineFresh = false;
-        !lineFresh && (x < me.trackLength || !tailBarCompleted) && restTrackNum > (maxWidth = 0);
-        visualIndex++) {
-        let columnStartPos = rowctx._postOps.length;
-        if (beginAWholeBar) {
-          x = rowctx._fillBarHeader(x, noteProgress, firstBarInRow);
-        }
-
-        // Start to arrange those notes in tracks
-        for (let beatStartX = x, track, trackIndex = 0; track = me._tracks[trackIndex]; ++trackIndex) {
-          if (visualIndex < nextVisualIndex[trackIndex]) {
-            // Skip the unreached emarks; wait the progress.
-            continue;
-          }
-
-          if (noteProgress[trackIndex] >= track.marks.length) {
-            // Whether all emarks in this track are settled.
-            // if so, eliminate _tracks.
-            nextVisualIndex[trackIndex]++;
-            restTrackNum--;
-            endAWholeBar = false;
-            continue;
-          }
-
-          let epos;
-          // treat the emark in this track
-          let m = track.marks[noteProgress[trackIndex]++];
-          if (m instanceof ESkip) {
-            nextVisualIndex[trackIndex] += m._skipN;
-          } else if (m instanceof EBarline) {
-            lineFresh = m._lineFresh;
-
-            // Be careful; EBarline will not trigger nextVisualIndex
-            // moving next.
-            // nextVisualIndex[trackIndex]++;
-            epos = m._budget(ctx, null, x, rowctx._tracksPosInfo);
-            rowctx._postOps.push(...epos.operations);
-            // At this visualIndex, there is only one EBarline. So
-            // the width of EBarline is the maximum width.
-            maxWidth = epos.width;
-
-            if (x < me.trackLength) {
-              rowctx._copyEtracksProgress(noteProgress);
-            } else {
-              tailBarCompleted = true;
-              hasConsective = false;
-              for (let ti = 0; ti < noteProgress.length; ti++) {
-                if (noteProgress[ti] < me._tracks[ti].marks.length) {
-                  hasConsective = true;
-                  break;
-                }
-              }
-            }
-
-            rowctx._recordBarSegment(tailBarCompleted);
-
-            visualIndex--;
-            endAWholeBar = beginAWholeBar = true;
-
-            if (rowctx._beatPositions.length) {
-              rowctx._beatPositions[rowctx._beatPositions.length - 1]._attach(m);
-            }
-
-            // EBarline only appears in the first track,
-            break;
-          } else {
-            // m instanceof EChord or ERest
-            nextVisualIndex[trackIndex]++;
-
-            epos = m._budget(ctx, track, x);
-            rowctx._postOps.push(...epos.operations);
-            // In order to make sure that the notes or marks do not
-            // conflict with each other, record all thier positions
-            // and envelopes.
-            rowctx._tracksPosInfo[trackIndex].ops.push(...epos.operations);
-
-            // TODO: add beat offset to the third element
-            if (rowctx._beatPositions.length == 0 || rowctx._beatPositions[
-                rowctx._beatPositions.length - 1].x < x)
-              rowctx._beatPositions.push(
-                new GBeatInfo(x, ctx.rowBaselineY.length, m._mobj.beat._start));
-
-            maxWidth = Math.max(
-              maxWidth, epos.width - (epos.noMargin ? g_option.margin : 0));
-
-
-            if (epos.shx) {
-              // If these marks required to insert some symbols before themselves,
-              // they are settled in the x coordinate, and context would shift
-              // them by shx.x to the place offers space for their symbols. In
-              // another way, the mark's budget will settle symbols in minus x,
-              // and till the context shift, time line is clean.
-              let shiftX = beatStartX + epos.shx.x - x;
-              if (shiftX > 0) {
-                ctx.shift(rowctx._postOps, shiftX, 0, columnStartPos);
-                x = beatStartX + epos.shx.x;
-              }
-              // shift before
-            }
-
-            rowctx._tracksPosInfo[trackIndex].rec.union(epos.rect);
-            for (let r of epos.rects) {
-              rowctx._tracksPosInfo[trackIndex].rec.union(r);
-              ctx._grid.put(r);
-            }
-            ctx._grid.put(epos.rect);
-
-            //if (m._linkObject) {}
-          }
-          endAWholeBar = false;
-        }
-        x += maxWidth + g_option.margin;
-
-        firstBarInRow = false;
-        if (!endAWholeBar) beginAWholeBar = false;
+    // arrange the row
+    for (let restTrackNum = this._tracks.length,
+      nextVisualIndex = zarray(restTrackNum),
+      tailBarCompleted = false,
+      firstBarInRow = true,
+      beginAWholeBar = true,
+      endAWholeBar = false,
+      visualIndex = 0, lineFresh = false, maxWidth;
+      !lineFresh && (x < this.trackLength || !tailBarCompleted) && restTrackNum > (maxWidth = 0);
+      visualIndex++) {
+      let columnStartPos = rowctx._postOps.length;
+      if (beginAWholeBar) {
+        x = rowctx._fillBarHeader(x, noteProgress, firstBarInRow);
       }
 
-      EndFlag = (restTrackNum == 0);
+      // Start to arrange those notes in tracks
+      for (let beatStartX = x, track, trackIndex = 0; track = this._tracks[trackIndex]; ++trackIndex) {
+        if (visualIndex < nextVisualIndex[trackIndex]) {
+          // Skip the unreached emarks; wait the progress.
+          continue;
+        }
+
+        if (noteProgress[trackIndex] >= track.marks.length) {
+          // Whether all emarks in this track are settled.
+          // if so, eliminate _tracks.
+          nextVisualIndex[trackIndex]++;
+          if (--restTrackNum === 0) {
+            rowctx.endFlag = true;
+          }
+          endAWholeBar = false;
+          continue;
+        }
+
+        let epos;
+        // treat the emark in this track
+        let m = track.marks[noteProgress[trackIndex]++];
+        if (m instanceof ESkip) {
+          nextVisualIndex[trackIndex] += m._skipN;
+        } else if (m instanceof EBarline) {
+          lineFresh = m._lineFresh;
+
+          // Be careful; EBarline will not trigger nextVisualIndex
+          // moving next.
+          // nextVisualIndex[trackIndex]++;
+          epos = m._budget(ctx, null, x, rowctx._tracksPosInfo);
+          rowctx._postOps.push(...epos.operations);
+          // At this visualIndex, there is only one EBarline. So
+          // the width of EBarline is the maximum width.
+          maxWidth = epos.width;
+
+          if (x < this.trackLength) {
+            rowctx._copyEtracksProgress(noteProgress);
+          } else {
+            tailBarCompleted = true;
+            rowctx.hasConsective = false;
+            for (let ti = 0; ti < noteProgress.length; ti++) {
+              if (noteProgress[ti] < this._tracks[ti].marks.length) {
+                rowctx.hasConsective = true;
+                break;
+              }
+            }
+          }
+
+          rowctx._recordBarSegment(tailBarCompleted);
+
+          visualIndex--;
+          endAWholeBar = beginAWholeBar = true;
+
+          if (rowctx._beatPositions.length) {
+            rowctx._beatPositions[rowctx._beatPositions.length - 1]._attach(m);
+          }
+
+          // EBarline only appears in the first track,
+          break;
+        } else {
+          // m instanceof EChord or ERest
+          nextVisualIndex[trackIndex]++;
+
+          epos = m._budget(ctx, track, x);
+          rowctx._postOps.push(...epos.operations);
+          // In order to make sure that the notes or marks do not
+          // conflict with each other, record all thier positions
+          // and envelopes.
+          rowctx._tracksPosInfo[trackIndex].ops.push(...epos.operations);
+
+          // TODO: add beat offset to the third element
+          if (rowctx._beatPositions.length == 0 || rowctx._beatPositions[
+              rowctx._beatPositions.length - 1].x < x)
+            rowctx._beatPositions.push(
+              new GBeatInfo(x, ctx.rowBaselineY.length, m._mobj.beat._start));
+
+          maxWidth = Math.max(
+            maxWidth, epos.width - (epos.noMargin ? g_option.margin : 0));
+
+
+          if (epos.shx) {
+            // If these marks required to insert some symbols before themselves,
+            // they are settled in the x coordinate, and context would shift
+            // them by shx.x to the place offers space for their symbols. In
+            // another way, the mark's budget will settle symbols in minus x,
+            // and till the context shift, time line is clean.
+            let shiftX = beatStartX + epos.shx.x - x;
+            if (shiftX > 0) {
+              ctx.shift(rowctx._postOps, shiftX, 0, columnStartPos);
+              x = beatStartX + epos.shx.x;
+            }
+            // shift before
+          }
+
+          rowctx._tracksPosInfo[trackIndex].rec.union(epos.rect);
+          for (let r of epos.rects) {
+            rowctx._tracksPosInfo[trackIndex].rec.union(r);
+            ctx._grid.put(r);
+          }
+          ctx._grid.put(epos.rect);
+
+          //if (m._linkObject) {}
+        }
+        endAWholeBar = false;
+      }
+      x += maxWidth + g_option.margin;
+
+      firstBarInRow = false;
+      if (!endAWholeBar) beginAWholeBar = false;
     }
+    //rowctx.endFlag = (restTrackNum == 0);
 
     rowctx._adjustMarginBetweenAdjacentTrack();
-    if (rowctx._stretchOps(EndFlag, noteProgress) && !hasConsective) {
-      EndFlag = true;
-    }
-
+    rowctx._stretchOps(noteProgress);  // endflag effected here
     rowctx._joinOps();
     rowctx._adjustMarginBetweenAdjacentRow();
-
     rowctx._archive();
 
-    return EndFlag ? null : ctx._grid.overall.bottom;
+    return rowctx.endFlag ? null : ctx._grid.overall.bottom;
   }
 
   budget(ctx, x: number, y: number): void {
@@ -277,6 +266,8 @@ class EScoreBudgetRowContext {
   _legacyMark: EBarline
   _prevRowMark: EBarline
   _etrackProgressCopy: Array<number>
+  endFlag: boolean
+  hasConsective: boolean
 
   constructor(escore: EScore, gctx: GContext) {
     this._score = escore;
@@ -288,6 +279,8 @@ class EScoreBudgetRowContext {
     this._barSegInfo = [new EBarSequence()];
     this._tracksPosInfo = [];
     this._legacyMark = null;
+    this.endFlag = false;
+    this.hasConsective = true;
 
     // Clear GContext
     gctx._grid.clear();
@@ -407,14 +400,14 @@ class EScoreBudgetRowContext {
     this._etrackProgressCopy = ps.concat();
   }
 
-  _stretchOps(endflag: boolean, ps: Array<number>): boolean {
+  _stretchOps(ps: Array<number>): void {
     // Adjust should take out and append to makeplan.
     var score = this._score;
     var ctx = this._gctx;
     var arr = this._postOps;
     var flag = true;
 
-    if (!endflag && this._barSegInfo.length > 1) {
+    if (!this.endFlag && this._barSegInfo.length > 1) {
       let barIdx = this._barSegInfo[0].opsIdx == 0 ? 1 : 0;
       let split = this._barSegInfo[barIdx];
 
@@ -461,7 +454,10 @@ class EScoreBudgetRowContext {
       }
     }
 
-    return flag;
+    if (flag && !this.hasConsective) {
+      this.endFlag = true;
+    }
+    //return flag;
   }
 
 

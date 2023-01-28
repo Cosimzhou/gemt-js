@@ -97,7 +97,7 @@ class TPlayer {
     }
   }
 
-  playing(): boolean {
+  get playing(): boolean {
     return this._player['playing'];
   }
 

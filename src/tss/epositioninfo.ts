@@ -1,11 +1,3 @@
-class GPoint {
-  x: number
-  y: number
-  constructor(x: number = 0, y: number = 0) {
-    this.x = x;
-    this.y = y;
-  }
-}
 
 // TODO():
 class AAAA {
@@ -17,6 +9,7 @@ class EPositionInfo{
   rect: GRect
   rects: Array<GRect>
   operations: Array<GStroke>
+  mainStroke: GStroke
   width: number
 
   // extension property

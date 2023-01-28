@@ -27,10 +27,11 @@ class MMark extends MLayerBase {
         newobj = new ERest(-this.type);
         break;
       case 'dupbar':
-        //newobj = new ERest(-this.type);
-        break;
       case 'blank':
-        //newobj = new ERest(-this.type);
+        break;
+      case 'parenleft':
+      case 'parenright':
+        newobj = new EMark(this.kind, 2);
         break;
       default:
         newobj = new EMark(this.kind, -1.5);

@@ -1,3 +1,9 @@
+/********************************
+ *
+ * Interfaces
+ *
+ *******************************/
+
 interface MInterface {
   beat: GTimeSlice
   nths: MBeatSequence
@@ -23,13 +29,13 @@ class GOUAttachment {
   _oumark: Array<string>
   _overmarks: Array<string>
   _undermarks: Array<string>
-  constructor(o1: Array<string>, o2: Array<string>, o3: Array<string>){
+  constructor(o1: Array<string>, o2: Array<string>, o3: Array<string>) {
     this._oumark = o1;
     this._overmarks =o2;
     this._undermarks = o3;
   }
 
-  static make(o1: Array<string>, o2: Array<string>, o3: Array<string>): GOUAttachment {
+  static make(o1: Array<string>, o2?: Array<string>, o3?: Array<string>): GOUAttachment {
     if (o1 != null || o2 != null || o3 != null) {
       return new GOUAttachment(o1, o2, o3);
     }
@@ -72,8 +78,6 @@ class MLayerBase implements MInterface, GOUAttachable {
 
   // ELayerBase
   _eobj: ELayerBase
-
-  //_linkObject: MiChordLinkInfo
 }
 
 class ELayerBase implements ELayoutBudget, GOUAttachable {
@@ -91,3 +95,8 @@ class ELayerBase implements ELayoutBudget, GOUAttachable {
 }
 
 
+interface IPlayer {
+  stop(): void
+  resume(): void
+  playing: boolean
+}

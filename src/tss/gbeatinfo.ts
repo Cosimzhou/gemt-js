@@ -1,3 +1,10 @@
+/********************************
+ *
+ * GBeatInfo
+ *
+ * @constructor
+ *******************************/
+
 class GBeatInfo implements MRepeatElement {
   x: number
   rowIndex: number
@@ -10,19 +17,19 @@ class GBeatInfo implements MRepeatElement {
     this.beat = beat;
   }
 
-  _attach = function(barl) {
+  _attach(barl): void {
     this.func = barl._barlineType;
   }
 
-  clone = function() {
+  clone(): GBeatInfo {
     return new GBeatInfo(this.x, this.rowIndex, this.beat);
   }
 
-  _seqVal = function() {
+  _seqVal(): number {
     return this.beat;
   }
 
-  _shift = function(v) {
+  _shift(v: number): void {
     this.beat += v;
   }
 }
