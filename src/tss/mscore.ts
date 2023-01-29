@@ -16,7 +16,7 @@ class MScore {
   track(idx: number) { return this._tracks[idx]; }
 
   appendTrack(): MTrack {
-    var track = MakeMTrack();
+    let track = MakeMTrack();
     this._tracks.push(track);
     return track;
   }
@@ -24,21 +24,21 @@ class MScore {
   makeRepeatCourse(): void {
     if (this._tracks.length <= 0 || this._repeatCourse) return;
 
-    var track = this._tracks[0];
-    var cursorBeat = 0;
-    var rc = new MRepeatCourse();
+    let track = this._tracks[0];
+    let cursorBeat = 0;
+    let rc = new MRepeatCourse();
     for (let bi = 0, bar; bar = track.bars[bi]; ++bi) {
       for (let ci = 0, mch; mch = bar.chords[ci]; ++ci) {
         // Convert MChord to TChord
         if (mch instanceof MMark) {
           if (mch.kind == 'barline') {
-            if (mch.type == 3) {
+            if (mch.subtype == 3) {
               // Repeat segment begin
               rc._push(cursorBeat, MRepeatCourse.Const.Begin);
-            } else if (mch.type == 4) {
+            } else if (mch.subtype == 4) {
               // Repeat segment end
               rc._push(cursorBeat, MRepeatCourse.Const.End);
-            } else if (mch.type == 7) {
+            } else if (mch.subtype == 7) {
               // Repeat segment begin and end
               rc._push(cursorBeat, MRepeatCourse.Const.End);
               rc._push(cursorBeat, MRepeatCourse.Const.Begin);

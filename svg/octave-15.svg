@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" width="16.75" height="17">
+  <path transform="matrix(0.025,0,0,-0.025,0,16.5)"
+    d="M0 454v38q52 1 82.5 8t45.5 23t19 33t4 49q0 7 -0.5 25t-0.5 27h70v-657h-80v454h-140zM240 160h40q15 -78 56.5 -104t107.5 -26q145 0 145 213q0 92 -26.5 143t-94.5 51q-84 0 -136 -90h-72l46 310h330v-45h-266l-24 -175q57 40 118 40q206 0 206 -231q0 -131 -56 -193.5t-170 -62.5q-178 0 -204 170z"
+     style="fill:currentColor" />
+</svg>
+

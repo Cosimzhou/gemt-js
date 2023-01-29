@@ -5,6 +5,33 @@
  * @constructor
  *
  *******************************/
+enum MClefType {
+  GClef = 0,
+  FClef = 1,
+  CClef = 2,
+  CClefTensor = 3,
+
+  GClefOver8 = 16,
+  FClefOver8 = 17,
+  CClefOver8 = 18,
+  CClefTensorOver8 = 19,
+
+  GClefLower8 = 24,
+  FClefLower8 = 25,
+  CClefLower8 = 26,
+  CClefTensorLower8 = 27,
+
+  GClefOver15 = 32,
+  FClefOver15 = 33,
+  CClefOver8 = 34,
+  CClefTensorOver8 = 35,
+
+  GClefLower15 = 40,
+  FClefLower15 = 41,
+  CClefLower15 = 42,
+  CClefTensorLower15 = 43,
+}
+
 class MClef {
   _type: number
   _tone: MTone
@@ -14,7 +41,7 @@ class MClef {
   high: number
   low: number
   base: number
-  off: number
+  offset: number
   level: number
   line: number
   constructor(n: number, t?: MTone) {
@@ -24,10 +51,6 @@ class MClef {
   }
 
   static Const = {
-    GClef: 0,
-    FClef: 1,
-    CClef: 2,
-    CClefTensor: 3,
     ova8: 0,
     ovb8: 8,
     clefRange: [
@@ -50,27 +73,32 @@ class MClef {
   set type(t: number) { this._type = t; this.load() }
 
   load(): void {
-    var clefData = MClef.Const.clefRange[this._type % 4];
-    for (let prop in clefData) this[prop] = clefData[prop];
+    let clefData = MClef.Const.clefRange[this._type % 4];
+    this.low = clefData.low;
+    this.high = clefData.high;
+    this.base = clefData.base;
+    this.level = clefData.level;
+    this.line = clefData.line;
 
     let off = this._type >> 4;
-    if (this._type & 8) {
-      off = -off;
-    }
-    this.base += 12 * off;
-    this.off = off;
+    if (this._type & 8) off = -off;
+    this.offset = off;
+    off *= 12;
+    this.base += off;
+    this.low += off;
+    this.high += off;
 
     if (this._tone == null)
       return;
 
-    var order = this._tone.noteOrder(this.base);
-    if (order * 2 % 2 == 1) {
+    let order = this._tone.noteOrder(this.base);
+    if (order * 2 % 2 === 1) {
       if (this._tone.flat) {
         order -= .5;
-        this.base -= 1;
+        this.base--;
       } else {
         order += .5;
-        this.base += 1;
+        this.base++;
       }
     }
     this.order = order;
@@ -103,10 +131,10 @@ class MClef {
   }
 
   _convertMark(preClef: MClef = null): Array<ELayoutBudget> {
-    var ms = [];
+    let ms = [];
 
     if (preClef == null) {
-      switch (this._type) {
+      switch (this._type % 4) {
         case 0:
           ms.push(new EMark('g-clef', 3));
           break;
@@ -120,6 +148,11 @@ class MClef {
           ms.push(new EMark('c-clef', 1));
           break;
       }
+
+      if (this.offset !== 0) {
+
+      }
+
       if (this._tone && this._tone.shifts.length) {
         let sym = this._tone.symbol == '#' ? 'sharp' : 'flat';
         for (let i = 0; i < this._tone.shifts.length; ++i) {
@@ -147,7 +180,6 @@ class MClef {
 
     return overline + underline;
   }
-
 }
 
 

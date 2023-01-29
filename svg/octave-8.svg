@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" width="11" height="17">
+  <path transform="matrix(0.025,0,0,-0.025,0,16.70625)"
+    d="M0 189q0 118 118 175q-96 54 -96 133q0 170 192 170q54 0 92 -14t56.5 -31.5t28.5 -45.5t11.5 -43t1.5 -37q0 -74 -96 -132q120 -52 120 -172q0 -202 -214 -202t-214 199zM80 185q0 -155 130 -155q136 0 136 155t-132 155q-134 0 -134 -155zM104 496q0 -111 110 -111 t110 112q0 130 -112 130q-108 0 -108 -131z"
+     style="fill:currentColor" />
+</svg>
+
+

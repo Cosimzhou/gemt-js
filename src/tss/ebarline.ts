@@ -145,4 +145,48 @@ class EBarline extends ELayerBase {// implements EScoreElement {
 
     return epos;
   }
+
+  // TODO(cosim): unused function
+  _budgetOUAttachment(ctx, etrack: ETrack, b: EChordBudgetContext) {
+    if (this.ouattach) {
+      let overmarks = this.ouattach._overmarks;
+      if (overmarks) {
+        let l0y = etrack.translate(0);
+        let ouy = b.noteImg.y;
+        let omk, pmk = null;
+        if (l0y > ouy) l0y = ouy;
+        for (let oum of overmarks) {
+          l0y -= 4;
+          b.epos.pushOperations(omk = ctx._draw(oum, 0, l0y)
+            ._attach(b.noteImg, GStrokeConstraintType.ConstraintXCenter)
+            ._attach(pmk, GStrokeConstraintType.ConstraintTopOn, l0y));
+          pmk = omk;
+          l0y = 0;
+        }
+      }
+
+      let oumark = this.ouattach._oumark;
+      if (oumark) {
+        if (b.isUp) {
+          let l0y = etrack.translate(0);
+          let ouy = b.noteImg.y;
+          if (l0y > ouy) l0y = ouy;
+          for (let oum of oumark) {
+            l0y -= 16;
+            b.epos.pushOperations(ctx._draw(oum, 0, l0y)
+              ._attach(b.noteImg, GStrokeConstraintType.ConstraintXCenter));
+          }
+        } else {
+          let l4y = etrack.translate(0);
+          let ouy = b.noteImg.y;
+          if (l4y < ouy) l4y = ouy;
+          for (let oum of oumark) {
+            l4y += 16;
+            b.epos.pushOperations(ctx._draw(oum, 0, l4y)
+              ._attach(b.noteImg, GStrokeConstraintType.ConstraintXCenter));
+          }
+        }
+      }
+    }
+  }
 }
