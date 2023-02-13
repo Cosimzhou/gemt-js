@@ -7,7 +7,7 @@
  *  1. EBarline must be settle in the first track in EScore
  *
  *************************************************************/
-class EBarline extends ELayerBase {// implements EScoreElement {
+class EBarline extends ELayerBase {
   _barlineType: number
   _lineFresh: boolean
   constructor(t: number) {
@@ -21,11 +21,11 @@ class EBarline extends ELayerBase {// implements EScoreElement {
   }
 
   _budget(ctx, track: ETrack, x: number, trkPos?: Array<ETrackPositionInfo>): EPositionInfo {
-    var endTrk = trkPos[trkPos.length - 1];
-    var oy = trkPos[0].y,
+    let endTrk = trkPos[trkPos.length - 1];
+    let oy = trkPos[0].y,
       y = endTrk.ey;
-    var height = y - oy;
-    var epos, line1, line2;
+    let height = y - oy;
+    let epos, line1, line2;
     switch (this._barlineType) {
       case 0: // single line
         epos = new EPositionInfo(3, height, x, oy);
@@ -55,7 +55,7 @@ class EBarline extends ELayerBase {// implements EScoreElement {
             GStrokeConstraintType.ConstraintY2),
           ctx._Vline(_, oy, _)._attach(line1, GStrokeConstraintType.ConstraintX,
             6)._attach(endTrk.bl, GStrokeConstraintType.ConstraintY2));
-        for (var trk, i = 0; trk = trkPos[i]; ++i) {
+        for (let trk, i = 0; trk = trkPos[i]; ++i) {
           // no need attch for y coordinate
           epos.pushOperations(ctx._dot(_, _, 2)._attach(line1, GStrokeConstraintType
               .ConstraintX, 10)._attach(trk.bl, GStrokeConstraintType.ConstraintY, -
@@ -76,7 +76,7 @@ class EBarline extends ELayerBase {// implements EScoreElement {
           ctx._Vline(x + 5, oy, y)._attach(line1, GStrokeConstraintType.ConstraintX, -
             3)._attach(endTrk.bl, GStrokeConstraintType.ConstraintY2));
 
-        for (var trk, i = 0; trk = trkPos[i]; ++i) {
+        for (let trk, i = 0; trk = trkPos[i]; ++i) {
           // no need attch for y
           epos.pushOperations(ctx._dot(_, _, 2)._attach(line1, GStrokeConstraintType
               .ConstraintX, -8)._attach(trk.bl, GStrokeConstraintType.ConstraintY, -
@@ -89,7 +89,7 @@ class EBarline extends ELayerBase {// implements EScoreElement {
         break;
       case 5: // dash line
         epos = new EPositionInfo(3, height, x, oy);
-        for (var trk, i = 0; trk = trkPos[i]; ++i) {
+        for (let trk, i = 0; trk = trkPos[i]; ++i) {
           epos.pushOperations(line1 = ctx._vline(x, _, 7)._attach(trk.bl,
               GStrokeConstraintType.ConstraintY, -32),
             ctx._vline(x, _, 7)._attach(trk.bl, GStrokeConstraintType.ConstraintY, -
@@ -111,7 +111,7 @@ class EBarline extends ELayerBase {// implements EScoreElement {
             .ConstraintX, 2)._attach(endTrk.bl, GStrokeConstraintType.ConstraintY2));
 
         // draw dots before the vertical lines
-        for (var trk, i = 0; trk = trkPos[i]; ++i) {
+        for (let trk, i = 0; trk = trkPos[i]; ++i) {
           epos.pushOperations(ctx._dot(_, _, 2)._attach(
               line1, GStrokeConstraintType.ConstraintX, -6)._attach(
               trk.bl, GStrokeConstraintType.ConstraintY, -12),
@@ -125,7 +125,7 @@ class EBarline extends ELayerBase {// implements EScoreElement {
             7)._attach(endTrk.bl, GStrokeConstraintType.ConstraintY2));
 
         // draw dots around the vertical lines
-        for (var trk, i = 0; trk = trkPos[i]; ++i) {
+        for (let trk, i = 0; trk = trkPos[i]; ++i) {
           epos.pushOperations(ctx._dot(_, _, 2)._attach(line1,
               GStrokeConstraintType.ConstraintX, 12)._attach(trk.bl, GStrokeConstraintType
               .ConstraintY, -12),

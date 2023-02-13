@@ -23,8 +23,8 @@ enum MClefType {
 
   GClefOver15 = 32,
   FClefOver15 = 33,
-  CClefOver8 = 34,
-  CClefTensorOver8 = 35,
+  CClefOver15 = 34,
+  CClefTensorOver15 = 35,
 
   GClefLower15 = 40,
   FClefLower15 = 41,
@@ -50,22 +50,18 @@ class MClef {
     this.load();
   }
 
-  static Const = {
-    ova8: 0,
-    ovb8: 8,
-    clefRange: [
-      // g-clef
-      { low: 64, high: 77, base: 67, level: 4, line: 3 },
-      // f-clef
-      { low: 43, high: 57, base: 53, level: 3, line: 1 },
-      // c-clef
-      { low: 53, high: 67, base: 60, level: 0, line: 2 },
-      // c-clef tensor
-      { low: 50, high: 64, base: 60, level: 0, line: 1 },
-      //
-      { low: 0, high: 14, base: 0, level: 0, line: 4 }
-    ],
-  };
+  static ClefRange = [
+    // g-clef
+    { low: 64, high: 77, base: 67, level: 4, line: 3 },
+    // f-clef
+    { low: 43, high: 57, base: 53, level: 3, line: 1 },
+    // c-clef
+    { low: 53, high: 67, base: 60, level: 0, line: 2 },
+    // c-clef tensor
+    { low: 50, high: 64, base: 60, level: 0, line: 1 },
+    //
+    { low: 0, high: 14, base: 0, level: 0, line: 4 }
+  ];
 
   get tone(): MTone { return this._tone; }
   set tone(t: MTone) { this._tone = t; this.load() }
@@ -73,7 +69,7 @@ class MClef {
   set type(t: number) { this._type = t; this.load() }
 
   load(): void {
-    let clefData = MClef.Const.clefRange[this._type % 4];
+    let clefData = MClef.ClefRange[this._type % 4];
     this.low = clefData.low;
     this.high = clefData.high;
     this.base = clefData.base;
@@ -127,7 +123,7 @@ class MClef {
   }
 
   _equal(mc: MClef): boolean {
-    return mc._type == this._type && mc._tone._equal(this._tone);
+    return mc._type === this._type && mc._tone._equal(this._tone);
   }
 
   _convertMark(preClef: MClef = null): Array<ELayoutBudget> {
