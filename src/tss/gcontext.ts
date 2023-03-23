@@ -13,7 +13,6 @@ class GContext {
 
   _context2D : object
   _pageIndex : number
-  _beatCursor : number
   _segs: Array<number>
   _grid: GGrid
   rowBaselineY: Array<number>
@@ -33,7 +32,6 @@ class GContext {
     this.cursor = 0;
     this._pageIndex = 0;
     this._segs = [];
-    this._beatCursor = 0;
 
     if (w != null && h != null) {
       this.beginBudget(w, h);
@@ -276,57 +274,8 @@ class GContext {
     return this.cursor > 0 && (this.cursor <= this.beatPositions.length);
   }
 
-  get isOver(): boolean {
-    var bp = this.beatPositions[this.beatPositions.length - 1];
-    if (bp != null) {
-      return this._beatCursor >= bp.beat+1;
-    }
-    return false;
-  }
-
-  frameNext(): boolean {
-    var ret = false;
-    this._beatCursor += 1;
-    while (this.cursor < this.beatPositions.length) {
-      var bpo = this.beatPositions[this.cursor];
-      if (bpo.beat <= this._beatCursor) {
-        this.cursor++;
-        ret = true;
-      } else {
-        return ret;
-      }
-    }
-
-    return ret;
-  }
-
-  frameRefresh(beat?: number): boolean {
-    if (beat != null) this._beatCursor = beat;
-    var l = 0, h = this.beatPositions.length;
-    var cursor = 0;
-    while (l < h - 1) {
-      let m = (l + h) >> 1;
-      let bpo = this.beatPositions[m];
-      if (bpo.beat === this._beatCursor) {
-        l = m;
-        break;
-      } else if (bpo.beat > this._beatCursor) {
-        h = m;
-      } else {
-        l = m;
-      }
-    }
-
-    if (++l != this.cursor) {
-      this.cursor = l;
-      return true;
-    }
-
-    return false;
-  }
-
   rewind(): void {
-    this._beatCursor = 0;
+    this.cursor = 0;
   }
 
   debug(): void {
@@ -391,6 +340,7 @@ const gEID = {
   //<svg xmlns="http://www.w3.org/2000/svg" version="1.2" width="10" height="8.77">
   //  <path transform="matrix(0.0044,0,0,-0.0044,0,0.796399923)"
 
+// add svg support
 if (1) {
   function createSvgElement(type) {
     return document.createElementNS('http://www.w3.org/2000/svg', type);

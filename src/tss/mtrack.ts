@@ -10,15 +10,16 @@ class MTrack {
   noteMin: number
 
   bars: Array<MBar>
-  _tailBar: MBar
   constructor() {
     this.tone = null;
     this.noteMax = 0;
     this.noteMin = Infinity;
 
     this.bars = [];
-    this._tailBar = null;
   }
+
+  get _tailBar(): MBar { return this.bars.length? this.bars[this.bars.length-1]: null; }
+  get endBeat(): number { return this._tailBar.beat.endBeat; }
 
   append(b: MBar): void {
     //assert (b instanceof MBar);
@@ -101,7 +102,7 @@ class MTrack {
     for (let bt1, i = 1; bt1 = tensers[i]; ++i) {
       if (!bt.join(bt1)) {
         if (bt.candidate == null) continue;
-        if (bt.candidate && bt.candidate.size == 1) {}
+        if (bt.candidate && bt.candidate.size === 1) {}
         let itone:number = [...bt.candidate][0];
         bt._clef = new MClef(bt._clef, new MTone(itone));
         bt = bt1;
@@ -125,7 +126,7 @@ class MTrack {
   }
 
   feed(ch: MLayerBase): void {
-    this._tailBar = this._tailBar.feed(this, ch);
+    this._tailBar.feed(this, ch);
   }
 
   get currentBeat(): MBeat {
@@ -145,8 +146,6 @@ function MakeMTrack() {
   bar.beat._start = 0;
   bar._timeBeat = ts;
   bar._clef = clef;
-
-  mtrk._tailBar = bar;
   mtrk.bars.push(bar);
   return mtrk;
 }
@@ -181,7 +180,7 @@ class MTrackFeeder {
     if (params == null) params = {};
     var ch;
     let timeBeat = params[1] || 4;
-    if (notes == null || (notes == 0 && this.mabs)) {
+    if (notes == null || (notes === 0 && this.mabs)) {
       // make a MRest instance
       if (typeof timeBeat === 'number') {
         ch = new MRest(timeBeat);
@@ -276,7 +275,7 @@ class MTrackFeeder {
 
   feed(content: Array<any>) {
     for (let elem of content) {
-      if (typeof(elem) == 'number') {
+      if (typeof(elem) === 'number') {
         this.pushNote(elem);
       } else if (elem instanceof Array) {
         this.pushNote(elem[0], elem);

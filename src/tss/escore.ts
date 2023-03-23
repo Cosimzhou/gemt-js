@@ -128,7 +128,7 @@ class EScore {
           rowctx._tracksPosInfo[trackIndex].ops.push(...epos.operations);
 
           // TODO: add beat offset to the third element
-          if (rowctx._beatPositions.length == 0 || rowctx._beatPositions[
+          if (rowctx._beatPositions.length === 0 || rowctx._beatPositions[
               rowctx._beatPositions.length - 1].x < x)
             rowctx._beatPositions.push(
               new GBeatInfo(x, ctx.rowBaselineY.length, m._mobj.beat._start));
@@ -175,7 +175,7 @@ class EScore {
     rowctx._adjustMarginBetweenAdjacentRow();
     rowctx._archive();
 
-    return rowctx.endFlag ? null : ctx._grid.overall.bottom;
+    return rowctx.endFlag? null: ctx._grid.overall.bottom;
   }
 
   budget(ctx, x: number, y: number): void {
@@ -192,7 +192,7 @@ class EScore {
     do {
       y = this.budgetARow(ctx, x, y, prog);
       ctx.debug();
-      if (0 == ctx.rowIndex++) {
+      if (0 === ctx.rowIndex++) {
         // first row
         x -= g_option.indentHeading;
         this.trackLength += g_option.indentHeading;
@@ -408,7 +408,7 @@ class EScoreBudgetRowContext {
     var flag = true;
 
     if (!this.endFlag && this._barSegInfo.length > 1) {
-      let barIdx = this._barSegInfo[0].opsIdx == 0 ? 1 : 0;
+      let barIdx = this._barSegInfo[0].opsIdx === 0 ? 1 : 0;
       let split = this._barSegInfo[barIdx];
 
       let lastOne = arr[arr.length - 1];
@@ -457,7 +457,12 @@ class EScoreBudgetRowContext {
     if (flag && !this.hasConsective) {
       this.endFlag = true;
     }
-    //return flag;
+
+    if (this.endFlag) {
+      let endBeat = Math.max(...this._score.mscore.tracks.map(function(x):number{return x.endBeat;}));
+      let lastx = this._beatPositions.length? this._beatPositions[this._beatPositions.length-1].x: 0;
+      this._beatPositions.push(new GBeatInfo(lastx, this._gctx.rowBaselineY.length, endBeat));
+    }
   }
 
 
@@ -520,7 +525,7 @@ class EScoreBudgetRowContext {
       // the ones in previous bar.
       for (let track, i = 0; track = score._tracks[i]; ++i) {
         for (let obj, ni = 1; obj = track.clefMarks[ni]; ni++) {
-          if (obj.marksIdx == noteProgress[i]) {
+          if (obj.marksIdx === noteProgress[i]) {
             clefMarks[i] = track.clefMarks[ni].headerMarks;
             addBarHeadingStaff++;
             break;
@@ -540,7 +545,7 @@ class EScoreBudgetRowContext {
     // of previous bar, NOT every first bar in row.
     var beatMarks = [];
     for (let obj, ni = 0, track = score._tracks[0]; obj = track.beatMarks[ni]; ni++) {
-      if (obj.marksIdx == noteProgress[0]) {
+      if (obj.marksIdx === noteProgress[0]) {
         beatMarks.push(track.beatMarks[ni].headerMarks);
         addBarHeadingStaff++;
         break;

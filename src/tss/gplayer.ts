@@ -71,7 +71,6 @@ class GPlayer {
 
   stop(): void {
     this._player.stop();
-    this.gcontext.cursor = 0;
     clearInterval(this.playIntervalHandle);
     this.playIntervalHandle = null;
 
@@ -80,13 +79,17 @@ class GPlayer {
 
   resume(): void {
     this.startTime = Date.now();
-    this.offsetTime = this.timeSequence.milliseconds[this.gcontext.cursor];
     this._player.resume();
     if (this.playing) {
       if (this.playIntervalHandle)
         clearInterval(this.playIntervalHandle);
 
-      if (this.gcontext.cursor == 0) {
+      if (this.gcontext.cursor === this.gcontext.beatPositions.length) {
+        this.gcontext.cursor = 0;
+      }
+
+      this.offsetTime = this.timeSequence.milliseconds[this.gcontext.cursor];
+      if (this.gcontext.cursor === 0) {
         this.gcontext.rewind();
         this.gcontext.cursor = 1;
         this.playRedraw(true);
@@ -108,19 +111,16 @@ class GPlayer {
   get playing(): boolean { return this._player.playing; }
 
   playRedraw(force?: boolean): void {
-    if (this.gcontext.isOver) {
-      if (this.playIntervalHandle)
-        clearInterval(this.playIntervalHandle);
-      this.playIntervalHandle = null;
+    let duration = Date.now() - this.startTime;
+    let time = duration + this.offsetTime;
+    let cursor = this.timeSequence.searchTime(time);
+    if (cursor !== this.gcontext.cursor) {
+      this.gcontext.cursor = cursor;
       force = true;
-    } else {
-      let duration = Date.now() - this.startTime;
-      let time = duration + this.offsetTime;
-      let cursor = this.timeSequence.searchTime(time);
-      if (cursor != this.gcontext.cursor) {
-        this.gcontext.cursor = cursor;
-        force = true;
-      }
+    }
+    if (cursor === this.gcontext.beatPositions.length) {
+      this.stop();
+      force = true;
     }
 
     if (force) {
