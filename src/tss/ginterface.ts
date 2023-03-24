@@ -98,5 +98,6 @@ class ELayerBase implements ELayoutBudget, GOUAttachable {
 interface IPlayer {
   stop(): void
   resume(): void
+  seek(t: number): void
   playing: boolean
 }

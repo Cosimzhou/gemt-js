@@ -304,8 +304,14 @@ function addScorePanel(w, h, isSvg = false) {
       svg.id = "myCanvas";
       svg.width.baseVal.valueAsString = w;
       svg.height.baseVal.valueAsString = h;
+
     }
 
+    svg.addEventListener("mousedown", function(e) {
+      var c = gct.searchCursorByPoint(e.offsetX, e.offsetY);
+      console.log(c);
+      player.seekByCursor(c);
+    });
     pictype = "svg";
   } else {
     pictype = "png";

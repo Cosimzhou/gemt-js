@@ -228,6 +228,24 @@ class GContext {
     if (this.clearImpl) this.clearImpl();
   }
 
+  searchCursorByPoint(x: number, y: number): number {
+    y += this._pageYBase[this._pageIndex];
+    if (y >= this.rowBaselineY[0]) {
+      let row = searchRange(this.rowBaselineY, y);
+      if (row >= this.rowBaselineY.length) return;
+
+      row++;
+      for (let i = 0, bp; bp = this.beatPositions[i];++i) {
+        if (bp.rowIndex < row) continue;
+        if (bp.rowIndex > row) break;
+        if (bp.x >= x) {
+          return i+1;
+        }
+      }
+    }
+    return 0;
+  }
+
   print(pageIdx: number = null): number {
     if (pageIdx == null) {
       if (this.isPlaying) {
@@ -250,21 +268,21 @@ class GContext {
       this._pageIndex = pageIdx;
     }
 
-    if (g_option.funcPageRender != null)
+    if (typeof g_option.funcPageRender === "function")
       g_option.funcPageRender(this._context2D, pageIdx);
 
-    if (pageIdx == 0 && g_option.funcTitleRender != null)
+    if (pageIdx === 0 && typeof g_option.funcTitleRender === "function")
       g_option.funcTitleRender(this._context2D, pageIdx);
 
-    if (g_option.funcHeadRender != null)
+    if (typeof g_option.funcHeadRender === "function")
       g_option.funcHeadRender(this._context2D, pageIdx);
 
     this.printImpl(pageIdx);
 
-    if (g_option.funcTailRender != null && pageIdx == this.pageCount())
+    if (typeof g_option.funcTailRender === "function" && pageIdx == this.pageCount())
       g_option.funcTailRender(this._context2D, pageIdx);
 
-    if (g_option.funcFootRender != null)
+    if (typeof g_option.funcFootRender === "function")
       g_option.funcFootRender(this._context2D, pageIdx);
 
     return pageIdx;
@@ -532,15 +550,15 @@ if (1) {
       let y1 = this.rowBaselineY[bpo.rowIndex];
       let h = y1 - y0;
 
-      let cursor = createSvgElement('g');
-      cursor.id = "cursor";
-      cursor.setAttribute("transform", "translate(" + bpo.x + "," + y0 + ")");
-      page.appendChild(cursor);
+      let gcursor = createSvgElement('g');
+      gcursor.id = "cursor";
+      gcursor.setAttribute("transform", "translate(" + bpo.x + "," + y0 + ")");
+      page.appendChild(gcursor);
 
       let path = createSvgElement('path');
       path.setAttribute("d", "M 0,0 v" + h + "m-5,0h10m0,-" + h + "h-10");
       path.style.stroke = "red";
-      cursor.appendChild(path);
+      gcursor.appendChild(path);
     }
   }
 

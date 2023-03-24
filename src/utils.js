@@ -79,3 +79,21 @@ function gcd(m, n) {
 
   return n;
 }
+
+function searchRange(array, target, start = 0) {
+  var l = start;
+  for (var h = array.length; l < h - 1;) {
+    var m = (l + h) >> 1;
+    var val = array[m];
+    if (val === target) {
+      l = m;
+      break;
+    } else if (val > target) {
+      h = m;
+    } else {
+      l = m;
+    }
+  }
+
+  return l;
+}

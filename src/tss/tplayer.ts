@@ -104,4 +104,8 @@ class TPlayer {
   stop(): void {
     this._player['stop']();
   }
+
+  seek(t: number): void {
+    this._player['currentTime'] = t * this._midi.header.ticksPerBeat;
+  }
 }

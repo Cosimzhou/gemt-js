@@ -28,21 +28,7 @@ class GTimeSequence {
   }
 
   searchTime(targetMs: number): number {
-    let l = 1, h = this.milliseconds.length;
-    while (l < h - 1) {
-      let m = (l + h) >> 1;
-      let bpo = this.milliseconds[m];
-      if (bpo === targetMs) {
-        l = m;
-        break;
-      } else if (bpo > targetMs) {
-        h = m;
-      } else {
-        l = m;
-      }
-    }
-
-    return l;
+    return searchRange(this.milliseconds, targetMs, 1);
   }
 }
 
@@ -70,7 +56,9 @@ class GPlayer {
   }
 
   stop(): void {
-    this._player.stop();
+    var me = this;
+    me._player.stop();
+    setTimeout(function(){ me._player.stop();}, 50);
     clearInterval(this.playIntervalHandle);
     this.playIntervalHandle = null;
 
@@ -105,6 +93,36 @@ class GPlayer {
       clearInterval(this.playIntervalHandle);
       this.playIntervalHandle = null;
       this.onStop && this.onStop();
+    }
+  }
+
+  seek(time: number): void {
+    if (this.playing) return;
+    let millis = time*1000.0;
+    let cursor = this.timeSequence.searchTime(millis);
+    this.gcontext.cursor = cursor;
+    if (cursor === 0) {
+      this._player.seek(0);
+      return;
+    }
+    let beat = this.gcontext.beatPositions[cursor-1].beat;
+    this._player.seek(beat);
+  }
+
+  seekByCursor(cursor: number): void {
+    if (this.playing) return;
+    cursor = Math.min(this.gcontext.beatPositions.length, cursor);
+    if (cursor >= 0) {
+      if (cursor) {
+        let beat = this.gcontext.beatPositions[cursor-1].beat;
+        this._player.seek(beat);
+      }
+      this.gcontext.cursor = cursor;
+
+      this.gcontext.clear();
+      this.gcontext.print();
+
+      this.onRefresh && this.onRefresh();
     }
   }
 

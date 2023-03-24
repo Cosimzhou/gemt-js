@@ -1,77 +1,80 @@
 var fileIndex;
 var Melody;
 
+//var fileIndex = 29;     // time signature test
+//var fileIndex = 16;     // key signature test
+//var fileIndex = 2;
+//var fileIndex = 17;       // conflict between two track
+
 var filelist = [
       //"Arabian_Dance-Tchaikovsky",  // no time signature
       //"Oriental-Granados",  // no time signature
       //"Rustles_of_Spring_Op-32_No-3",   // no time signature
       //"The_Entertainer-Joplin",   // no time signature
       //"Waltz_of_the_Flowers-Tchaikovsky",   // no time signature
-      "七子之歌-澳门",
-      "G大调变奏曲", // single track
-      "不想长大",
-      "大鱼海棠",
-      "天空之城",
-      "Scarborough_Fair",
-      "极乐净土",
-      "爱的供养",
-      "U.N.オーエンは彼女なのか",
-      "いつも何度でも",
+      "あなたがいるから",
+      "Bad_Apple",
+      "CANON IN D", //
+      "Dj_Okawari-Flower_Dance",
+      "electronic_angel",
       "EVA-残酷な天使のテーゼ",
-      "加勒比海盗主题曲",
-      "only_my_railgun",
       "fripSide-Only_my_railgun",
       "fripSide-Sisters'_noise",
-      "檄！帝国華撃団Ⅲ",
-      "supercell-君の知らない物語",
+      "Graduation-三枝夕夏",
+      "G大调变奏曲", // single track
+      "Lemon",
+      "only_my_railgun",
+      "Red_Alert_Hell_March",
       "someone-else",
-      "白金ディスコ",
-      "electronic_angel",
+      "summer-菊次郎的夏天",
+      "supercell-君の知らない物語",
+      "Time after time~在落花纷飞的街道上~《名侦探柯南——迷宫的十字路口》主题",
+      "U.N.オーエンは彼女なのか",
       "yyjjxq",
+      "七子之歌-澳门",
+      "不想长大",
+      "いつも何度でも",
+      "克罗地亚狂想曲",
+      "兰的决意",
+      "刀剑神域OP",
+      "初音ミく-千本桜",
+      "加勒比海盗主题曲",
+      "叶塞尼亚",
+      "名侦探柯南-主题歌",
+      "喀秋莎",
+      "土耳其进行曲",
+      "大鱼海棠",
+      "天空之城",
+      "富士山下",
       "巡音ルカ-红一葉",
       "幽雅に咲かせ、墨染の桜～Border_of_Life",
-      "初音ミく-千本桜",
-      "千本桜",
-      "刀剑神域OP",
-      "深海少女",
-      "素敵だね",
-      "あなたがいるから",
-      "CANON IN D",
-      "Lemon",
-      "Lydia",
-      "Bad_Apple",
-      "钟",
+      "极乐净土",
       "梁祝",
-      "喀秋莎",
-      "超级玛莉",
-      "叶塞尼亚",
-      "富士山下",
-      "名侦探柯南-主题歌",
       "梦中的婚礼",
-      "土耳其进行曲",
+      "爱的供养",
+      "生物がかり-桜",
+      "白金ディスコ",
+      "素敵だね",
+      "超级玛莉",
+      "轻飘飘的时间",
+      "钟",
+      "千本桜", // mute order
+      "深海少女",
+      "檄！帝国華撃団Ⅲ",
       "四季-春",
       "菊次郎的夏天",
-      "summer-菊次郎的夏天",
-      "生物がかり-桜",
-      "轻飘飘的时间",
-      "克罗地亚狂想曲",
-      "Dj_Okawari-Flower_Dance",
-      "Red_Alert_Hell_March",
+      "Lydia",
+      "Scarborough_Fair",
       "柯南与爱尔兰对峙时的背景音乐",
-      "兰的决意",
-      "Graduation-三枝夕夏",
-      "Time after time~在落花纷飞的街道上~《名侦探柯南——迷宫的十字路口》主题"
+      null // last order
     ];
 
+filelist.pop();
 
 
 
 function MIDIDemoInit() {
   var tmp_fileIndex = getParam("mi");
-  //var fileIndex = 29;     // time signature test
-  //var fileIndex = 16;     // key signature test
-  //var fileIndex = 2;
-  //var fileIndex = 17;       // conflict between two track
   fileIndex = (tmp_fileIndex != null) ? tmp_fileIndex : 17;
 
   // make catalog
