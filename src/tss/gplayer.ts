@@ -55,7 +55,7 @@ class GPlayer {
     this.timeSequence = new GTimeSequence(ctx.beatPositions, ctx.tempoList, this.tempo);
   }
 
-  stop(): void {
+  _stop(): void {
     var me = this;
     me._player.stop();
     setTimeout(function(){ me._player.stop();}, 50);
@@ -63,6 +63,11 @@ class GPlayer {
     this.playIntervalHandle = null;
 
     this.onStop && this.onStop();
+  }
+
+  stop(): void {
+    this._stop();
+    this.gcontext.cursor = 0;
   }
 
   resume(): void {
@@ -105,8 +110,7 @@ class GPlayer {
       this._player.seek(0);
       return;
     }
-    let beat = this.gcontext.beatPositions[cursor-1].beat;
-    this._player.seek(beat);
+    this._player.seek(millis);
   }
 
   seekByCursor(cursor: number): void {
@@ -114,7 +118,7 @@ class GPlayer {
     cursor = Math.min(this.gcontext.beatPositions.length, cursor);
     if (cursor >= 0) {
       if (cursor) {
-        let beat = this.gcontext.beatPositions[cursor-1].beat;
+        let beat = this.timeSequence.milliseconds[cursor];
         this._player.seek(beat);
       }
       this.gcontext.cursor = cursor;
@@ -137,7 +141,7 @@ class GPlayer {
       force = true;
     }
     if (cursor === this.gcontext.beatPositions.length) {
-      this.stop();
+      this._stop();
       force = true;
     }
 
