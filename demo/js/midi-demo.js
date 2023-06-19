@@ -12,6 +12,8 @@ var filelist = [
       //"Rustles_of_Spring_Op-32_No-3",   // no time signature
       //"The_Entertainer-Joplin",   // no time signature
       //"Waltz_of_the_Flowers-Tchaikovsky",   // no time signature
+      "渡月桥.ccmz",
+      "senbon.ccmz",
       "あなたがいるから",
       "Bad_Apple",
       "CANON IN D", //

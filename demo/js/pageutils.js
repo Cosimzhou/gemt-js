@@ -343,6 +343,16 @@ window.addEventListener("load", function() {
     elem.href = location.pathname + "?mi=" + nmi;
   }
 
+  window.addEventListener("keydown", function(e) {
+    switch (e.key) {
+      case ' ':
+        Play();
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+  });
 });
 
 

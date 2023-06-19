@@ -213,7 +213,7 @@ class EScore {
   }
 }
 
-class EBarSequence{
+class EBarSequence {
   opsIdx: number
   beatIdx: number
   rectIdx: number
@@ -405,7 +405,7 @@ class EScoreBudgetRowContext {
     var score = this._score;
     var ctx = this._gctx;
     var arr = this._postOps;
-    var flag = true;
+    var noBarLeft = true;
 
     if (!this.endFlag && this._barSegInfo.length > 1) {
       let barIdx = this._barSegInfo[0].opsIdx === 0 ? 1 : 0;
@@ -416,7 +416,12 @@ class EScoreBudgetRowContext {
       // TODO: judge cut the last bar or not
 
       // compact or not
-      if (!g_option.compactLayout) {
+      let postponeLastBar = !g_option.compactLayout;
+      //if (this._gctx && this._gctx.rowIndex == xxx) {
+      //  postponeLastBar = true;
+      //}
+
+      if (postponeLastBar) {
         // Cut the last bar to the next row
         this._postOps.splice(split.opsIdx);
         this._beatPositions.splice(split.beatIdx);
@@ -427,7 +432,7 @@ class EScoreBudgetRowContext {
         if (this._etrackProgressCopy) {
           this._etrackProgressCopy.forEach(function(elem, idx) { ps[idx] = elem; });
         }
-        flag = false;
+        noBarLeft = false;
       }
     }
 
@@ -454,7 +459,7 @@ class EScoreBudgetRowContext {
       }
     }
 
-    if (flag && !this.hasConsective) {
+    if (noBarLeft && !this.hasConsective) {
       this.endFlag = true;
     }
 
