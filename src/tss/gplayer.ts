@@ -6,17 +6,30 @@
  *******************************/
 
 interface ITempoEvent {
-  microsecondsPerBeat: number
-  startBeat: number
+  microsecondsPerBeat: number;
+  startBeat: number;
 }
 
 class GTimeSequence {
-  milliseconds: Array<number>
-  constructor(bps: Array<GBeatInfo>, events: Array<ITempoEvent>, tempo: number) {
+  milliseconds: Array<number>;
+  constructor(
+    bps: Array<GBeatInfo>,
+    events: Array<ITempoEvent>,
+    tempo: number
+  ) {
     if (events == null) events = [];
     this.milliseconds = [0];
-    events.push({microsecondsPerBeat: 0, startBeat: Infinity});
-    for (let i = 0, bp, evni = 0, event = events[evni], startTime = 0, startBeat = 0; bp = bps[i]; i++) {
+    events.push({ microsecondsPerBeat: 0, startBeat: Infinity });
+    for (
+      let i = 0,
+        bp,
+        evni = 0,
+        event = events[evni],
+        startTime = 0,
+        startBeat = 0;
+      (bp = bps[i]);
+      i++
+    ) {
       while (event.startBeat <= bp.beat) {
         startTime += tempo * (event.startBeat - startBeat);
         startBeat = event.startBeat;
@@ -33,32 +46,42 @@ class GTimeSequence {
 }
 
 class GPlayer {
-  startTime: number
-  offsetTime: number
-  _player: IPlayer
-  playIntervalHandle: number
-  gcontext: GContext
-  tempo: number // milliseconds per beat
-  timeSequence: GTimeSequence
+  startTime: number;
+  offsetTime: number;
+  _player: IPlayer;
+  playIntervalHandle: number;
+  gcontext: GContext;
+  tempo: number; // milliseconds per beat
+  timeSequence: GTimeSequence;
 
-  onPlay: ()=>void
-  onStop: ()=>void
-  onRefresh: ()=>void
+  onPlay: () => void;
+  onStop: () => void;
+  onRefresh: () => void;
   constructor() {
     this.tempo = 60000 / 120;
   }
 
-  set player(p: IPlayer) { this._player = p; }
-  get context(): GContext { return this.gcontext; }
+  set player(p: IPlayer) {
+    this._player = p;
+  }
+  get context(): GContext {
+    return this.gcontext;
+  }
   set context(ctx: GContext) {
     this.gcontext = ctx;
-    this.timeSequence = new GTimeSequence(ctx.beatPositions, ctx.tempoList, this.tempo);
+    this.timeSequence = new GTimeSequence(
+      ctx.beatPositions,
+      ctx.tempoList,
+      this.tempo
+    );
   }
 
   _stop(): void {
     var me = this;
     me._player.stop();
-    setTimeout(function(){ me._player.stop();}, 50);
+    setTimeout(function () {
+      me._player.stop();
+    }, 50);
     clearInterval(this.playIntervalHandle);
     this.playIntervalHandle = null;
 
@@ -74,8 +97,7 @@ class GPlayer {
     this.startTime = Date.now();
     this._player.resume();
     if (this.playing) {
-      if (this.playIntervalHandle)
-        clearInterval(this.playIntervalHandle);
+      if (this.playIntervalHandle) clearInterval(this.playIntervalHandle);
 
       if (this.gcontext.cursor === this.gcontext.beatPositions.length) {
         this.gcontext.cursor = 0;
@@ -89,7 +111,7 @@ class GPlayer {
       }
 
       let me = this;
-      this.playIntervalHandle = setInterval(function(){
+      this.playIntervalHandle = setInterval(function () {
         me.playRedraw();
       }, Math.trunc(60000 / 120 / 8));
 
@@ -103,7 +125,7 @@ class GPlayer {
 
   seek(time: number): void {
     if (this.playing) return;
-    let millis = time*1000.0;
+    let millis = time * 1000.0;
     let cursor = this.timeSequence.searchTime(millis);
     this.gcontext.cursor = cursor;
     if (cursor === 0) {
@@ -130,7 +152,9 @@ class GPlayer {
     }
   }
 
-  get playing(): boolean { return this._player.playing; }
+  get playing(): boolean {
+    return this._player.playing;
+  }
 
   playRedraw(force?: boolean): void {
     let duration = Date.now() - this.startTime;

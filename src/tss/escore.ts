@@ -10,12 +10,12 @@
  *******************************/
 
 class EScore {
-  _tracks: Array<ETrack>
-  trkcombo: Array<any>
-  trackLength: number
-  _prevRowMark: EBarline
-  currentBarIndex: number
-  mscore: MScore
+  _tracks: Array<ETrack>;
+  trkcombo: Array<any>;
+  trackLength: number;
+  _prevRowMark: EBarline;
+  currentBarIndex: number;
+  mscore: MScore;
 
   constructor(trkNum: number = 2) {
     this._tracks = [];
@@ -43,22 +43,32 @@ class EScore {
     x = rowctx.trkOriginX;
 
     // arrange the row
-    for (let restTrackNum = this._tracks.length,
-      nextVisualIndex = zarray(restTrackNum),
-      tailBarCompleted = false,
-      firstBarInRow = true,
-      beginAWholeBar = true,
-      endAWholeBar = false,
-      visualIndex = 0, lineFresh = false, maxWidth;
-      !lineFresh && (x < this.trackLength || !tailBarCompleted) && restTrackNum > (maxWidth = 0);
-      visualIndex++) {
+    for (
+      let restTrackNum = this._tracks.length,
+        nextVisualIndex = zarray(restTrackNum),
+        tailBarCompleted = false,
+        firstBarInRow = true,
+        beginAWholeBar = true,
+        endAWholeBar = false,
+        visualIndex = 0,
+        lineFresh = false,
+        maxWidth;
+      !lineFresh &&
+      (x < this.trackLength || !tailBarCompleted) &&
+      restTrackNum > (maxWidth = 0);
+      visualIndex++
+    ) {
       let columnStartPos = rowctx._postOps.length;
       if (beginAWholeBar) {
         x = rowctx._fillBarHeader(x, noteProgress, firstBarInRow);
       }
 
       // Start to arrange those notes in tracks
-      for (let beatStartX = x, track, trackIndex = 0; track = this._tracks[trackIndex]; ++trackIndex) {
+      for (
+        let beatStartX = x, track, trackIndex = 0;
+        (track = this._tracks[trackIndex]);
+        ++trackIndex
+      ) {
         if (visualIndex < nextVisualIndex[trackIndex]) {
           // Skip the unreached emarks; wait the progress.
           continue;
@@ -128,14 +138,18 @@ class EScore {
           rowctx._tracksPosInfo[trackIndex].ops.push(...epos.operations);
 
           // TODO: add beat offset to the third element
-          if (rowctx._beatPositions.length === 0 || rowctx._beatPositions[
-              rowctx._beatPositions.length - 1].x < x)
+          if (
+            rowctx._beatPositions.length === 0 ||
+            rowctx._beatPositions[rowctx._beatPositions.length - 1].x < x
+          )
             rowctx._beatPositions.push(
-              new GBeatInfo(x, ctx.rowBaselineY.length, m._mobj.beat._start));
+              new GBeatInfo(x, ctx.rowBaselineY.length, m._mobj.beat._start)
+            );
 
           maxWidth = Math.max(
-            maxWidth, epos.width - (epos.noMargin ? g_option.margin : 0));
-
+            maxWidth,
+            epos.width - (epos.noMargin ? g_option.margin : 0)
+          );
 
           if (epos.shx) {
             // If these marks required to insert some symbols before themselves,
@@ -170,12 +184,12 @@ class EScore {
     //rowctx.endFlag = (restTrackNum == 0);
 
     rowctx._adjustMarginBetweenAdjacentTrack();
-    rowctx._stretchOps(noteProgress);  // endflag effected here
+    rowctx._stretchOps(noteProgress); // endflag effected here
     rowctx._joinOps();
     rowctx._adjustMarginBetweenAdjacentRow();
     rowctx._archive();
 
-    return rowctx.endFlag? null: ctx._grid.overall.bottom;
+    return rowctx.endFlag ? null : ctx._grid.overall.bottom;
   }
 
   budget(ctx, x: number, y: number): void {
@@ -214,9 +228,9 @@ class EScore {
 }
 
 class EBarSequence {
-  opsIdx: number
-  beatIdx: number
-  rectIdx: number
+  opsIdx: number;
+  beatIdx: number;
+  rectIdx: number;
   constructor(o: number = 0, b: number = 0, r: number = 0) {
     this.opsIdx = o;
     this.beatIdx = b;
@@ -224,19 +238,18 @@ class EBarSequence {
   }
 }
 
-
 class ETrackPositionInfo {
-  y: number
-  ey: number
-  bl: GStroke           // the base line of this track
-  ops: Array<GStroke>
-  rec: GRect
+  y: number;
+  ey: number;
+  bl: GStroke; // the base line of this track
+  ops: Array<GStroke>;
+  rec: GRect;
   constructor(sy: number, ey: number, ops: Array<GStroke>) {
     this.y = sy;
     this.ey = ey;
-    this.bl = ops[ops.length-1];
+    this.bl = ops[ops.length - 1];
     this.ops = ops;
-    this.rec = (new GRect()).clear();
+    this.rec = new GRect().clear();
   }
 }
 
@@ -249,25 +262,25 @@ class ETrackPositionInfo {
  *
  *******************************/
 class EScoreBudgetRowContext {
-  _currentBarTrialIndex: number
-  _score: EScore
-  _gctx: GContext
-  _beatPositions: Array<GBeatInfo>
-  _preOps: Array<GStroke>
-  _postOps: Array<GStroke>
-  finalOps: Array<GStroke>
-  _barSegInfo: Array<EBarSequence>
+  _currentBarTrialIndex: number;
+  _score: EScore;
+  _gctx: GContext;
+  _beatPositions: Array<GBeatInfo>;
+  _preOps: Array<GStroke>;
+  _postOps: Array<GStroke>;
+  finalOps: Array<GStroke>;
+  _barSegInfo: Array<EBarSequence>;
 
-  psIdx: number
-  eatIdx: number
-  ectIdx: number
-  trkOriginX: number
-  _tracksPosInfo: Array<ETrackPositionInfo>
-  _legacyMark: EBarline
-  _prevRowMark: EBarline
-  _etrackProgressCopy: Array<number>
-  endFlag: boolean
-  hasConsective: boolean
+  psIdx: number;
+  eatIdx: number;
+  ectIdx: number;
+  trkOriginX: number;
+  _tracksPosInfo: Array<ETrackPositionInfo>;
+  _legacyMark: EBarline;
+  _prevRowMark: EBarline;
+  _etrackProgressCopy: Array<number>;
+  endFlag: boolean;
+  hasConsective: boolean;
 
   constructor(escore: EScore, gctx: GContext) {
     this._score = escore;
@@ -303,27 +316,30 @@ class EScoreBudgetRowContext {
     this.finalOps = this._preOps.concat(this._postOps);
   }
 
-
   _recordBarSegment(notFirst: boolean): void {
     if (!notFirst) {
       this._barSegInfo.pop();
     }
 
-    this._barSegInfo.push(new EBarSequence(this._postOps.length,
-      this._beatPositions.length, this._gctx._grid.array.length));
+    this._barSegInfo.push(
+      new EBarSequence(
+        this._postOps.length,
+        this._beatPositions.length,
+        this._gctx._grid.array.length
+      )
+    );
 
     this._currentBarTrialIndex++;
   }
-
 
   _adjustMarginBetweenAdjacentTrack(): void {
     // Adjust margin between adjacent track.
     // move the under one lower
     var ctx = this._gctx;
-    var trackShiftY = 0
+    var trackShiftY = 0;
     for (let i = 1; i < this._tracksPosInfo.length; ++i) {
-      let diff = this._tracksPosInfo[i].rec.top - this._tracksPosInfo[i - 1]
-        .rec.bottom;
+      let diff =
+        this._tracksPosInfo[i].rec.top - this._tracksPosInfo[i - 1].rec.bottom;
       if (diff <= 0) {
         trackShiftY += g_option.gapMinBetweenRows - diff;
       }
@@ -336,11 +352,10 @@ class EScoreBudgetRowContext {
     }
 
     if (trackShiftY > 0) {
-      for (let op, i = 0; op = this._preOps[i]; i++) op._settle();
+      for (let op, i = 0; (op = this._preOps[i]); i++) op._settle();
       ctx._grid.overall.bottom += trackShiftY;
     }
   }
-
 
   _adjustMarginBetweenAdjacentRow(): void {
     // Avoid overlap between adjacent rows.
@@ -365,10 +380,12 @@ class EScoreBudgetRowContext {
     // Prepare track lines strokes for one row of _tracks.
     var x = ox + g_option.marginAhead;
     var y = oy;
-    for (let etrack, i = 0; etrack = score._tracks[i]; ++i) {
+    for (let etrack, i = 0; (etrack = score._tracks[i]); ++i) {
       let cOps = etrack.preview(ctx, x, y);
       this._preOps.push(...cOps);
-      this._tracksPosInfo.push(new ETrackPositionInfo(y, y + 4 * g_option.gap, cOps));
+      this._tracksPosInfo.push(
+        new ETrackPositionInfo(y, y + 4 * g_option.gap, cOps)
+      );
       y += 80;
     }
 
@@ -376,21 +393,36 @@ class EScoreBudgetRowContext {
     ctx._grid.overall.bottom = y = lastTrackInfo.ey;
     if (!g_option._openTrack) {
       // Draw the vertical closed line in the two ends of the row.
-      this._preOps.push(ctx._Vline(x, oy, y)._attach(
-        lastTrackInfo.bl, GStrokeConstraintType.ConstraintY2));
-      this._preOps.push(ctx._Vline(x + score.trackLength, oy, y)
-        ._attach(lastTrackInfo.bl, GStrokeConstraintType.ConstraintY2));
+      this._preOps.push(
+        ctx
+          ._Vline(x, oy, y)
+          ._attach(lastTrackInfo.bl, GStrokeConstraintType.ConstraintY2)
+      );
+      this._preOps.push(
+        ctx
+          ._Vline(x + score.trackLength, oy, y)
+          ._attach(lastTrackInfo.bl, GStrokeConstraintType.ConstraintY2)
+      );
     }
 
     // draw bracket of _tracks
-    for (let e, i = 0; e = score.trkcombo[i]; ++i) {
-      this._preOps.push(ctx._draw('brace', ox, this._tracksPosInfo[e[0]].y,
-        0, this._tracksPosInfo[e[1]].ey - this._tracksPosInfo[e[0]].y));
+    for (let e, i = 0; (e = score.trkcombo[i]); ++i) {
+      this._preOps.push(
+        ctx._draw(
+          "brace",
+          ox,
+          this._tracksPosInfo[e[0]].y,
+          0,
+          this._tracksPosInfo[e[1]].ey - this._tracksPosInfo[e[0]].y
+        )
+      );
     }
 
     // Print No. for the first bar in score row.
     if (g_option.barNoShowAtRowHeading) {
-      this._preOps.push(ctx._text((score.currentBarIndex + 1).toString(), x, oy));
+      this._preOps.push(
+        ctx._text((score.currentBarIndex + 1).toString(), x, oy)
+      );
     }
 
     this.trkOriginX = ox + g_option.marginAhead;
@@ -430,7 +462,9 @@ class EScoreBudgetRowContext {
         this._currentBarTrialIndex--;
 
         if (this._etrackProgressCopy) {
-          this._etrackProgressCopy.forEach(function(elem, idx) { ps[idx] = elem; });
+          this._etrackProgressCopy.forEach(function (elem, idx) {
+            ps[idx] = elem;
+          });
         }
         noBarLeft = false;
       }
@@ -449,7 +483,7 @@ class EScoreBudgetRowContext {
         this._legacyMark = lastOne.opt.eobj;
       }
 
-      let tailGap = (lastOne.ext || 0);
+      let tailGap = lastOne.ext || 0;
       let ubound = lastOne.x - this.trkOriginX - tailGap;
       let rate = (score.trackLength - tailGap) / ubound;
       ctx._compress(arr, this.trkOriginX, rate);
@@ -464,12 +498,19 @@ class EScoreBudgetRowContext {
     }
 
     if (this.endFlag) {
-      let endBeat = Math.max(...this._score.mscore.tracks.map(function(x):number{return x.endBeat;}));
-      let lastx = this._beatPositions.length? this._beatPositions[this._beatPositions.length-1].x: 0;
-      this._beatPositions.push(new GBeatInfo(lastx, this._gctx.rowBaselineY.length, endBeat));
+      let endBeat = Math.max(
+        ...this._score.mscore.tracks.map(function (x): number {
+          return x.endBeat;
+        })
+      );
+      let lastx = this._beatPositions.length
+        ? this._beatPositions[this._beatPositions.length - 1].x
+        : 0;
+      this._beatPositions.push(
+        new GBeatInfo(lastx, this._gctx.rowBaselineY.length, endBeat)
+      );
     }
   }
-
 
   /********************************
    * _planEMarks
@@ -485,9 +526,16 @@ class EScoreBudgetRowContext {
   _planEMarks(ctx, x, getArr) {
     var score = this._score;
 
-    for (let curTrack, i, maxWidth, rest_trk = score._tracks.length,
-        cursor = score._tracks.map(x => 0); rest_trk;) {
-      for (rest_trk = maxWidth = i = 0; curTrack = score._tracks[i]; ++i) {
+    for (
+      let curTrack,
+        i,
+        maxWidth,
+        rest_trk = score._tracks.length,
+        cursor = score._tracks.map((x) => 0);
+      rest_trk;
+
+    ) {
+      for (rest_trk = maxWidth = i = 0; (curTrack = score._tracks[i]); ++i) {
         let arr = getArr(i);
         if (!arr || arr.length <= cursor[i]) continue;
         rest_trk++;
@@ -505,7 +553,11 @@ class EScoreBudgetRowContext {
     return x;
   }
 
-  _fillBarHeader(x: number, noteProgress: Array<number>, firstBarInRow: boolean): number {
+  _fillBarHeader(
+    x: number,
+    noteProgress: Array<number>,
+    firstBarInRow: boolean
+  ): number {
     var score = this._score;
     var ctx = this._gctx;
 
@@ -516,8 +568,8 @@ class EScoreBudgetRowContext {
       addBarHeadingStaff = 0;
     if (firstBarInRow) {
       // draw cleves in first bar.
-      for (let track, i = 0, ni, obj; track = score._tracks[i]; ++i) {
-        for (ni = 1; obj = track.clefMarks[ni]; ni++) {
+      for (let track, i = 0, ni, obj; (track = score._tracks[i]); ++i) {
+        for (ni = 1; (obj = track.clefMarks[ni]); ni++) {
           if (obj.marksIdx > noteProgress[i]) {
             break;
           }
@@ -528,8 +580,8 @@ class EScoreBudgetRowContext {
     } else {
       // draw clefs and draw time beats when they are different from
       // the ones in previous bar.
-      for (let track, i = 0; track = score._tracks[i]; ++i) {
-        for (let obj, ni = 1; obj = track.clefMarks[ni]; ni++) {
+      for (let track, i = 0; (track = score._tracks[i]); ++i) {
+        for (let obj, ni = 1; (obj = track.clefMarks[ni]); ni++) {
           if (obj.marksIdx === noteProgress[i]) {
             clefMarks[i] = track.clefMarks[ni].headerMarks;
             addBarHeadingStaff++;
@@ -542,14 +594,18 @@ class EScoreBudgetRowContext {
     }
 
     if (addBarHeadingStaff) {
-      x = this._planEMarks(ctx, x, i => clefMarks[i]);
+      x = this._planEMarks(ctx, x, (i) => clefMarks[i]);
     }
 
     // Prepare to draw beat marks.
     // Draw beat marks only when they are different from the ones
     // of previous bar, NOT every first bar in row.
     var beatMarks = [];
-    for (let obj, ni = 0, track = score._tracks[0]; obj = track.beatMarks[ni]; ni++) {
+    for (
+      let obj, ni = 0, track = score._tracks[0];
+      (obj = track.beatMarks[ni]);
+      ni++
+    ) {
       if (obj.marksIdx === noteProgress[0]) {
         beatMarks.push(track.beatMarks[ni].headerMarks);
         addBarHeadingStaff++;
@@ -560,11 +616,11 @@ class EScoreBudgetRowContext {
     }
 
     if (beatMarks.length) {
-      x = this._planEMarks(ctx, x, i => beatMarks);
+      x = this._planEMarks(ctx, x, (i) => beatMarks);
     }
 
     if (addBarHeadingStaff) {
-      x = this._planEMarks(ctx, x, i => [new EBlank()]);
+      x = this._planEMarks(ctx, x, (i) => [new EBlank()]);
     }
 
     if (this._prevRowMark) {

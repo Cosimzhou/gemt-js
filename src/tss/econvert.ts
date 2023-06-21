@@ -39,7 +39,7 @@ function EConvert(mscore: MScore) {
         marks.push(new ESkip(n));
       }
     }
-    var curnote = Array.from(bars, x => 0);
+    var curnote = Array.from(bars, (x) => 0);
     var minBeat = 0;
 
     {
@@ -48,19 +48,25 @@ function EConvert(mscore: MScore) {
         if (bars[i] == null) continue;
         if (!last_bars || !bars[i]._clef._equal(last_bars[i]._clef)) {
           let arr = bars[i]._clef._convertMark();
-          score._tracks[i].clefMarks.push(new ETrackHeaderMark(score._tracks[i].marks.length, arr));
+          score._tracks[i].clefMarks.push(
+            new ETrackHeaderMark(score._tracks[i].marks.length, arr)
+          );
         }
-        if ((i == 0) &&
-          (!last_bars || !bars[i]._timeBeat._equal(last_bars[i]._timeBeat))) {
+        if (
+          i == 0 &&
+          (!last_bars || !bars[i]._timeBeat._equal(last_bars[i]._timeBeat))
+        ) {
           let arr = bars[i]._timeBeat._convertMark();
           if (arr)
-            score._tracks[i].beatMarks.push(new ETrackHeaderMark(score._tracks[i].marks.length, arr));
+            score._tracks[i].beatMarks.push(
+              new ETrackHeaderMark(score._tracks[i].marks.length, arr)
+            );
         }
       }
     }
 
     var openBeamCombine = new Map();
-    for (var restbars = 1; restbars;) {
+    for (var restbars = 1; restbars; ) {
       minBeat = Infinity;
       restbars = 0;
       // get the minimum _start beat chord, which will appear in
@@ -80,7 +86,7 @@ function EConvert(mscore: MScore) {
         ch = bars[b].chords[curnote[b]];
         if (ch == null) {
           pushSkip(b);
-        } else if (b == 0 && (ch instanceof MMark) && ch.kind == 'barline') {
+        } else if (b == 0 && ch instanceof MMark && ch.kind == "barline") {
           let newobj = ch._convertToE(bars[b]._clef);
           if (newobj instanceof EBarline) {
             newobj._mobj = ch;
@@ -124,7 +130,7 @@ function EConvert(mscore: MScore) {
 
               for (let i = 0, up = upd > 0; i < openobj._eobjects.length; ++i) {
                 openobj._eobjects[i].force = {
-                  up: up
+                  up: up,
                 };
               }
             }
@@ -142,7 +148,8 @@ function EConvert(mscore: MScore) {
       }
     }
 
-    { // add bar line
+    {
+      // add bar line
       let marks = score._tracks[0].marks;
       if (bars[0] && bars[0]._timeBeat._unlimited()) {
         marks.push(new EBarline(6));
@@ -172,14 +179,13 @@ function EConvert(mscore: MScore) {
     for (let i = 0; i < t.marks.length; ++i) {
       let mark = t.marks[i];
       if (mark instanceof ESkip && mark._skipN == 0) {
-      } else
-        t.marks[n++] = mark;
-
+      } else t.marks[n++] = mark;
     }
     t.marks = t.marks.slice(0, n);
   }
 
-  { // auto append end line
+  {
+    // auto append end line
     let emarks = score._tracks[0].marks;
     let lastMark = emarks[emarks.length - 1];
     if (lastMark instanceof EBarline) {
@@ -191,4 +197,3 @@ function EConvert(mscore: MScore) {
 
   return score;
 }
-

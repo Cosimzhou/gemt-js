@@ -10,8 +10,8 @@
  *******************************/
 
 class ETrackHeaderMark {
-  marksIdx: number
-  headerMarks: Array<ELayoutBudget>
+  marksIdx: number;
+  headerMarks: Array<ELayoutBudget>;
 
   constructor(idx: number, marks: Array<ELayoutBudget>) {
     this.marksIdx = idx;
@@ -20,13 +20,13 @@ class ETrackHeaderMark {
 }
 
 class ETrack {
-  score: EScore
-  x: number
-  _y: number
+  score: EScore;
+  x: number;
+  _y: number;
   gap = g_option.gap;
-  marks: Array<ELayoutBudget>
-  clefMarks: Array<ETrackHeaderMark>
-  beatMarks: Array<ETrackHeaderMark>
+  marks: Array<ELayoutBudget>;
+  clefMarks: Array<ETrackHeaderMark>;
+  beatMarks: Array<ETrackHeaderMark>;
   constructor(sc: EScore) {
     this.score = sc;
     this.x = 0;
@@ -36,7 +36,9 @@ class ETrack {
     this.beatMarks = [];
   }
 
-  translate(l: number): number { return this._y + l * this.gap; }
+  translate(l: number): number {
+    return this._y + l * this.gap;
+  }
 
   preview(ctx: GContext, x: number, y: number): Array<GStroke> {
     var ops = [],
@@ -44,7 +46,7 @@ class ETrack {
     x += this.x;
     this._y = y;
     for (var i = 0; i < 5; i++) {
-      ops.push(line = ctx._hline(x, y, this.score.trackLength));
+      ops.push((line = ctx._hline(x, y, this.score.trackLength)));
       y += this.gap;
     }
     //

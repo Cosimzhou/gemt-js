@@ -29,33 +29,33 @@ var Gap = 8;
 
 class GUIInfo {
   static a = {
-  "g-clef": ESpace(0, 32, 20, 52),
-  "f-clef": ESpace(0, 7, 21.6, 24),
-  "c-clef": ESpace(0, 15.25, 21.7, 31.5),
-  "sharp": ESpace(0, 8, 5.6, 15.2),
-  "flat": ESpace(0, 8, 6, 13),
-  "natural": ESpace(0, 8, 3.62, 15.2),
-  "rest-4": ESpace(0, 13, 8, 24),
-  "rest-8": ESpace(0, 8, 10, 18),
-  "rest-16": ESpace(0, 8, 10, 18),
-  "rest-32": ESpace(0, 8, 10, 18),
-  "rest-64": ESpace(0, 8, 10, 18),
-  "rest-128": ESpace(0, 8, 10, 18),
-  "note": ESpace(0, 3.42, 8.16, 6.84),
-  "note2": ESpace(0, 3.78, 9.01, 7.56),
-  "fullnote": ESpace(0.8, 4, 12.6, 8.1),
-  "brace": ESpace(0, 0, 8, 82),
-  "num": ESpace(0, 0, 8, 82),
-  "fermata": ESpace(0, 8, 6, 13),
-  "segno": ESpace(5, 8, 10, 18),
-  "parenleft": ESpace(0, 15, 8, 30),
-  "parenright": ESpace(0, 15, 8, 30),
+    "g-clef": ESpace(0, 32, 20, 52),
+    "f-clef": ESpace(0, 7, 21.6, 24),
+    "c-clef": ESpace(0, 15.25, 21.7, 31.5),
+    sharp: ESpace(0, 8, 5.6, 15.2),
+    flat: ESpace(0, 8, 6, 13),
+    natural: ESpace(0, 8, 3.62, 15.2),
+    "rest-4": ESpace(0, 13, 8, 24),
+    "rest-8": ESpace(0, 8, 10, 18),
+    "rest-16": ESpace(0, 8, 10, 18),
+    "rest-32": ESpace(0, 8, 10, 18),
+    "rest-64": ESpace(0, 8, 10, 18),
+    "rest-128": ESpace(0, 8, 10, 18),
+    note: ESpace(0, 3.42, 8.16, 6.84),
+    note2: ESpace(0, 3.78, 9.01, 7.56),
+    fullnote: ESpace(0.8, 4, 12.6, 8.1),
+    brace: ESpace(0, 0, 8, 82),
+    num: ESpace(0, 0, 8, 82),
+    fermata: ESpace(0, 8, 6, 13),
+    segno: ESpace(5, 8, 10, 18),
+    parenleft: ESpace(0, 15, 8, 30),
+    parenright: ESpace(0, 15, 8, 30),
 
-  "cadence": ESpace(7.25, 3.25, 14.5, 6.5),
-  "triangle": ESpace(2, 8, 4, 8),
-  "tsuyoi": ESpace(4, 4, 8, 8),
-  "yowai": ESpace(4, 4, 8, 8),
-}
+    cadence: ESpace(7.25, 3.25, 14.5, 6.5),
+    triangle: ESpace(2, 8, 4, 8),
+    tsuyoi: ESpace(4, 4, 8, 8),
+    yowai: ESpace(4, 4, 8, 8),
+  };
 
   constructor() {
     var ginfo = GUIInfo.a;
@@ -64,7 +64,7 @@ class GUIInfo {
     }
   }
 
-  get(x: string): GRect{
+  get(x: string): GRect {
     return GUIInfo.a[x];
   }
 }
@@ -77,32 +77,32 @@ var g_option: EOption;
  *
  *******************************/
 class EOption {
-  trackWidth : number
-  gap : number
-  gapBetweenRows : number
-  gapMinBetweenRows : number
-  margin : number
-  marginBlank : number
-  marginAhead : number
-  marginTitle : number
-  indentHeading : number
+  trackWidth: number;
+  gap: number;
+  gapBetweenRows: number;
+  gapMinBetweenRows: number;
+  margin: number;
+  marginBlank: number;
+  marginAhead: number;
+  marginTitle: number;
+  indentHeading: number;
 
-  fontFamily: string
+  fontFamily: string;
 
-  barNoShowAtRowHeading : boolean
-  compactLayout: boolean
+  barNoShowAtRowHeading: boolean;
+  compactLayout: boolean;
   /**
    *  heading indent
    *
    *  which implies indent just for first row.
    */
-  _openTrack : any
+  _openTrack: any;
 
-  funcPageRender : (ctx: object, p: number)=>void
-  funcTitleRender :(ctx: object, p: number)=>void
-  funcTailRender : (ctx: object, p: number)=>void
-  funcFootRender : (ctx: object, p: number)=>void
-  funcHeadRender : (ctx: object, p: number)=>void
+  funcPageRender: (ctx: object, p: number) => void;
+  funcTitleRender: (ctx: object, p: number) => void;
+  funcTailRender: (ctx: object, p: number) => void;
+  funcFootRender: (ctx: object, p: number) => void;
+  funcHeadRender: (ctx: object, p: number) => void;
   constructor(isDef?: boolean) {
     if (isDef || g_option == null) {
       this.trackWidth = 750;

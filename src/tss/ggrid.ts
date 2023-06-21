@@ -4,14 +4,14 @@
  *
  * @constructor
  *******************************/
-type GGridEnumFunc = (a: Array<GRect>, g: GRect)=>boolean
+type GGridEnumFunc = (a: Array<GRect>, g: GRect) => boolean;
 
 class GGrid {
-  width: number
-  height: number
-  array: Array<GRect>
-  arr: Array<Array<Array<GRect>>>
-  overall: GRect
+  width: number;
+  height: number;
+  array: Array<GRect>;
+  arr: Array<Array<Array<GRect>>>;
+  overall: GRect;
 
   constructor(w: number, h: number) {
     this.width = w >> 6;
@@ -29,12 +29,12 @@ class GGrid {
       }
     }
 
-    var r = this.overall = new GRect();
+    var r = (this.overall = new GRect());
     r.left = r.top = Infinity;
     r.right = r.bottom = -Infinity;
   }
 
-  enumerate (g: GRect, act: GGridEnumFunc): void {
+  enumerate(g: GRect, act: GGridEnumFunc): void {
     var l = g.left >> 6,
       t = g.top >> 6,
       r = (g.right >> 6) + (g.right % 64 ? 1 : 0),
@@ -56,17 +56,16 @@ class GGrid {
 
   put(g: GRect): void {
     this.array.push(g);
-      //this.enumerate(g, GGridEnumFunc {
-    this.enumerate(g, (arr: Array<GRect>, g: GRect)=> (arr.push(g), false));
+    //this.enumerate(g, GGridEnumFunc {
+    this.enumerate(g, (arr: Array<GRect>, g: GRect) => (arr.push(g), false));
     this.overall.union(g);
   }
 
   hit(g: GRect): GRect {
-    if (!this.overall.hit(g))
-      return null;
+    if (!this.overall.hit(g)) return null;
 
     var ret = null;
-    this.enumerate(g, function(arr: Array<GRect>, g: GRect): boolean {
+    this.enumerate(g, function (arr: Array<GRect>, g: GRect): boolean {
       for (var h of arr) {
         if (h.hit(g)) {
           ret = h;
@@ -81,4 +80,3 @@ class GGrid {
 }
 
 //exports.GGrid = GGrid;
-

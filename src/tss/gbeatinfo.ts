@@ -6,10 +6,10 @@
  *******************************/
 
 class GBeatInfo implements MRepeatElement {
-  x: number
-  rowIndex: number
-  beat: number
-  func: number
+  x: number;
+  rowIndex: number;
+  beat: number;
+  func: number;
 
   constructor(x: number, row: number, beat: number) {
     this.x = x;

@@ -5,14 +5,14 @@
  * @constructor
  *******************************/
 class ENote implements ELayoutBudget {
-  imgK: string
-  img: GRect
-  line: number
-  nth: number
-  sign: string
-  float: boolean
-  ffloat: boolean
-  small: boolean
+  imgK: string;
+  img: GRect;
+  line: number;
+  nth: number;
+  sign: string;
+  float: boolean;
+  ffloat: boolean;
+  small: boolean;
 
   constructor(ns: MBeatSequence, l: number = 0, s: string = null) {
     var n = ns.nths[0];
@@ -31,12 +31,14 @@ class ENote implements ELayoutBudget {
     }
   }
 
-  static comparator = function(a, b) {
+  static comparator = function (a, b) {
     return a.line - b.line;
-  }
+  };
 
   // note head width
-  get width(): number { return this.small? 4: this.img.width; }
+  get width(): number {
+    return this.small ? 4 : this.img.width;
+  }
 
   _budget(ctx, etrack: ETrack, x: number): EPositionInfo {
     // budget note head, float point and flat/sharp symbol only
@@ -60,13 +62,13 @@ class ENote implements ELayoutBudget {
       // draw float point
       y = oy + ((this.line * 2) % 2 == 0 ? 4 : 0);
       var dot;
-      epos.pushOperations(dot = ctx._dot(x + w + 3, y, 1));
+      epos.pushOperations((dot = ctx._dot(x + w + 3, y, 1)));
       dot._attach(noteImg, GStrokeConstraintType.ConstraintX, w + 3);
       epos.width += 4;
       epos.rect.width += 4;
       if (this.ffloat) {
         // draw double float point
-        epos.pushOperations(dot = ctx._dot(x + w + 7, y, 1));
+        epos.pushOperations((dot = ctx._dot(x + w + 7, y, 1)));
         dot._attach(noteImg, GStrokeConstraintType.ConstraintX, w + 7);
         epos.width += 5;
         epos.rect.width += 5;
@@ -78,7 +80,7 @@ class ENote implements ELayoutBudget {
       var imgS = g_GInfo.get(this.sign);
       epos.pushOperations(ctx._draw(this.sign, x - 2 - imgS.width, oy));
       epos.shx = {
-        x: imgS.width + 2
+        x: imgS.width + 2,
       };
     }
     epos.img = noteImg;
